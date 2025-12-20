@@ -167,7 +167,7 @@ export default function TicketDetailPage() {
                 <div className="border-t border-gray-100 my-4"></div>
 
                 <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 flex items-center justify-between">
-                  <div><p className="text-xs text-gray-400">Dipesan Oleh</p><p className="font-bold text-gray-800">{booking.user.name}</p></div>
+                  <div><p className="text-xs text-gray-400">Dipesan Oleh</p><p className="font-bold text-gray-800">{booking.user?.name}</p></div>
                   <div className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full border border-green-200">LUNAS</div>
                 </div>
               </div>
