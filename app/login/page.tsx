@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useNotification } from "@/context/NotificationContext";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Loader2, Mail, Lock, Eye, EyeOff } from "lucide-react";
-import Cookies from "js-cookie"; // IMPORT PENTING
+import Cookies from "js-cookie";
 
 // --- KOMPONEN ICON ---
 const GoogleIcon = () => (
@@ -25,7 +25,8 @@ const FacebookIcon = () => (
   </svg>
 );
 
-export default function LoginPage() {
+// --- BAGIAN 1: ISI KONTEN UTAMA ---
+function LoginContent() {
   const { login } = useAuth();
   const { addNotification } = useNotification();
   const router = useRouter();
@@ -47,7 +48,6 @@ export default function LoginPage() {
     Cookies.remove('token');
     Cookies.remove('user_role');
     
-    // Fallback cleanup document cookies
     document.cookie.split(";").forEach((c) => {
       document.cookie = c
         .replace(/^ +/, "")
@@ -57,11 +57,7 @@ export default function LoginPage() {
 
   // Helper untuk set sesi (Storage & Cookies)
   const setSession = (token: string, role: string) => {
-    // 1. Simpan di LocalStorage untuk Client Component
     localStorage.setItem('token', token);
-    
-    // 2. Simpan di Cookies untuk Middleware (Next.js Server Side)
-    // 'path: /' memastikan cookie terbaca di seluruh rute
     Cookies.set('token', token, { expires: 7, path: '/' });
     Cookies.set('user_role', role, { expires: 7, path: '/' });
   };
@@ -108,7 +104,6 @@ export default function LoginPage() {
           const user = await res.json();
           console.log('✅ Token valid, syncing cookies & redirecting');
           
-          // SYNC COOKIES (Penting jika user refresh browser)
           setSession(token, user.role);
           
           if (user.role === 'admin') {
@@ -146,10 +141,7 @@ export default function LoginPage() {
 
       if (!res.ok) throw new Error(data.message || "Login gagal");
 
-      // 1. Update Context
       login(data.access_token, data.user);
-
-      // 2. Simpan Cookie & LocalStorage (CRITICAL STEP)
       setSession(data.access_token, data.user.role);
 
       addNotification(
@@ -158,7 +150,6 @@ export default function LoginPage() {
         `Selamat datang kembali, ${data.user.name}!`
       );
       
-      // 3. Redirect sesuai role
       if (data.user.role === 'admin') {
         router.push('/admin/dashboard');
       } else {
@@ -347,5 +338,18 @@ export default function LoginPage() {
         &copy; {new Date().getFullYear()} TiketLoka. All Rights Reserved.
       </footer>
     </div>
+  );
+}
+
+// --- BAGIAN 2: EXPORT UTAMA DENGAN SUSPENSE ---
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <Loader2 className="animate-spin text-[#F57C00] w-10 h-10" />
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   );
 }

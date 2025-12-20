@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react"; // Tambahkan Suspense
 import { useAuth } from "@/context/AuthContext";
 import { useNotification } from "@/context/NotificationContext";
 import Link from "next/link";
@@ -38,7 +38,8 @@ const FacebookIcon = () => (
   </svg>
 );
 
-export default function RegisterPage() {
+// --- BAGIAN 1: ISI KONTEN ---
+function RegisterContent() {
   const { login } = useAuth();
   const { addNotification } = useNotification();
   const [formData, setFormData] = useState({
@@ -53,14 +54,12 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // KONFIGURASI URL API
   const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // --- LOGIKA VALIDASI ---
   const isFormValid =
     formData.name.trim() !== "" &&
     formData.email.trim() !== "" &&
@@ -80,7 +79,6 @@ export default function RegisterPage() {
     }
 
     try {
-      // Menggunakan BASE_URL
       const res = await fetch(`${BASE_URL}/api/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -104,15 +102,12 @@ export default function RegisterPage() {
   };
 
   const handleGoogleLogin = () => {
-    // Menggunakan BASE_URL
     window.location.href = `${BASE_URL}/auth/google`;
   };
   const handleFacebookLogin = () => {
-    // Menggunakan BASE_URL
     window.location.href = `${BASE_URL}/auth/facebook`;
   };
 
-  // Styling Variables
   const inputWrapperClass = "relative flex items-center";
   const iconClass = "absolute left-3 text-gray-400 w-5 h-5";
   const inputClass =
@@ -325,5 +320,18 @@ export default function RegisterPage() {
         &copy; {new Date().getFullYear()} TiketLoka. All Rights Reserved.
       </footer>
     </div>
+  );
+}
+
+// --- BAGIAN 2: EXPORT UTAMA DENGAN SUSPENSE ---
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <Loader2 className="animate-spin text-[#F57C00] w-10 h-10" />
+      </div>
+    }>
+      <RegisterContent />
+    </Suspense>
   );
 }
