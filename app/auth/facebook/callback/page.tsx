@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Loader2, XCircle } from 'lucide-react';
 
+export const dynamic = "force-dynamic";
+
 export default function FacebookCallbackPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
