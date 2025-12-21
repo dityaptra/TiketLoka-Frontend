@@ -13,7 +13,7 @@ const HeroSection = () => {
     e.preventDefault(); // Mencegah reload halaman
     if (searchQuery.trim()) {
       // Redirect ke halaman events dengan parameter search
-      router.push(`/events?search=${encodeURIComponent(searchQuery)}`);
+      router.push(`?search=${encodeURIComponent(searchQuery)}`);
     }
   };
 
