@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useCartContext } from "@/context/CartContext"; 
 import { useNotification } from "@/context/NotificationContext"; 
 import Swal from "sweetalert2";
+import Cookies from "js-cookie"; // ✅ WAJIB: Import ini
 import {
   LogOut,
   User,
@@ -18,13 +19,13 @@ import {
   Settings,
   Home,
   LucideIcon,
+  Loader2, // Icon loading
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
 // KONFIGURASI URL API
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
-// Helper for Image URL
 const getAvatarUrl = (url: string | undefined) => {
   if (!url) return null;
   if (url.startsWith("http")) return url;
@@ -39,24 +40,32 @@ interface MenuItem {
 }
 
 const Navbar = () => {
-  const { user, logout } = useAuth();
+  const { user, logout } = useAuth(); // User data dari API
   const router = useRouter();
   const pathname = usePathname();
   
-  // Global Context
   const { cartCount } = useCartContext(); 
   const { unreadCount } = useNotification();
 
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState<boolean>(false);
   const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
+  // ✅ STATE BARU: Untuk cek token langsung di browser
+  const [hasToken, setHasToken] = useState<boolean>(false); 
+  
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // ✅ EFEK BARU: Cek Cookie Token saat komponen dimuat
+  useEffect(() => {
+    const token = Cookies.get('token');
+    if (token) {
+      setHasToken(true);
+    }
+  }, []);
 
   // --- SEO-FRIENDLY LOGOUT FUNCTION ---
   const handleLogout = async () => {
-    // Close dropdown menu first for neatness
     setIsProfileMenuOpen(false);
 
-    // Show SweetAlert Confirmation
     const result = await Swal.fire({
       title: 'Yakin ingin keluar?',
       text: "Anda harus login kembali untuk mengakses tiket dan profil Anda.",
@@ -69,33 +78,25 @@ const Navbar = () => {
       reverseButtons: true
     });
 
-    // If user clicks "Yes, Logout"
     if (result.isConfirmed) {
       setIsLoggingOut(true);
-      
       try {
-        // Call logout function from AuthContext
         await logout();
-        
-        // No notification if successful (direct redirect)
-
+        setHasToken(false); // Update state manual biar UI langsung berubah
+        Cookies.remove('token'); // Pastikan cookie hilang
       } catch (error) {
         console.error("Logout error:", error);
         setIsLoggingOut(false);
-        
-        // Notification ONLY if logout FAILS
-        Swal.fire({
-          icon: 'error',
-          title: 'Gagal Logout',
-          text: 'Terjadi kesalahan saat mencoba keluar. Silakan coba lagi.',
-          confirmButtonColor: '#d33'
-        });
+        // Tetap paksa logout visual jika error API
+        setHasToken(false); 
+        Cookies.remove('token');
+        window.location.reload();
       }
     }
   };
 
   const handleCartClick = () => {
-    if (!user) {
+    if (!hasToken) { // Cek token, bukan user (biar lebih responsif)
       router.push("/login");
     } else {
       router.push("/cart");
@@ -130,6 +131,9 @@ const Navbar = () => {
   const profileMenuItems: MenuItem[] = [
     { label: "Pengaturan", icon: Settings, href: "/settings" },
   ];
+
+  // ✅ LOGIKA KUNCI: Dianggap login jika ada User ATAU ada Token Cookie
+  const isAuthenticated = user || hasToken;
 
   return (
     <nav className="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-100 font-sans">
@@ -173,7 +177,7 @@ const Navbar = () => {
             <span className="text-sm font-medium hidden sm:block">Keranjang</span>
           </button>
 
-          {user && (
+          {isAuthenticated && (
             <>
               {/* MY TICKETS */}
               <button onClick={handleTicketsClick} className={getNavStyle("/tickets")}>
@@ -197,15 +201,17 @@ const Navbar = () => {
           )}
 
           {/* PROFILE DROPDOWN */}
-          {user ? (
+          {isAuthenticated ? (
             <div className="relative ml-2 pl-2 border-l border-blue-200" ref={menuRef}>
               <button
                 className="flex items-center gap-2 p-1 rounded-full hover:bg-blue-50 transition-colors"
                 onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
               >
-                {/* Avatar Logic: Image or Icon */}
+                {/* Avatar Logic: Handle User Loading State */}
                 <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-50 overflow-hidden border border-blue-200 relative">
-                    {user.avatar_url ? (
+                  {user ? (
+                    // Jika User Data SUDAH dimuat
+                    user.avatar_url ? (
                       <Image 
                         src={getAvatarUrl(user.avatar_url) || ""} 
                         alt={user.name}
@@ -214,8 +220,12 @@ const Navbar = () => {
                         unoptimized
                       />
                     ) : (
-                      <User size={20} />
-                    )}
+                      <User size={20} className="text-blue-500" />
+                    )
+                  ) : (
+                    // Jika User Data SEDANG dimuat (tapi token ada)
+                    <Loader2 size={20} className="text-blue-500 animate-spin" />
+                  )}
                 </div>
                 
                 <ChevronDown 
@@ -228,7 +238,10 @@ const Navbar = () => {
 
               <div className={`absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.1)] border border-gray-100 py-2 animate-in fade-in slide-in-from-top-2 z-60 ${isProfileMenuOpen ? "block" : "hidden"}`}>
                 <div className="px-5 py-3 border-b border-gray-100 mb-2">
-                    <p className="font-bold text-[#0B2F5E] truncate text-base">{user.name}</p>
+                    {/* Fallback Name jika data user belum sampai */}
+                    <p className="font-bold text-[#0B2F5E] truncate text-base">
+                        {user?.name || "Memuat Pengguna..."}
+                    </p>
                     <p className="text-xs text-gray-500 truncate">Member TiketLoka</p>
                 </div>
                 <div className="max-h-[60vh] overflow-y-auto">
@@ -239,7 +252,6 @@ const Navbar = () => {
                     ))}
                     <div className="my-2 border-t border-gray-100"></div>
                     
-                    {/* SEO-FRIENDLY LOGOUT BUTTON */}
                     <button 
                       onClick={handleLogout} 
                       disabled={isLoggingOut}
