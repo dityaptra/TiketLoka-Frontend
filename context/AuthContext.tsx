@@ -8,6 +8,7 @@ import {
   ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
+import Cookies from "js-cookie"; // ✅ Pastikan import ini ada
 
 // Tipe data User
 interface User {
@@ -39,33 +40,84 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  // Cek LocalStorage saat aplikasi pertama kali dimuat
+  // 👇 LOGIKA BARU (Fetch Version)
   useEffect(() => {
-    const storedToken = localStorage.getItem("token");
-    const storedUser = localStorage.getItem("user");
+    const initAuth = async () => {
+      // 1. Cek Token: Prioritaskan Cookie (dari Google), lalu LocalStorage
+      const cookieToken = Cookies.get("token");
+      const localToken = localStorage.getItem("token");
+      const validToken = cookieToken || localToken;
 
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (e) {
-        console.error("Error parsing user data", e);
-        // Jika data corrupt, bersihkan storage
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
+      if (validToken) {
+        setToken(validToken);
+
+        // Cek data user di LocalStorage (Cache Cepat)
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+          try {
+            setUser(JSON.parse(storedUser));
+          } catch (e) {
+            console.error("User data corrupt", e);
+          }
+        }
+
+        // 2. FETCH DATA USER DARI SERVER (Wajib untuk memastikan Token Valid)
+        try {
+          const res = await fetch(`${BASE_URL}/api/user`, {
+            method: "GET",
+            headers: {
+              "Authorization": `Bearer ${validToken}`, // Manual pasang Header
+              "Accept": "application/json",
+            },
+          });
+
+          if (res.ok) {
+            const freshUserData = await res.json();
+            setUser(freshUserData);
+            
+            // Sinkronisasi Storage
+            localStorage.setItem("user", JSON.stringify(freshUserData));
+            if (!localToken) {
+                localStorage.setItem("token", validToken);
+            }
+          } else {
+            // Jika token expired (401), logout otomatis
+            if (res.status === 401) {
+                throw new Error("Token Expired");
+            }
+          }
+        } catch (error) {
+          console.error("Gagal validasi user:", error);
+          // Jika gagal fetch user, anggap logout
+          handleLogoutCleanup(); 
+        }
       }
-    }
-    setIsLoading(false);
+      
+      setIsLoading(false);
+    };
+
+    initAuth();
   }, []);
 
-  // Fungsi Login (Simpan data)
+  // Helper untuk membersihkan state (dipakai di logout & error)
+  const handleLogoutCleanup = () => {
+    setToken(null);
+    setUser(null);
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    Cookies.remove("token");
+  };
+
+  // Fungsi Login (Manual Form)
   const login = (newToken: string, userData: User) => {
     setToken(newToken);
     setUser(userData);
+    
+    // Simpan di kedua tempat
     localStorage.setItem("token", newToken);
     localStorage.setItem("user", JSON.stringify(userData));
+    Cookies.set("token", newToken, { expires: 7 }); 
 
-    // Redirect sesuai role
     if (userData.role === "admin") {
       router.push("/admin/dashboard");
     } else {
@@ -73,43 +125,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Fungsi Logout (Hapus data)
+  // Fungsi Logout
   const logout = async () => {
-    // 1. SIMPAN TOKEN SEMENTARA UTK API CALL
-    const currentToken = token;
+    const currentToken = token; // Simpan token sebelum dihapus
 
-    // 2. BERSIHKAN CLIENT SIDE DULUAN (Optimistic UI)
-    // Agar user tidak menunggu loading API cuma buat logout
-    setToken(null);
-    setUser(null);
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-
-    // Hapus Semua Cookie (Pembersihan menyeluruh)
-    document.cookie.split(";").forEach((c) => {
-      document.cookie = c
-        .replace(/^ +/, "")
-        .replace(/=.*/, "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/");
-    });
-
-    // 3. REDIRECT SEGERA
-    router.replace("/"); // Gunakan replace agar tidak bisa di-back
+    // 1. Bersihkan Client Dulu (Optimistic)
+    handleLogoutCleanup();
+    router.replace("/");
     router.refresh();
 
-    // 4. PANGGIL API LOGOUT DI BACKGROUND
+    // 2. Panggil API Logout (Background)
     try {
       if (currentToken) {
         await fetch(`${BASE_URL}/api/logout`, {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${currentToken}`,
-            Accept: "application/json",
+            "Authorization": `Bearer ${currentToken}`,
+            "Accept": "application/json",
             "Content-Type": "application/json",
           },
         });
       }
     } catch (error) {
-      console.warn("Server logout failed, but client session is cleared.");
+      console.warn("Logout server failed, but client is clear.");
     }
   };
 
