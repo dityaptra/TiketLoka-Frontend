@@ -57,11 +57,16 @@ export default function PaymentPage() {
 
     const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
-    // --- FETCH DATA ---
+    // --- FETCH DATA (DIPERBAIKI) ---
     const fetchBooking = useCallback(async () => {
         try {
+            // PERBAIKAN: Tambah credentials dan header
             const res = await fetch(`${BASE_URL}/api/bookings/${params.code}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json' 
+                },
+                credentials: 'include' // <--- PENTING: Agar cookie sesi terbawa
             });
             const json = await res.json();
             
@@ -72,8 +77,14 @@ export default function PaymentPage() {
                     router.replace(`/tickets/${json.data.booking_code}`);
                 }
             } else {
-                toast.error("Data pesanan tidak ditemukan");
-                router.push('/');
+                // Jika 401 (Unauth) atau 404 (Not Found)
+                if (res.status === 401) {
+                    toast.error("Sesi berakhir, silakan login ulang");
+                    router.push('/login');
+                } else {
+                    toast.error("Data pesanan tidak ditemukan");
+                    router.push('/');
+                }
             }
         } catch (error) {
             console.error(error);
@@ -140,7 +151,7 @@ export default function PaymentPage() {
         return `${m}:${s < 10 ? '0' : ''}${s}`;
     };
 
-    // --- ACTIONS ---
+    // --- ACTIONS (DIPERBAIKI) ---
     const handleCheckStatus = async () => {
         setProcessing(true);
         try {
@@ -148,8 +159,10 @@ export default function PaymentPage() {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` 
-                }
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                },
+                credentials: 'include' // <--- PENTING
             });
             if (res.ok) {
                 toast.success("Pembayaran Dikonfirmasi!");
@@ -183,7 +196,11 @@ export default function PaymentPage() {
         try {
             const res = await fetch(`${BASE_URL}/api/bookings/${booking?.booking_code}/cancel`, {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                },
+                credentials: 'include' // <--- PENTING
             });
             if (res.ok) {
                 toast.success("Pesanan berhasil dibatalkan");
@@ -204,6 +221,8 @@ export default function PaymentPage() {
     };
 
     if (loading) return <div className="min-h-screen flex justify-center items-center"><Loader2 className="animate-spin text-[#0B2F5E] w-10 h-10"/></div>;
+    
+    // Safety check jika fetch error tapi tidak redirect (jarang terjadi)
     if (!booking) return null;
 
     const isQRIS = booking.payment_method === 'qris';
