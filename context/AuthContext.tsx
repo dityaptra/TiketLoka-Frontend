@@ -7,10 +7,8 @@ import {
   useEffect,
   ReactNode,
 } from "react";
-import { useRouter } from "next/navigation";
-import Cookies from "js-cookie"; // ✅ Pastikan import ini ada
+import Cookies from "js-cookie";
 
-// Tipe data User
 interface User {
   id: number;
   name: string;
@@ -23,157 +21,111 @@ interface User {
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  login: (token: string, userData: User) => void;
-  logout: () => Promise<void>;
-  updateUser: (userData: Partial<User>) => void;
   isLoading: boolean;
+  setAuth: (token: string, user: User) => void;
+  clearAuth: () => void;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// KONFIGURASI URL API
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
 
-  // 👇 LOGIKA BARU (Fetch Version)
+  // 🔐 INIT AUTH (ONCE)
   useEffect(() => {
     const initAuth = async () => {
-      // 1. Cek Token: Prioritaskan Cookie (dari Google), lalu LocalStorage
       const cookieToken = Cookies.get("token");
-      const localToken = localStorage.getItem("token");
-      const validToken = cookieToken || localToken;
 
-      if (validToken) {
-        setToken(validToken);
-
-        // Cek data user di LocalStorage (Cache Cepat)
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) {
-          try {
-            setUser(JSON.parse(storedUser));
-          } catch (e) {
-            console.error("User data corrupt", e);
-          }
-        }
-
-        // 2. FETCH DATA USER DARI SERVER (Wajib untuk memastikan Token Valid)
-        try {
-          const res = await fetch(`${BASE_URL}/api/user`, {
-            method: "GET",
-            headers: {
-              "Authorization": `Bearer ${validToken}`, // Manual pasang Header
-              "Accept": "application/json",
-            },
-          });
-
-          if (res.ok) {
-            const freshUserData = await res.json();
-            setUser(freshUserData);
-            
-            // Sinkronisasi Storage
-            localStorage.setItem("user", JSON.stringify(freshUserData));
-            if (!localToken) {
-                localStorage.setItem("token", validToken);
-            }
-          } else {
-            // Jika token expired (401), logout otomatis
-            if (res.status === 401) {
-                throw new Error("Token Expired");
-            }
-          }
-        } catch (error) {
-          console.error("Gagal validasi user:", error);
-          // Jika gagal fetch user, anggap logout
-          handleLogoutCleanup(); 
-        }
+      if (!cookieToken) {
+        setIsLoading(false);
+        return;
       }
-      
-      setIsLoading(false);
+
+      setToken(cookieToken);
+
+      try {
+        const res = await fetch(`${BASE_URL}/api/user`, {
+          headers: {
+            Authorization: `Bearer ${cookieToken}`,
+            Accept: "application/json",
+          },
+        });
+
+        if (!res.ok) throw new Error("Unauthorized");
+
+        const userData = await res.json();
+        setUser(userData);
+        localStorage.setItem("user", JSON.stringify(userData));
+      } catch {
+        clearAuth();
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     initAuth();
   }, []);
 
-  // Helper untuk membersihkan state (dipakai di logout & error)
-  const handleLogoutCleanup = () => {
-    setToken(null);
-    setUser(null);
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    Cookies.remove("token");
-  };
+  // ✅ Dipanggil oleh login / callback page
+  const setAuth = (newToken: string, userData: User) => {
+    Cookies.set("token", newToken, {
+      expires: 7,
+      secure: true,
+      sameSite: "lax",
+      path: "/",
+    });
 
-  // Fungsi Login (Manual Form)
-  const login = (newToken: string, userData: User) => {
     setToken(newToken);
     setUser(userData);
-    
-    // Simpan di kedua tempat
-    localStorage.setItem("token", newToken);
     localStorage.setItem("user", JSON.stringify(userData));
-    Cookies.set("token", newToken, { expires: 7 }); 
-
-    if (userData.role === "admin") {
-      router.push("/admin/dashboard");
-    } else {
-      router.push("/");
-    }
   };
 
-  // Fungsi Logout
-  const logout = async () => {
-    const currentToken = token; // Simpan token sebelum dihapus
+  const clearAuth = () => {
+    setToken(null);
+    setUser(null);
+    Cookies.remove("token", { path: "/" });
+    localStorage.removeItem("user");
+  };
 
-    // 1. Bersihkan Client Dulu (Optimistic)
-    handleLogoutCleanup();
-    router.replace("/");
-    router.refresh();
+  // 🔄 Optional refresh (dipakai profile update)
+  const refreshUser = async () => {
+    const token = Cookies.get("token");
+    if (!token) return;
 
-    // 2. Panggil API Logout (Background)
     try {
-      if (currentToken) {
-        await fetch(`${BASE_URL}/api/logout`, {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${currentToken}`,
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-          },
-        });
-      }
-    } catch (error) {
-      console.warn("Logout server failed, but client is clear.");
-    }
-  };
+      const res = await fetch(`${BASE_URL}/api/user`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      });
 
-  // Fungsi Update User
-  const updateUser = (userData: Partial<User>) => {
-    if (user) {
-      const updatedUser = { ...user, ...userData };
-      setUser(updatedUser);
-      localStorage.setItem("user", JSON.stringify(updatedUser));
+      if (!res.ok) throw new Error();
+
+      const userData = await res.json();
+      setUser(userData);
+      localStorage.setItem("user", JSON.stringify(userData));
+    } catch {
+      clearAuth();
     }
   };
 
   return (
     <AuthContext.Provider
-      value={{ user, token, login, logout, updateUser, isLoading }}
+      value={{ user, token, isLoading, setAuth, clearAuth, refreshUser }}
     >
       {children}
     </AuthContext.Provider>
   );
 }
 
-// Custom Hook
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
+  return ctx;
 }
