@@ -66,7 +66,7 @@ const HeroBackgroundSlider = () => {
               priority={idx === 0} // Optimasi loading untuk gambar pertama saja
             />
             {/* Overlay tetap menggunakan absolute inset-0 */}
-            <div className="absolute inset-0 bg-black/35 z-10" />
+            <div className="absolute inset-0 bg-black/40 z-10" />
           </div>
         ))}
       </div>
