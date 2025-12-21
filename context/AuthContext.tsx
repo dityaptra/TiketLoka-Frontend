@@ -7,6 +7,7 @@ import {
   useEffect,
   ReactNode,
 } from "react";
+import Cookies from "js-cookie";
 
 interface User {
   id: number;
@@ -19,65 +20,104 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
+  token: string | null;
   isLoading: boolean;
-  setUser: (user: User | null) => void;
+  setAuth: (token: string, user: User) => void;
+  clearAuth: () => void;
   refreshUser: () => Promise<void>;
-  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-const API_URL = process.env.NEXT_PUBLIC_API_URL!;
+
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 🔐 INIT AUTH (cek session cookie)
+  // 🔐 INIT AUTH (ONCE)
   useEffect(() => {
-    refreshUser().finally(() => setIsLoading(false));
-  }, []);
+    const initAuth = async () => {
+      const cookieToken = Cookies.get("token");
 
-  // 🔄 Ambil user dari backend (cookie-based)
-  const refreshUser = async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/user`, {
-        credentials: "include",
-        headers: { Accept: "application/json" },
-      });
-
-      if (!res.ok) {
-        setUser(null);
+      if (!cookieToken) {
+        setIsLoading(false);
         return;
       }
 
-      const data = await res.json();
-      setUser(data);
-    } catch {
-      setUser(null);
-    }
+      setToken(cookieToken);
+
+      try {
+        const res = await fetch(`${BASE_URL}/api/user`, {
+          headers: {
+            Authorization: `Bearer ${cookieToken}`,
+            Accept: "application/json",
+          },
+        });
+
+        if (!res.ok) throw new Error("Unauthorized");
+
+        const userData = await res.json();
+        setUser(userData);
+        localStorage.setItem("user", JSON.stringify(userData));
+      } catch {
+        clearAuth();
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initAuth();
+  }, []);
+
+  // ✅ Dipanggil oleh login / callback page
+  const setAuth = (newToken: string, userData: User) => {
+    Cookies.set("token", newToken, {
+      expires: 7,
+      secure: true,
+      sameSite: "lax",
+      path: "/",
+    });
+
+    setToken(newToken);
+    setUser(userData);
+    localStorage.setItem("user", JSON.stringify(userData));
   };
 
-  // 🚪 Logout
-  const logout = async () => {
+  const clearAuth = () => {
+    setToken(null);
+    setUser(null);
+    Cookies.remove("token", { path: "/" });
+    localStorage.removeItem("user");
+  };
+
+  // 🔄 Optional refresh (dipakai profile update)
+  const refreshUser = async () => {
+    const token = Cookies.get("token");
+    if (!token) return;
+
     try {
-      await fetch(`${API_URL}/api/logout`, {
-        method: "POST",
-        credentials: "include",
+      const res = await fetch(`${BASE_URL}/api/user`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
       });
-    } finally {
-      setUser(null);
+
+      if (!res.ok) throw new Error();
+
+      const userData = await res.json();
+      setUser(userData);
+      localStorage.setItem("user", JSON.stringify(userData));
+    } catch {
+      clearAuth();
     }
   };
 
   return (
     <AuthContext.Provider
-      value={{
-        user,
-        isLoading,
-        setUser,
-        refreshUser,
-        logout,
-      }}
+      value={{ user, token, isLoading, setAuth, clearAuth, refreshUser }}
     >
       {children}
     </AuthContext.Provider>
