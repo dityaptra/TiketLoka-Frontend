@@ -45,7 +45,6 @@ export default function CartPage() {
   const getItemAddons = (item: CartItem) => {
     let ids: any[] = [];
     try { 
-        // Mendukung format array maupun string JSON dari backend
         ids = Array.isArray(item.addons) ? item.addons : JSON.parse(item.addons as any || "[]"); 
     } catch (e) { ids = []; }
     
@@ -62,14 +61,18 @@ export default function CartPage() {
     return `${BASE_URL}/storage/${cleanPath}`;
   };
 
-  // 1. Fetch Data
+  // 1. Fetch Data (DITAMBAHKAN credentials: 'include')
   useEffect(() => {
     if (authLoading) return; 
     const fetchCart = async () => {
       if (!token) { setLoading(false); return; }
       try {
         const res = await fetch(`${BASE_URL}/api/cart`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+            headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json' 
+            },
+            credentials: 'include' // <--- WAJIB: Agar cookie session terkirim
         });
         const json = await res.json();
         if (res.ok) setCarts(json.data);
@@ -140,17 +143,20 @@ export default function CartPage() {
     if (!result.isConfirmed) return;
 
     try {
-        // PERHATIAN: Pastikan route Backend adalah: Route::delete('/cart', ...)
         const res = await fetch(`${BASE_URL}/api/cart`, { 
             method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${token}` }
+            headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json' 
+            },
+            credentials: 'include' // <--- WAJIB
         });
 
         if (res.ok) {
-            setCarts([]); // Kosongkan state lokal
-            setSelectedIds([]); // Reset seleksi
+            setCarts([]); 
+            setSelectedIds([]); 
             toast.success('Keranjang berhasil dikosongkan');
-            await refreshCart(); // Refresh context global (navbar badge, dll)
+            await refreshCart(); 
         } else {
             const json = await res.json();
             toast.error(json.message || 'Gagal mengosongkan keranjang');
@@ -178,7 +184,11 @@ export default function CartPage() {
     try {
       await fetch(`${BASE_URL}/api/cart/${id}`, { 
           method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${token}` }
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json' 
+          },
+          credentials: 'include' // <--- WAJIB
       });
       setCarts(prev => prev.filter(item => item.id !== id));
       setSelectedIds(prev => prev.filter(selId => selId !== id));
@@ -187,7 +197,7 @@ export default function CartPage() {
     } catch (error) { toast.error('Gagal menghapus'); }
   };
 
-  // 3. Logic Checkout (SWEETALERT)
+  // 3. Logic Checkout (DIPERBAIKI)
   const handleCheckout = async () => {
     if (selectedIds.length === 0) return toast.error('Pilih minimal 1 item!');
 
@@ -211,19 +221,39 @@ export default function CartPage() {
     
     setIsCheckingOut(true);
     try {
+      // --- PERBAIKAN UTAMA DISINI ---
       const res = await fetch(`${BASE_URL}/api/checkout`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        headers: { 
+            'Content-Type': 'application/json', 
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json' // Tambahan header standard
+        },
+        credentials: 'include', // <--- INI KUNCINYA AGAR TIDAK 401
         body: JSON.stringify({ cart_ids: selectedIds, payment_method: paymentMethod })
       });
+
       const json = await res.json();
+      
       if (res.ok) {
         addNotification('transaction', 'Menunggu Pembayaran', `Pesanan ${json.booking_code} berhasil dibuat.`);
         toast.success("Checkout berhasil!");
         await refreshCart(); 
         router.push(`/payment/${json.booking_code}`);
-      } else { toast.error(json.message); }
-    } catch (error) { toast.error('Kesalahan koneksi'); } finally { setIsCheckingOut(false); }
+      } else { 
+        // Handle error spesifik dari backend
+        toast.error(json.message || "Terjadi kesalahan saat checkout"); 
+        if (res.status === 401) {
+             // Jika masih 401, token mungkin expired
+             router.push('/login');
+        }
+      }
+    } catch (error) { 
+        console.error(error);
+        toast.error('Kesalahan koneksi ke server'); 
+    } finally { 
+        setIsCheckingOut(false); 
+    }
   };
 
   if (loading || authLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-[#F57C00]"/></div>;
@@ -253,15 +283,13 @@ export default function CartPage() {
           <div className="flex flex-col lg:flex-row gap-8">
             {/* --- LIST ITEM --- */}
             <div className="flex-1 space-y-4">
-               {/* --- UPDATE: HEADER LIST DENGAN HAPUS SEMUA --- */}
+               {/* --- HEADER LIST DENGAN HAPUS SEMUA --- */}
                <div className="bg-white p-4 rounded-xl border border-gray-100 flex items-center justify-between">
-                   {/* Kiri: Checkbox Pilih Semua */}
                    <div className="flex items-center gap-3 cursor-pointer select-none" onClick={toggleSelectAll}>
                         {selectedIds.length === carts.length ? <CheckSquare className="text-[#F57C00]" /> : <Square className="text-gray-300" />}
                         <span className="font-bold text-sm">Pilih Semua ({carts.length})</span>
                    </div>
                    
-                   {/* Kanan: Tombol Hapus Semua */}
                    <button 
                         onClick={handleClearCart}
                         className="text-red-500 hover:text-red-700 font-medium text-sm transition-colors flex items-center gap-1"
