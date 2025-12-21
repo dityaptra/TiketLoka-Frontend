@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Link from 'next/link';
 import { 
-    Trash2, Calendar, MapPin, Loader2, ShoppingCart, ArrowLeft, 
+    Trash2, Calendar, Loader2, ShoppingCart, ArrowLeft, 
     Ticket, CheckSquare, Square, Wallet, ShieldCheck, 
     ScanLine, Building2, PlusCircle
 } from 'lucide-react'; 
@@ -121,7 +121,46 @@ export default function CartPage() {
     setSelectedIds(selectedIds.length === carts.length && carts.length > 0 ? [] : carts.map(item => item.id));
   };
 
-  // 2. Fungsi Hapus Item (SWEETALERT)
+  // --- FITUR BARU: HAPUS SEMUA KERANJANG ---
+  const handleClearCart = async () => {
+    if (carts.length === 0) return;
+
+    const result = await Swal.fire({
+        title: 'Kosongkan Keranjang?',
+        text: "Semua item akan dihapus permanen.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, Kosongkan',
+        cancelButtonText: 'Batal',
+        reverseButtons: true
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+        // PERHATIAN: Pastikan route Backend adalah: Route::delete('/cart', ...)
+        const res = await fetch(`${BASE_URL}/api/cart`, { 
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (res.ok) {
+            setCarts([]); // Kosongkan state lokal
+            setSelectedIds([]); // Reset seleksi
+            toast.success('Keranjang berhasil dikosongkan');
+            await refreshCart(); // Refresh context global (navbar badge, dll)
+        } else {
+            const json = await res.json();
+            toast.error(json.message || 'Gagal mengosongkan keranjang');
+        }
+    } catch (error) {
+        toast.error('Gagal terhubung ke server');
+    }
+  };
+
+  // 2. Fungsi Hapus Item Satuan (SWEETALERT)
   const handleDelete = async (id: number) => {
     const result = await Swal.fire({
         title: 'Hapus dari keranjang?',
@@ -214,9 +253,21 @@ export default function CartPage() {
           <div className="flex flex-col lg:flex-row gap-8">
             {/* --- LIST ITEM --- */}
             <div className="flex-1 space-y-4">
-               <div className="bg-white p-4 rounded-xl border border-gray-100 flex items-center gap-3 cursor-pointer" onClick={toggleSelectAll}>
-                    {selectedIds.length === carts.length ? <CheckSquare className="text-[#F57C00]" /> : <Square className="text-gray-300" />}
-                    <span className="font-bold text-sm">Pilih Semua ({carts.length})</span>
+               {/* --- UPDATE: HEADER LIST DENGAN HAPUS SEMUA --- */}
+               <div className="bg-white p-4 rounded-xl border border-gray-100 flex items-center justify-between">
+                   {/* Kiri: Checkbox Pilih Semua */}
+                   <div className="flex items-center gap-3 cursor-pointer select-none" onClick={toggleSelectAll}>
+                        {selectedIds.length === carts.length ? <CheckSquare className="text-[#F57C00]" /> : <Square className="text-gray-300" />}
+                        <span className="font-bold text-sm">Pilih Semua ({carts.length})</span>
+                   </div>
+                   
+                   {/* Kanan: Tombol Hapus Semua */}
+                   <button 
+                        onClick={handleClearCart}
+                        className="text-red-500 hover:text-red-700 font-medium text-sm transition-colors flex items-center gap-1"
+                   >
+                        <Trash2 className="w-4 h-4" /> Hapus Semua
+                   </button>
                </div>
 
               {carts.map((item) => {
