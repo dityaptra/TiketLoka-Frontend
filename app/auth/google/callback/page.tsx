@@ -24,10 +24,7 @@ function CallbackContent() {
       // 2. Simpan ke LocalStorage (Cadangan)
       localStorage.setItem('token', token);
 
-      // 3. Paksa reload ke Dashboard
-      // ⚠️ Cek: Apakah Anda login sebagai Admin atau User?
-      // Jika Admin, ganti jadi '/admin/dashboard'
-      window.location.href = '/admin/dashboard'; 
+      window.location.href = '/';
     } 
     else if (error) {
       setStatus('Login Gagal: ' + error);
