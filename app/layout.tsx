@@ -21,6 +21,10 @@ export const metadata: Metadata = {
     template: "%s | TiketLoka",
   },
 
+  verification: {
+    google: "-ouFo0FTrUYzyZGFTpAm45HapZ2E8iPkw434J2btUvQ",
+  },
+
   // 3. Deskripsi Global
   description: "Platform pemesanan tiket wisata terbaik di Indonesia. Temukan destinasi impianmu, pesan tiket dengan mudah, dan nikmati liburan tanpa ribet.",
 
