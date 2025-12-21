@@ -15,7 +15,7 @@ function CallbackContent() {
     const error = searchParams.get('error');
 
     if (token) {
-      setStatus('Login berhasil! Mengalihkan ke dashboard...');
+      setStatus('Login berhasil!.');
       
       // 1. Simpan Token ke Cookie (Versi js-cookie)
       // expires: 7 artinya 7 hari
