@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { setCookie } from 'cookies-next'; // Pastikan sudah: npm i cookies-next
+import Cookies from 'js-cookie'; // ✅ Menggunakan library yang sudah Anda punya
 
 function CallbackContent() {
   const router = useRouter();
@@ -17,14 +17,17 @@ function CallbackContent() {
     if (token) {
       setStatus('Login berhasil! Mengalihkan ke dashboard...');
       
-      // 1. Simpan Token ke Cookie (Wajib untuk Middleware)
-      setCookie('token', token, { maxAge: 60 * 60 * 24 * 7 }); // 7 hari
+      // 1. Simpan Token ke Cookie (Versi js-cookie)
+      // expires: 7 artinya 7 hari
+      Cookies.set('token', token, { expires: 7 }); 
       
-      // 2. Simpan ke LocalStorage (Cadangan untuk Client Component)
+      // 2. Simpan ke LocalStorage (Cadangan)
       localStorage.setItem('token', token);
 
-      // 3. Paksa reload ke Dashboard agar state auth ter-refresh
-      window.location.href = '/user/dashboard'; 
+      // 3. Paksa reload ke Dashboard
+      // ⚠️ Cek: Apakah Anda login sebagai Admin atau User?
+      // Jika Admin, ganti jadi '/admin/dashboard'
+      window.location.href = '/admin/dashboard'; 
     } 
     else if (error) {
       setStatus('Login Gagal: ' + error);
@@ -37,7 +40,6 @@ function CallbackContent() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4">
       <div className="w-full max-w-md rounded-lg bg-white p-6 text-center shadow-lg border border-gray-100">
-        {/* Spinner Loading Sederhana */}
         <div className="mb-4 flex justify-center">
             <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
         </div>
@@ -48,7 +50,6 @@ function CallbackContent() {
   );
 }
 
-// WAJIB: Bungkus dengan Suspense di Next.js App Router agar tidak error saat build
 export default function GoogleCallbackPage() {
   return (
     <Suspense fallback={<div className="p-10 text-center">Loading...</div>}>
