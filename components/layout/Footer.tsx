@@ -7,7 +7,7 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-white border-t border-gray-100 pt-16 pb-8">
+    <footer className="bg-white border-t border-gray-300 pt-16 pb-8">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         {/* --- BAGIAN ATAS (Main Content) --- */}
         {/* Menggunakan grid-cols-3: Logo (2 bagian) + Kontak (1 bagian) agar lebih seimbang */}
