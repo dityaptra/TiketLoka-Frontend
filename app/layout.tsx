@@ -11,28 +11,26 @@ const inter = Inter({ subsets: ["latin"] });
 
 // --- KONFIGURASI SEO GLOBAL ---
 export const metadata: Metadata = {
-  // 1. Base URL (Penting untuk SEO Gambar & Link Absolut)
-  // Ganti 'https://tiketloka.com' dengan domain asli Anda saat deploy
+  // Base URL (Penting untuk SEO Gambar & Link Absolut)
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://tiketloka.web.id'),
 
-  // 2. Title Template (Halaman lain cukup set title: "Nama Wisata", otomatis jadi "Nama Wisata | TiketLoka")
+  // Title Template (Halaman lain cukup set title: "Nama Wisata", otomatis jadi "Nama Wisata | TiketLoka")
   title: {
-    default: "TiketLoka - Booking Tiket Wisata Termurah & Mudah",
+    default: "TiketLoka: Pesan Tiket Wisata Online Termurah & Termudah",
     template: "%s | TiketLoka",
   },
 
-  // 3. Deskripsi Global
+  // Deskripsi Global
   description: "Platform pemesanan tiket wisata terbaik di Indonesia. Temukan destinasi impianmu, pesan tiket dengan mudah, dan nikmati liburan tanpa ribet.",
 
   verification: {
     google: '-ouFo0FTrUYzyZGFTpAm45HapZ2E8iPkw434J2btUvQ', 
-    // Contoh: 'ALkds_j12398asdLKJ-askdj123' (Hanya ambil isi content-nya saja)
   },
 
-  // 4. Kata Kunci Global
+  // Kata Kunci Global
   keywords: ["tiket wisata", "booking online", "wisata bali", "liburan murah", "tiketloka"],
 
-  // 5. Open Graph (Tampilan saat link dishare di WA/FB/IG)
+  // Open Graph (Tampilan saat link dishare di WA/FB/IG)
   openGraph: {
     title: "TiketLoka - Jelajahi Indonesia",
     description: "Pesan tiket wisata favoritmu sekarang di TiketLoka.",
@@ -50,7 +48,7 @@ export const metadata: Metadata = {
     type: "website",
   },
 
-  // 6. Twitter Card (Tampilan di Twitter/X)
+  // Twitter Card (Tampilan di Twitter/X)
   twitter: {
     card: "summary_large_image",
     title: "TiketLoka - Booking Wisata Mudah",
@@ -58,7 +56,7 @@ export const metadata: Metadata = {
     // images: ["/images/og-image-default.jpg"],
   },
 
-  // 8. Ikon Aplikasi
+  // Ikon Aplikasi
   icons: {
     icon: "/icon.png",
     shortcut: "/icon-16x16.png",
@@ -74,7 +72,7 @@ export default function RootLayout({
   return (
     <html lang="id">
       <body
-        className={`${inter.className} bg-gray-50 min-h-[100dvh] overscroll-none antialiased`}
+        className={`${inter.className} bg-gray-50 min-h-dvh overscroll-none antialiased`}
       >
         <AuthProvider>
           <NotificationProvider>
