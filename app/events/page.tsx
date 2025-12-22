@@ -120,7 +120,7 @@ export default function AllDestinationsPage() {
       <div className="bg-gray-50 py-10 px-4">
         
         {/* SEARCH BAR CONTAINER */}
-        <div className="max-w-5xl mx-auto bg-white p-1.5 rounded-2xl shadow-xl border border-gray-100 flex flex-col md:flex-row gap-1">
+        <div className="max-w-5xl mx-auto bg-white p-1.5 rounded-2xl border border-gray-100 flex flex-col md:flex-row gap-1">
             
             {/* KATEGORI DROPDOWN */}
             <div className="relative w-full md:w-48 z-30">
