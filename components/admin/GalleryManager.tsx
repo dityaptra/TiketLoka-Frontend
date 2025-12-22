@@ -98,18 +98,27 @@ export default function GalleryManager({
     setIsUploading(true);
 
     const formData = new FormData();
-    formData.append("destination_id", String(destinationId));
+    // Tidak perlu append destination_id manual jika URL sudah pakai ID
+    // formData.append("destination_id", String(destinationId)); 
+    
     uploadQueue.forEach((file) => {
-      // Pastikan nama field sesuai backend (biasanya images[])
+      // Pastikan nama field sesuai validasi backend ('images.*')
       formData.append("images[]", file); 
     });
 
     try {
+      // PERBAIKAN URL DISINI:
+      // Dari: /api/admin/destination-images
+      // Ke:   /api/admin/destinations/{ID}/gallery
       const res = await fetch(
-        `${BASE_URL}/api/admin/destination-images`,
+        `${BASE_URL}/api/admin/destinations/${destinationId}/gallery`,
         {
           method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            // JANGAN set Content-Type header manual saat pakai FormData
+            // Browser akan otomatis set multipart/form-data + boundary
+          },
           body: formData,
         }
       );
