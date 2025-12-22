@@ -26,7 +26,7 @@ interface Destination {
     price: number; 
     location: string; 
     image_url: string; 
-    category?: { name: string };
+    category?: string;
     images?: { id: number; image: string }[]; 
     inclusions?: { id: number; name: string }[]; 
     addons?: { id: number; name: string; price: number }[]; 
@@ -113,7 +113,7 @@ export default function EventDetailView({ slug }: { slug: string }) {
                                 <div className="flex items-center gap-1.5 font-medium text-gray-700 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
                                     <MapPin className="w-4 h-4 text-[#F57C00]" /><span>{destination.location}</span>
                                 </div>
-                                {destination.category && <span className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider border border-blue-100">{destination.category.name}</span>}
+                                {destination.category && <span className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider border border-blue-100">{destination.category}</span>}
                                 {destination.reviews && destination.reviews.length > 0 && (
                                     <div className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-yellow-100 bg-yellow-50/50">
                                         <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
