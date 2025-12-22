@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next';
-
+export const dynamic = 'force-dynamic';
 // --- BAGIAN INI SAYA KUNCI KE DOMAIN ASLI AGAR AMAN ---
 // Jangan pakai localhost, karena Google tidak bisa baca localhost
 const WEB_BASE_URL = 'https://tiketloka.web.id'; 
