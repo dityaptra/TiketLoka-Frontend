@@ -24,6 +24,11 @@ export const metadata: Metadata = {
   // 3. Deskripsi Global
   description: "Platform pemesanan tiket wisata terbaik di Indonesia. Temukan destinasi impianmu, pesan tiket dengan mudah, dan nikmati liburan tanpa ribet.",
 
+  verification: {
+    google: '-ouFo0FTrUYzyZGFTpAm45HapZ2E8iPkw434J2btUvQ', 
+    // Contoh: 'ALkds_j12398asdLKJ-askdj123' (Hanya ambil isi content-nya saja)
+  },
+
   // 4. Kata Kunci Global
   keywords: ["tiket wisata", "booking online", "wisata bali", "liburan murah", "tiketloka"],
 
