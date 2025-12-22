@@ -5,7 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useCartContext } from '@/context/CartContext'; 
 import { useNotification } from '@/context/NotificationContext'; 
-import Navbar from '@/components/layout/Navbar'; 
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer'; 
 import { 
     MapPin, Calendar as CalendarIcon, ArrowLeft, Minus, Plus, X, CheckCircle, Check, Tag, Star, 
     ChevronLeft, ChevronRight, ShoppingCart, 
@@ -137,6 +138,7 @@ export default function EventDetailView({ slug }: { slug: string }) {
                     </div>
                 </div>
             </div>
+            <Footer />
         </main>
     );
 }
@@ -382,9 +384,9 @@ function BookingCard({ destination }: { destination: Destination }) {
                 <div>
                     <label className="text-xs font-bold text-gray-700 uppercase mb-2 block">Jumlah Peserta</label>
                     <div className="flex justify-between items-center p-1 bg-gray-50 rounded-xl border border-gray-200">
-                        <button onClick={() => setQty(q => Math.max(1, q - 1))} className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white transition"><Minus className="w-4 h-4"/></button>
+                        <button onClick={() => setQty(q => Math.max(1, q - 1))} className="w-10 h-10 flex items-center justify-center bg-[#0B2F5E] text-white rounded-lg transition cursor-pointer"><Minus className="w-4 h-4"/></button>
                         <span className="font-bold text-gray-800 text-lg">{qty}</span>
-                        <button onClick={() => setQty(q => q + 1)} className="w-10 h-10 flex items-center justify-center bg-[#0B2F5E] text-white rounded-lg transition"><Plus className="w-4 h-4"/></button>
+                        <button onClick={() => setQty(q => q + 1)} className="w-10 h-10 flex items-center justify-center bg-[#0B2F5E] text-white rounded-lg transition cursor-pointer"><Plus className="w-4 h-4"/></button>
                     </div>
                 </div>
                 {destination.addons && destination.addons.length > 0 && (
@@ -401,8 +403,8 @@ function BookingCard({ destination }: { destination: Destination }) {
                 <div className="flex justify-between pt-4 border-t border-gray-100"><span className="font-medium text-gray-500">Total Harga</span><span className="font-extrabold text-2xl text-[#0B2F5E]">Rp {total.toLocaleString('id-ID')}</span></div>
             </div>
             <div className="flex gap-3">
-                <button onClick={handleAddToCart} disabled={addingToCart} className="flex-1 flex justify-center py-3.5 border-2 border-[#F57C00] text-[#F57C00] rounded-xl font-bold transition disabled:opacity-50">{addingToCart ? <Loader2 className="animate-spin"/> : <ShoppingCart/>}</button>
-                <button onClick={() => { if(!token) return router.push('/login'); if(!date) return toast.error('Pilih tanggal!'); setModalOpen(true); }} className="flex-[1.5] bg-[#0B2F5E] text-white py-3.5 rounded-xl font-bold transition">Pesan Sekarang</button>
+                <button onClick={handleAddToCart} disabled={addingToCart} className="flex-1 flex justify-center py-3.5 border-2 border-[#F57C00] text-[#F57C00] rounded-xl font-bold transition disabled:opacity-50 cursor-pointer">{addingToCart ? <Loader2 className="animate-spin"/> : <ShoppingCart/>}</button>
+                <button onClick={() => { if(!token) return router.push('/login'); if(!date) return toast.error('Pilih tanggal!'); setModalOpen(true); }} className="flex-[1.5] bg-[#0B2F5E] text-white py-3.5 rounded-xl font-bold transition cursor-pointer">Beli Langsung</button>
             </div>
             {modalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in">

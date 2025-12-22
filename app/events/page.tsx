@@ -117,7 +117,7 @@ export default function AllDestinationsPage() {
       <Navbar />
 
       {/* SEARCH AREA */}
-      <div className="bg-linear-to-b from-blue-50 to-gray-50 py-10 px-4">
+      <div className="bg-gray-50 py-10 px-4">
         
         {/* SEARCH BAR CONTAINER */}
         <div className="max-w-5xl mx-auto bg-white p-1.5 rounded-2xl shadow-xl border border-gray-100 flex flex-col md:flex-row gap-1">
