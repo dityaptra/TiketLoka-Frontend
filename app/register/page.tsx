@@ -279,7 +279,7 @@ function RegisterContent() {
                 onClick={handleGoogleLogin}
                 className="w-full flex items-center justify-center cursor-pointer gap-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium py-2 rounded-lg transition-all text-sm shadow-sm hover:shadow"
               >
-                <GoogleIcon /> <span>Masuk dengan Google</span>
+                <GoogleIcon /> <span>Google</span>
               </button>
             </div>
 
