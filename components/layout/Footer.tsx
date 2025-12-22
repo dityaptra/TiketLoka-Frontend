@@ -66,11 +66,11 @@ export default function Footer() {
 
         {/* --- BAGIAN BAWAH (Copyright) --- */}
         <div className="border-t border-gray-300 pt-8 flex flex-col-reverse md:flex-row justify-between items-center gap-4">
-          <p className="text-gray-400 text-xs md:text-sm text-center md:text-left">
+          <p className="text-gray-500 text-xs md:text-sm text-center md:text-left">
             &copy; {currentYear} TiketLoka. All Rights Reserved.
           </p>
 
-          <div className="flex gap-6 text-xs md:text-sm text-gray-400 font-medium">
+          <div className="flex gap-6 text-xs md:text-sm text-gray-500">
             <Link href="/privacy" className="hover:text-[#F57C00] transition-colors">
               Privacy Policy
             </Link>
