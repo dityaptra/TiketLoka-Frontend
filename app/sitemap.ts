@@ -1,19 +1,14 @@
 import { MetadataRoute } from 'next';
 export const dynamic = 'force-dynamic';
-// --- BAGIAN INI SAYA KUNCI KE DOMAIN ASLI AGAR AMAN ---
-// Jangan pakai localhost, karena Google tidak bisa baca localhost
-const WEB_BASE_URL = 'https://tiketloka.web.id'; 
 
-// Pastikan ini mengarah ke Backend Laravel kamu yang sudah live (HTTPS)
+const WEB_BASE_URL = 'https://tiketloka.web.id'; 
 const API_BASE_URL = 'https://tiketloka.web.id'; 
 
 // Fungsi Fetch Data semua wisata dari Laravel
 async function getAllDestinations() {
   try {
-    // Kita panggil API public list wisata
-    // Pastikan endpoint '/api/destinations' ini benar ada di backend
     const res = await fetch(`${API_BASE_URL}/api/destinations?limit=1000`, {
-      cache: 'no-store', // Selalu ambil data terbaru
+      cache: 'no-store',
     });
     
     if (!res.ok) return [];
@@ -33,8 +28,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // 2. Buat URL Dinamis untuk setiap wisata
   const destinationUrls = destinations.map((item: any) => ({
-    // PERHATIKAN: Pastikan folder di Next.js kamu namanya 'events' atau 'tickets'?
-    // Sesuaikan '/events/' di bawah ini dengan nama folder di 'app/' kamu.
     url: `${WEB_BASE_URL}/events/${item.slug}`, 
     lastModified: new Date(item.updated_at || new Date()), 
     changeFrequency: 'weekly' as const, 
@@ -44,7 +37,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 3. Buat URL Statis (Halaman Tetap)
   const staticUrls = [
     {
-      url: WEB_BASE_URL, // Homepage
+      url: WEB_BASE_URL,
       lastModified: new Date(),
       changeFrequency: 'daily' as const,
       priority: 1.0,
@@ -55,9 +48,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'yearly' as const,
       priority: 0.3,
     },
-    // Tambahkan halaman lain jika ada (misal: /register, /about)
   ];
 
-  // Gabungkan keduanya
   return [...staticUrls, ...destinationUrls];
 }
