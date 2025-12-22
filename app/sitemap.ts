@@ -1,14 +1,17 @@
 import { MetadataRoute } from 'next';
 
-// Base URL Frontend & Backend
-const WEB_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+// --- BAGIAN INI SAYA KUNCI KE DOMAIN ASLI AGAR AMAN ---
+// Jangan pakai localhost, karena Google tidak bisa baca localhost
+const WEB_BASE_URL = 'https://tiketloka.web.id'; 
+
+// Pastikan ini mengarah ke Backend Laravel kamu yang sudah live (HTTPS)
+const API_BASE_URL = 'https://tiketloka.web.id'; 
 
 // Fungsi Fetch Data semua wisata dari Laravel
 async function getAllDestinations() {
   try {
     // Kita panggil API public list wisata
-    // Pastikan API ini mereturn array data wisata
+    // Pastikan endpoint '/api/destinations' ini benar ada di backend
     const res = await fetch(`${API_BASE_URL}/api/destinations?limit=1000`, {
       cache: 'no-store', // Selalu ambil data terbaru
     });
@@ -16,6 +19,7 @@ async function getAllDestinations() {
     if (!res.ok) return [];
     
     const json = await res.json();
+    // Pastikan struktur JSON backend kamu benar (json.data)
     return json.data || [];
   } catch (error) {
     console.error("Gagal generate sitemap:", error);
@@ -29,25 +33,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // 2. Buat URL Dinamis untuk setiap wisata
   const destinationUrls = destinations.map((item: any) => ({
-    url: `${WEB_BASE_URL}/events/${item.slug}`, // URL Halaman Detail
-    lastModified: new Date(item.updated_at || new Date()), // Kapan terakhir diedit
-    changeFrequency: 'weekly' as const, // Seberapa sering konten berubah
-    priority: 0.8, // Skala 0.0 - 1.0 (0.8 artinya penting)
+    // PERHATIKAN: Pastikan folder di Next.js kamu namanya 'events' atau 'tickets'?
+    // Sesuaikan '/events/' di bawah ini dengan nama folder di 'app/' kamu.
+    url: `${WEB_BASE_URL}/events/${item.slug}`, 
+    lastModified: new Date(item.updated_at || new Date()), 
+    changeFrequency: 'weekly' as const, 
+    priority: 0.8, 
   }));
 
   // 3. Buat URL Statis (Halaman Tetap)
   const staticUrls = [
     {
-      url: WEB_BASE_URL, // Homepage (Paling Penting)
+      url: WEB_BASE_URL, // Homepage
       lastModified: new Date(),
       changeFrequency: 'daily' as const,
       priority: 1.0,
-    },
-    {
-      url: `${WEB_BASE_URL}/about`, // Halaman Tentang Kami (Jika ada)
-      lastModified: new Date(),
-      changeFrequency: 'monthly' as const,
-      priority: 0.5,
     },
     {
       url: `${WEB_BASE_URL}/login`,
@@ -55,6 +55,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'yearly' as const,
       priority: 0.3,
     },
+    // Tambahkan halaman lain jika ada (misal: /register, /about)
   ];
 
   // Gabungkan keduanya
