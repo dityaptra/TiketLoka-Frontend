@@ -233,11 +233,11 @@ export default function AdminBookings() {
         <div className="flex justify-between items-center bg-white p-4 rounded-xl border shadow-sm">
           <span className="text-xs text-gray-400 font-medium">Data {meta.from} - {meta.to} dari {meta.total}</span>
           <div className="flex gap-1">
-            <button disabled={page === 1} onClick={() => setPage(page - 1)} className="px-3 py-1.5 bg-gray-50 rounded-lg text-xs font-bold disabled:opacity-30 border hover:bg-gray-100 transition-colors">Prev</button>
+            <button disabled={page === 1} onClick={() => setPage(page - 1)} className="px-3 py-1.5 bg-gray-50 rounded-lg text-xs font-bold disabled:opacity-30 border hover:bg-gray-100 text-gray-500 transition-colors">Prev</button>
             <span className="px-4 py-1.5 bg-[#0B2F5E] text-white rounded-lg text-xs font-bold flex items-center justify-center">
               Halaman {page} dari {meta.last_page}
             </span>
-            <button disabled={page === meta.last_page} onClick={() => setPage(page + 1)} className="px-3 py-1.5 bg-gray-50 rounded-lg text-xs font-bold disabled:opacity-30 border hover:bg-gray-100 transition-colors">Next</button>
+            <button disabled={page === meta.last_page} onClick={() => setPage(page + 1)} className="px-3 py-1.5 bg-gray-50 rounded-lg text-xs font-bold disabled:opacity-30 border hover:bg-gray-100 text-gray-500 transition-colors">Next</button>
           </div>
         </div>
       )}
