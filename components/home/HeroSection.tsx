@@ -65,7 +65,7 @@ const HeroSection = () => {
           />
           <button 
             type="submit"
-            className="bg-[#F57C00] hover:bg-[#E65100] text-white px-8 py-4 rounded-xl font-bold transition-all shadow-lg flex items-center gap-2 active:scale-95"
+            className="bg-[#F57C00] hover:bg-[#E65100] text-white px-8 py-4 rounded-xl font-bold transition-all shadow-lg flex items-center gap-2 active:scale-95 cursor-pointer"
           >
             <span className="hidden md:inline">Cari</span>
             {/* Tampilkan icon search di mobile jika text hidden */}

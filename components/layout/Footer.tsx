@@ -17,7 +17,7 @@ export default function Footer() {
           <div className="space-y-2 lg:col-span-2">
             <div className="relative h-18 w-64">
               <Image
-                src="/images/logonama4.png"
+                src="/images/logonama.png"
                 alt="TiketLoka Logo"
                 fill
                 className="object-contain object-left"

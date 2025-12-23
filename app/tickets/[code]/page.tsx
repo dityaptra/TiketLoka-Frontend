@@ -102,7 +102,7 @@ export default function TicketDetailPage() {
     <main className={`min-h-screen ${bgPageColor} pb-20 font-sans text-gray-800 print:bg-white print:pb-0`}>
       
       {/* --- NAVBAR (Disembunyikan saat print) --- */}
-      <div className="bg-white px-4 py-3 shadow-sm sticky top-0 z-20 border-b border-gray-200 print:hidden">
+      <div className="bg-white px-4 py-2 shadow-sm sticky top-0 z-20 border-b border-gray-200 print:hidden">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/tickets" className="hover:bg-gray-100 p-2 rounded-full transition text-gray-600">
@@ -198,7 +198,7 @@ export default function TicketDetailPage() {
               </div>
 
               <div className="mt-4">
-                <Image src="/images/logonama4.png" alt="Logo" width={150} height={45} className="opacity-50 transition opacity-100" />
+                <Image src="/images/logonama.png" alt="Logo" width={150} height={45} className="opacity-50 transition opacity-100" />
               </div>
             </div>
           </div>

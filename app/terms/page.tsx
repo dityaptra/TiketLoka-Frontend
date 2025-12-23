@@ -17,7 +17,7 @@ export default function TermsAndConditions() {
             <div className="relative w-52 h-26">
                {/* Pastikan file logo.png ada di folder public */}
                <Image 
-                 src="/images/logonama4.png" 
+                 src="/images/logonama.png" 
                  alt="Logo TiketLoka" 
                  fill
                  className="object-contain"
