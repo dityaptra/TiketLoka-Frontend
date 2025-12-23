@@ -155,7 +155,7 @@ const Navbar = () => {
         <Link href="/" className="flex items-center gap-2 group">
           <div className="relative h-14 w-52 transition-transform">
             <Image
-              src="/images/logonama3.png"
+              src="/images/logonama4.png"
               alt="TiketLoka Logo"
               fill
               className="object-contain object-left"
