@@ -1,17 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation"; // + Import useRouter
 import { LayoutDashboard, Map, ShoppingBag, Tag, LogOut } from "lucide-react";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import Swal from "sweetalert2";
+// 1. IMPORT Server Action untuk Hapus Cookie HttpOnly
+import { deleteSession } from "@/app/actions/auth";
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter(); // + Init Router
   
-  // Mengambil user dan logout dari Context
-  // Pastikan AuthContext Anda sudah memiliki tipe data untuk 'user'
   const { user, logout } = useAuth();
 
   const menuItems = [
@@ -21,8 +22,8 @@ export default function Sidebar() {
     { name: "Transaksi", href: "/admin/bookings", icon: ShoppingBag },
   ];
 
-  const handleLogout = () => {
-    Swal.fire({
+  const handleLogout = async () => {
+    const result = await Swal.fire({
       title: "Keluar Aplikasi?",
       text: "Anda harus login kembali untuk mengakses halaman admin.",
       icon: "warning",
@@ -32,15 +33,29 @@ export default function Sidebar() {
       confirmButtonText: "Ya, Keluar",
       cancelButtonText: "Batal",
       reverseButtons: true,
-    }).then((result) => {
-      if (result.isConfirmed) {
-        logout();
-      }
     });
+
+    if (result.isConfirmed) {
+      try {
+        // 2. HAPUS COOKIE SERVER-SIDE (Wajib!)
+        await deleteSession();
+
+        // 3. Bersihkan State Client
+        await logout();
+
+        // 4. Redirect ke Login & Refresh agar middleware sadar cookie hilang
+        router.push("/login");
+        router.refresh(); 
+
+      } catch (error) {
+        console.error("Logout error:", error);
+        // Force logout jika error
+        await deleteSession();
+        window.location.href = "/login";
+      }
+    }
   };
 
-  // Helper untuk inisial nama dengan Type Annotation
-  // Menerima string, null, atau undefined
   const getInitial = (name?: string | null): string => {
     if (!name) return "A";
     return name.charAt(0).toUpperCase();
@@ -65,7 +80,7 @@ export default function Sidebar() {
       <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
         {menuItems.map((item) => {
           const isActive = pathname.startsWith(item.href);
-          const Icon = item.icon; // Assign ke variabel kapital agar bisa dirender sebagai komponen
+          const Icon = item.icon; 
 
           return (
             <Link
@@ -103,7 +118,6 @@ export default function Sidebar() {
           {/* Info User */}
           <div className="overflow-hidden">
             <p className="text-sm font-bold text-gray-800 truncate" title={user?.name || "Admin"}>
-              {/* Optional Chaining (?.) sangat penting di TS jika user bisa null */}
               {user?.name || "Admin"}
             </p>
             <p className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">
@@ -115,7 +129,7 @@ export default function Sidebar() {
         {/* Tombol Logout */}
         <button
           onClick={handleLogout}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 w-full rounded-lg text-xs font-bold text-red-600 bg-white border border-gray-200 hover:bg-red-50 hover:border-red-200 transition-all shadow-sm"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 w-full rounded-lg text-xs font-bold text-red-600 bg-white border border-gray-200 hover:bg-red-50 hover:border-red-200 transition-all shadow-sm cursor-pointer"
         >
           <LogOut size={16} />
           LOGOUT
