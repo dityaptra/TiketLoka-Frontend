@@ -18,7 +18,7 @@ const HeroSection = () => {
   };
 
   return (
-    <div className="relative h-[700px] flex items-center justify-center overflow-hidden">
+    <div className="relative h-[650px] flex items-center justify-center overflow-hidden">
       {/* Background Layer */}
       <div className="absolute inset-0 z-0">
         <HeroBackgroundSlider />
