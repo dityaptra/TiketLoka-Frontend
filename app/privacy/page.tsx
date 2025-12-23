@@ -14,8 +14,8 @@ export default function PrivacyPolicy() {
         
         {/* Header: Logo & Judul */}
         <div className="text-center mb-12">
-          <div className="flex justify-center mb-6">
-            <div className="relative w-40 h-12">
+          <div className="flex justify-center mb-1">
+            <div className="relative w-52 h-26">
                {/* Pastikan file logo.png ada di folder public */}
                <Image 
                  src="/images/logonama4.png" 
@@ -26,7 +26,7 @@ export default function PrivacyPolicy() {
                />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">Kebijakan Privasi TiketLoka</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 uppercase tracking-wide">Kebijakan Privasi TiketLoka</h1>
           <p className="text-sm text-gray-500 mt-2">
             Terakhir diperbarui: {lastUpdated}
           </p>

@@ -9,12 +9,12 @@ export default function TermsAndConditions() {
   return (
     <div className="min-h-screen bg-white text-gray-800 font-sans">
       {/* Container Utama */}
-      <div className="max-w-5xl mx-auto px-6 sm:px-8 py-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12">
         
         {/* Header: Logo & Judul */}
         <div className="text-center mb-12 border-b border-gray-200 pb-8">
-          <div className="flex justify-center mb-6">
-            <div className="relative w-40 h-12">
+          <div className="flex justify-center mb-1">
+            <div className="relative w-52 h-26">
                {/* Pastikan file logo.png ada di folder public */}
                <Image 
                  src="/images/logonama4.png" 

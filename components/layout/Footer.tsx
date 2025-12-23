@@ -14,8 +14,8 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-16 mb-12">
           
           {/* KOLOM KIRI: Brand & Sosmed (Mengambil 2 kolom di layar besar) */}
-          <div className="space-y-6 lg:col-span-2">
-            <div className="relative h-14 w-52">
+          <div className="space-y-2 lg:col-span-2">
+            <div className="relative h-18 w-64">
               <Image
                 src="/images/logonama4.png"
                 alt="TiketLoka Logo"

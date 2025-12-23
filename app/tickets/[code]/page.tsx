@@ -198,7 +198,7 @@ export default function TicketDetailPage() {
               </div>
 
               <div className="mt-4">
-                <Image src="/images/logonama3.png" alt="Logo" width={150} height={45} className="opacity-50 transition opacity-100" />
+                <Image src="/images/logonama4.png" alt="Logo" width={150} height={45} className="opacity-50 transition opacity-100" />
               </div>
             </div>
           </div>
