@@ -44,14 +44,14 @@ export default function Sidebar() {
         await logout();
 
         // 4. Redirect ke Login & Refresh agar middleware sadar cookie hilang
-        router.push("/login");
+        router.push("/");
         router.refresh(); 
 
       } catch (error) {
         console.error("Logout error:", error);
         // Force logout jika error
         await deleteSession();
-        window.location.href = "/login";
+        window.location.href = "/";
       }
     }
   };
