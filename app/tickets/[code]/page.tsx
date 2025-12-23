@@ -110,10 +110,6 @@ export default function TicketDetailPage() {
             </Link>
             <h1 className="font-bold text-lg text-[#0B2F5E]">E-Ticket</h1>
           </div>
-          {/* Tombol Cetak Kecil di Navbar */}
-          <button onClick={() => window.print()} className="flex items-center gap-2 text-gray-600 hover:bg-gray-100 px-3 py-1.5 rounded-lg text-sm font-medium transition cursor-pointer">
-            <Printer className="w-4 h-4" /> <span className="hidden sm:inline">Cetak</span>
-          </button>
         </div>
       </div>
 
