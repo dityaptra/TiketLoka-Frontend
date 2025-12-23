@@ -203,7 +203,7 @@ export default function AdminBookings() {
                         </td>
                         <td className="px-6 py-4 text-center">
                           <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded-md font-bold text-xs">
-                            {item.details?.reduce((acc, curr) => acc + curr.quantity, 0)} Orang
+                            {item.details?.reduce((acc, curr) => acc + Number(curr.quantity), 0)} Orang
                           </span>
                         </td>
                         <td className="px-6 py-4 font-black text-gray-600">Rp {Number(item.grand_total).toLocaleString("id-ID")}</td>
