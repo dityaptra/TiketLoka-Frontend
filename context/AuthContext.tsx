@@ -35,79 +35,86 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  // Token hanya disimpan di Memori (State), HILANG saat refresh.
+  // Ini AMAN karena autentikasi utama sekarang dipegang oleh Cookie HttpOnly.
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   // Cek LocalStorage saat aplikasi pertama kali dimuat
   useEffect(() => {
-    const storedToken = localStorage.getItem("token");
+    // ❌ KITA HAPUS LOGIKA GET TOKEN DARI SINI
+    // Kita hanya mengambil data User agar tampilan profil tetap ada
     const storedUser = localStorage.getItem("user");
 
-    if (storedToken && storedUser) {
-      setToken(storedToken);
+    if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
       } catch (e) {
         console.error("Error parsing user data", e);
-        // Jika data corrupt, bersihkan storage
-        localStorage.removeItem("token");
         localStorage.removeItem("user");
       }
     }
+    
+    // Pastikan tidak ada sisa token lama di LocalStorage pengguna
+    localStorage.removeItem("token"); 
+    
     setIsLoading(false);
   }, []);
 
   // Fungsi Login (Simpan data)
   const login = (newToken: string, userData: User) => {
-    setToken(newToken);
+    setToken(newToken); // Simpan di memori sementara
     setUser(userData);
-    localStorage.setItem("token", newToken);
+    
+    // ❌ JANGAN SIMPAN TOKEN KE LOCALSTORAGE
+    // localStorage.setItem("token", newToken); <--- INI DIHAPUS
+    
+    // Simpan data user saja (aman)
     localStorage.setItem("user", JSON.stringify(userData));
 
     // Redirect sesuai role
-    if (userData.role === "admin") {
+    // (Opsional: Bisa dihapus jika redirect sudah ditangani di page login)
+    /* if (userData.role === "admin") {
       router.push("/admin/dashboard");
     } else {
       router.push("/");
     }
+    */
   };
 
   // Fungsi Logout (Hapus data)
   const logout = async () => {
-    // 1. SIMPAN TOKEN SEMENTARA UTK API CALL
     const currentToken = token;
 
-    // 2. BERSIHKAN CLIENT SIDE DULUAN (Optimistic UI)
-    // Agar user tidak menunggu loading API cuma buat logout
+    // 1. BERSIHKAN CLIENT SIDE
     setToken(null);
     setUser(null);
-    localStorage.removeItem("token");
+    // Hapus data user dari storage
     localStorage.removeItem("user");
+    // Pastikan token bersih (jaga-jaga)
+    localStorage.removeItem("token");
 
-    // Hapus Semua Cookie (Pembersihan menyeluruh)
-    document.cookie.split(";").forEach((c) => {
-      document.cookie = c
-        .replace(/^ +/, "")
-        .replace(/=.*/, "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/");
-    });
-
-    // 3. REDIRECT SEGERA
-    router.replace("/"); // Gunakan replace agar tidak bisa di-back
+    // 2. REDIRECT SEGERA (Optimistic UI)
+    router.replace("/login"); 
     router.refresh();
 
-    // 4. PANGGIL API LOGOUT DI BACKGROUND
+    // 3. PANGGIL API LOGOUT DI BACKGROUND
+    // Karena token di localstorage sudah tidak ada, fetch ini mungkin perlu
+    // cookie credentials agar backend tahu siapa yg logout.
     try {
-      if (currentToken) {
-        await fetch(`${BASE_URL}/api/logout`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${currentToken}`,
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-        });
-      }
+      await fetch(`${BASE_URL}/api/logout`, {
+        method: "POST",
+        headers: {
+          // Jika backend butuh Bearer dan kita punya di state, kirim.
+          // Tapi jika refresh, token null. Backend harus bisa baca cookie.
+          ...(currentToken ? { Authorization: `Bearer ${currentToken}` } : {}),
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        // PENTING: Kirim cookie HttpOnly ke backend Laravel
+        credentials: "include", 
+      });
     } catch (error) {
       console.warn("Server logout failed, but client session is cleared.");
     }
