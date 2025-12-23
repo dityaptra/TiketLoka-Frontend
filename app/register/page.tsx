@@ -1,13 +1,15 @@
 "use client";
 
-import { useState, Suspense } from "react"; // Tambahkan Suspense
+import { useState, Suspense } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useNotification } from "@/context/NotificationContext";
+import { useRouter } from "next/navigation"; // 1. Import useRouter untuk redirect
 import Link from "next/link";
 import Image from "next/image";
 import { Loader2, User, Mail, Phone, Lock, Eye, EyeOff } from "lucide-react";
+import { createSession } from "@/app/actions/auth"; // 2. Import Server Action untuk keamanan cookie
 
-// --- COMPONENTS: ICONS (Tetap sama) ---
+// --- KOMPONEN ICON ---
 const GoogleIcon = () => (
   <svg className="w-5 h-5" viewBox="0 0 24 24">
     <path
@@ -29,11 +31,12 @@ const GoogleIcon = () => (
   </svg>
 );
 
-
 // --- BAGIAN 1: ISI KONTEN ---
 function RegisterContent() {
   const { login } = useAuth();
   const { addNotification } = useNotification();
+  const router = useRouter(); // Inisialisasi router
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -71,21 +74,33 @@ function RegisterContent() {
     }
 
     try {
+      // 1. Request ke Backend Laravel
       const res = await fetch(`${BASE_URL}/api/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
       const data = await res.json();
+      
       if (!res.ok)
         throw new Error(data.message || "Gagal melakukan pendaftaran");
 
+      // 2. SIMPAN COOKIE HTTPONLY (PENTING!)
+      // Ini memastikan user tetap login saat halaman direfresh
+      await createSession(data.access_token, data.user.role);
+
+      // 3. Update State UI (Context)
       login(data.access_token, data.user);
+
       addNotification(
         "system",
         "Pendaftaran Berhasil",
         "Akun Anda telah aktif. Selamat bergabung!"
       );
+
+      // 4. Redirect ke Dashboard/Home
+      router.push('/');
+
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -127,6 +142,7 @@ function RegisterContent() {
                   alt="Ilustrasi Register"
                   fill
                   className="object-contain drop-shadow-xl"
+                  priority
                 />
               </div>
               <h2 className="text-2xl font-bold text-white mb-2 tracking-tight">
@@ -273,7 +289,7 @@ function RegisterContent() {
             </div>
 
             {/* Social Login Buttons */}
-              <div className="mt-1">
+            <div className="mt-1">
               <button
                 type="button"
                 onClick={handleGoogleLogin}
