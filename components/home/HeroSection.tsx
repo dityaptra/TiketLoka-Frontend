@@ -27,7 +27,7 @@ const HeroSection = () => {
       </div>
 
       {/* Content Layer */}
-      <div className="relative z-10 text-center px-4 max-w-5xl mx-auto -mt-25">
+      <div className="relative z-10 text-center px-4 max-w-5xl mx-auto -mt-15">
 
         {/* Heading */}
         <h1
