@@ -7,7 +7,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Loader2, Mail, Lock, Eye, EyeOff } from "lucide-react";
-import Cookies from "js-cookie";
+// Import Server Actions yang baru dibuat
+import { createSession, deleteSession } from "@/app/actions/auth";
 
 // --- KOMPONEN ICON ---
 const GoogleIcon = () => (
@@ -18,7 +19,6 @@ const GoogleIcon = () => (
     <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
   </svg>
 );
-
 
 // --- BAGIAN 1: ISI KONTEN UTAMA ---
 function LoginContent() {
@@ -32,92 +32,39 @@ function LoginContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  
+  // Kita hilangkan checking session client-side yang berat
+  // Biarkan Middleware yang menangani redirect jika user sudah login
   const [isCheckingSession, setIsCheckingSession] = useState(true);
 
   const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
-  // Helper untuk membersihkan sesi (Storage & Cookies)
-  const clearSession = () => {
-    localStorage.clear();
-    sessionStorage.clear();
-    Cookies.remove('token');
-    Cookies.remove('user_role');
-    
-    document.cookie.split(";").forEach((c) => {
-      document.cookie = c
-        .replace(/^ +/, "")
-        .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-    });
-  };
-
-  // Helper untuk set sesi (Storage & Cookies)
-  const setSession = (token: string, role: string) => {
-    localStorage.setItem('token', token);
-    Cookies.set('token', token, { expires: 7, path: '/' });
-    Cookies.set('user_role', role, { expires: 7, path: '/' });
-  };
-
   useEffect(() => {
-    const initializePage = async () => {
-      // 1. CEK ERROR DARI OAUTH
+    const handleOAuthAndCleanup = async () => {
+      // 1. CEK ERROR DARI OAUTH (Jika ada redirect dari Google)
       const oauthError = searchParams.get('error');
       const oauthMessage = searchParams.get('message');
       
       if (oauthError) {
         console.log('🔴 OAuth Error Detected:', oauthError);
-        clearSession();
+        // Panggil Server Action untuk hapus cookie (jika ada sisa)
+        await deleteSession();
         
         if (oauthMessage) {
           setError(decodeURIComponent(oauthMessage));
         }
-        
-        setIsCheckingSession(false);
         window.history.replaceState({}, '', '/login');
-        return;
       }
 
-      // 2. CEK TOKEN EKSISTING
-      const token = localStorage.getItem('token');
+      // NOTE: Pengecekan "Apakah user sudah login?" sebaiknya dilakukan di Middleware.
+      // Karena cookie sekarang HttpOnly, JavaScript di sini tidak bisa membacanya 
+      // untuk melakukan validasi otomatis saat halaman dimuat.
       
-      if (!token) {
-        console.log('✅ No token found, safe to show login form');
-        setIsCheckingSession(false);
-        return;
-      }
-
-      // 3. VALIDASI TOKEN KE SERVER
-      console.log('🔄 Token found, validating...');
-      try {
-        const res = await fetch(`${BASE_URL}/api/user`, {
-          headers: { 
-            "Authorization": `Bearer ${token}`,
-            "Accept": "application/json"
-          }
-        });
-
-        if (res.ok) {
-          const user = await res.json();
-          console.log('✅ Token valid, syncing cookies & redirecting');
-          
-          setSession(token, user.role);
-          
-          if (user.role === 'admin') {
-            router.replace('/admin/dashboard');
-          } else {
-            router.replace('/');
-          }
-        } else {
-          throw new Error("Invalid token");
-        }
-      } catch (e) {
-        console.log('❌ Token invalid, cleaning up...');
-        clearSession();
-        setIsCheckingSession(false);
-      }
+      setIsCheckingSession(false);
     };
 
-    initializePage();
-  }, [searchParams, router, BASE_URL]);
+    handleOAuthAndCleanup();
+  }, [searchParams]);
 
   const isFormValid = email.trim() !== "" && password.trim() !== "";
 
@@ -127,6 +74,7 @@ function LoginContent() {
     setError("");
 
     try {
+      // 1. Request ke Backend Laravel
       const res = await fetch(`${BASE_URL}/api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -136,8 +84,13 @@ function LoginContent() {
 
       if (!res.ok) throw new Error(data.message || "Login gagal");
 
+      // 2. SET COOKIE HTTPONLY (Server Action) - AMAN
+      // Token dari Laravel dikirim ke Next.js Server untuk dijadikan Cookie
+      await createSession(data.access_token, data.user.role);
+
+      // 3. Update Context React (Untuk UI State)
+      // Context tetap memegang data di memori agar UI responsif
       login(data.access_token, data.user);
-      setSession(data.access_token, data.user.role);
 
       addNotification(
         "system",
@@ -145,6 +98,7 @@ function LoginContent() {
         `Selamat datang kembali, ${data.user.name}!`
       );
       
+      // 4. Redirect
       if (data.user.role === 'admin') {
         router.push('/admin/dashboard');
       } else {
@@ -158,9 +112,10 @@ function LoginContent() {
     }
   };
 
-  const handleGoogleLogin = () => {
+  const handleGoogleLogin = async () => {
     console.log('🔵 Initiating Google OAuth...');
-    clearSession();
+    // Pastikan sesi bersih sebelum mulai
+    await deleteSession();
     window.location.href = `${BASE_URL}/auth/google`;
   };
 
