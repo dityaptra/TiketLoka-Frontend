@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Navbar from "@/components/layout/Navbar";
+// 1. IMPORT Server Action
+import { deleteSession } from "@/app/actions/auth"; 
 import { 
   User, Mail, Phone, Camera, Save, Lock, 
   Loader2, LogOut, Ticket, Bell, ChevronRight,
@@ -13,14 +15,12 @@ import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
 
-// KONFIGURASI URL API
+// ... (Bagian Import dan Helper URL Gambar sama) ...
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
-// Helper URL Gambar
 const getAvatarUrl = (url: string | undefined) => {
   if (!url) return null;
   if (url.startsWith("http")) return url;
-  // Hapus slash di awal jika ada untuk menghindari double slash
   const cleanPath = url.startsWith('/') ? url.substring(1) : url;
   return `${BASE_URL}/storage/${cleanPath}`;
 };
@@ -29,14 +29,11 @@ export default function SettingsPage() {
   const { user, logout, token, updateUser } = useAuth();
   const router = useRouter();
   
-  // State Tab
+  // ... (State declaration tetap sama) ...
   const [activeTab, setActiveTab] = useState<"profile" | "password">("profile");
-  
-  // State Form Profil
   const [profileForm, setProfileForm] = useState({ name: "", email: "", phone_number: "", avatar: null as File | null });
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   
-  // State Form Password
   const [passForm, setPassForm] = useState({ 
     current_password: "", 
     new_password: "", 
@@ -70,7 +67,7 @@ export default function SettingsPage() {
     }
   }, [user, isLoggingOut, router]);
 
-  // --- FUNGSI HANDLE LOGOUT ---
+  // --- FUNGSI HANDLE LOGOUT PERBAIKAN ---
   const handleLogout = async () => {
     const result = await Swal.fire({
       title: 'Yakin ingin keluar?',
@@ -87,20 +84,29 @@ export default function SettingsPage() {
     if (result.isConfirmed) {
       setIsLoggingOut(true);
       try {
+        // 1. Panggil Server Action (PENTING: Hapus HttpOnly Cookie)
+        await deleteSession();
+
+        // 2. Bersihkan Client State
         await logout();
+
+        // 3. Redirect
+        router.push('/login');
+        router.refresh();
+
       } catch (error) {
         console.error("Logout error:", error);
         setIsLoggingOut(false);
-        Swal.fire({
-          icon: 'error',
-          title: 'Gagal Logout',
-          text: 'Terjadi kesalahan saat mencoba keluar. Silakan coba lagi.',
-          confirmButtonColor: '#d33'
-        });
+        // Force logout visual
+        await deleteSession();
+        window.location.href = '/login';
       }
     }
   };
 
+  // ... (Sisa fungsi handleUpdateProfile, handleChangePassword, dll TETAP SAMA) ...
+  // ... Cukup copy paste logika form di bawah ini dari kode lama Anda ...
+  
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -111,7 +117,6 @@ export default function SettingsPage() {
     if (profileForm.avatar) formData.append("avatar", profileForm.avatar);
     
     try {
-      // Menggunakan BASE_URL
       const res = await fetch(`${BASE_URL}/api/profile`, {
         method: "POST",
         headers: { 
@@ -146,7 +151,6 @@ export default function SettingsPage() {
     }
     setLoading(true);
     try {
-      // Menggunakan BASE_URL
       const res = await fetch(`${BASE_URL}/api/password`, {
         method: "PUT",
         headers: { 
@@ -179,7 +183,6 @@ export default function SettingsPage() {
 
   const getInitials = (name: string) => name ? name.charAt(0).toUpperCase() : "U";
 
-  // Loading state saat checking authentication
   if (!user) {
     return (
       <div className="min-h-screen flex justify-center items-center bg-[#F8F9FA]">
@@ -248,7 +251,7 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* CONTENT */}
+          {/* CONTENT (Sama persis dengan kode lama) */}
           <div className="lg:col-span-9">
             
             {activeTab === "profile" && (

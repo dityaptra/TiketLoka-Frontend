@@ -7,7 +7,10 @@ import { useAuth } from "@/context/AuthContext";
 import { useCartContext } from "@/context/CartContext"; 
 import { useNotification } from "@/context/NotificationContext"; 
 import Swal from "sweetalert2";
-import Cookies from "js-cookie"; // ✅ WAJIB: Import ini
+import Cookies from "js-cookie"; 
+// 1. IMPORT Server Action untuk hapus cookie HttpOnly
+import { deleteSession } from "@/app/actions/auth"; 
+
 import {
   LogOut,
   User,
@@ -19,11 +22,10 @@ import {
   Settings,
   Home,
   LucideIcon,
-  Loader2, // Icon loading
+  Loader2,
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
-// KONFIGURASI URL API
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
 const getAvatarUrl = (url: string | undefined) => {
@@ -40,7 +42,7 @@ interface MenuItem {
 }
 
 const Navbar = () => {
-  const { user, logout } = useAuth(); // User data dari API
+  const { user, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   
@@ -49,20 +51,22 @@ const Navbar = () => {
 
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState<boolean>(false);
   const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
-  // ✅ STATE BARU: Untuk cek token langsung di browser
   const [hasToken, setHasToken] = useState<boolean>(false); 
   
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // ✅ EFEK BARU: Cek Cookie Token saat komponen dimuat
   useEffect(() => {
-    const token = Cookies.get('token');
-    if (token) {
+    // Cek keberadaan cookie (hanya visual, cookie asli ada di httpOnly)
+    // Kita tetap cek ini agar UI tidak flickering
+    const token = Cookies.get('token'); 
+    // Catatan: Cookies.get() mungkin return undefined untuk HttpOnly cookie di beberapa browser,
+    // tapi kita pakai user context sebagai fallback utama.
+    if (token || user) {
       setHasToken(true);
     }
-  }, []);
+  }, [user]);
 
-  // --- SEO-FRIENDLY LOGOUT FUNCTION ---
+  // --- FUNGSI LOGOUT YANG BENAR ---
   const handleLogout = async () => {
     setIsProfileMenuOpen(false);
 
@@ -81,22 +85,32 @@ const Navbar = () => {
     if (result.isConfirmed) {
       setIsLoggingOut(true);
       try {
+        // 1. HAPUS COOKIE DI SERVER (Wajib untuk HttpOnly)
+        await deleteSession();
+
+        // 2. Bersihkan State Context React
         await logout();
-        setHasToken(false); // Update state manual biar UI langsung berubah
-        Cookies.remove('token'); // Pastikan cookie hilang
+        
+        // 3. Update UI Lokal
+        setHasToken(false);
+        
+        // 4. Redirect Paksa ke Login
+        router.push('/login');
+        router.refresh(); // Refresh agar server component tahu cookie hilang
+        
       } catch (error) {
         console.error("Logout error:", error);
         setIsLoggingOut(false);
-        // Tetap paksa logout visual jika error API
-        setHasToken(false); 
-        Cookies.remove('token');
-        window.location.reload();
+        
+        // Force logout jika error
+        await deleteSession(); 
+        window.location.href = '/login';
       }
     }
   };
 
   const handleCartClick = () => {
-    if (!hasToken) { // Cek token, bukan user (biar lebih responsif)
+    if (!isAuthenticated) {
       router.push("/login");
     } else {
       router.push("/cart");
@@ -132,8 +146,7 @@ const Navbar = () => {
     { label: "Pengaturan", icon: Settings, href: "/settings" },
   ];
 
-  // ✅ LOGIKA KUNCI: Dianggap login jika ada User ATAU ada Token Cookie
-  const isAuthenticated = user || hasToken;
+  const isAuthenticated = !!user; // Mengandalkan context user lebih akurat
 
   return (
     <nav className="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-100 font-sans">
@@ -207,11 +220,8 @@ const Navbar = () => {
                 className="flex items-center gap-2 p-1 rounded-full hover:bg-blue-50 transition-colors"
                 onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
               >
-                {/* Avatar Logic: Handle User Loading State */}
                 <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-50 overflow-hidden border border-blue-200 relative">
-                  {user ? (
-                    // Jika User Data SUDAH dimuat
-                    user.avatar_url ? (
+                  {user?.avatar_url ? (
                       <Image 
                         src={getAvatarUrl(user.avatar_url) || ""} 
                         alt={user.name}
@@ -222,10 +232,7 @@ const Navbar = () => {
                     ) : (
                       <User size={20} className="text-blue-500" />
                     )
-                  ) : (
-                    // Jika User Data SEDANG dimuat (tapi token ada)
-                    <Loader2 size={20} className="text-blue-500 animate-spin" />
-                  )}
+                  }
                 </div>
                 
                 <ChevronDown 
@@ -238,9 +245,8 @@ const Navbar = () => {
 
               <div className={`absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.1)] border border-gray-100 py-2 animate-in fade-in slide-in-from-top-2 z-60 ${isProfileMenuOpen ? "block" : "hidden"}`}>
                 <div className="px-5 py-3 border-b border-gray-100 mb-2">
-                    {/* Fallback Name jika data user belum sampai */}
                     <p className="font-bold text-[#0B2F5E] truncate text-base">
-                        {user?.name || "Memuat Pengguna..."}
+                        {user?.name || "Pengguna"}
                     </p>
                     <p className="text-xs text-gray-500 truncate">Member TiketLoka</p>
                 </div>
