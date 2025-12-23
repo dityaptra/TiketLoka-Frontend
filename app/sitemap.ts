@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 export const dynamic = 'force-dynamic';
 
 const WEB_BASE_URL = 'https://tiketloka.web.id'; 
-const API_BASE_URL = 'https://tiketloka.web.id'; 
+const API_BASE_URL = 'https://api.tiketloka.web.id'; 
 
 // Fungsi Fetch Data semua wisata dari Laravel
 async function getAllDestinations() {
