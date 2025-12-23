@@ -94,8 +94,8 @@ const Navbar = () => {
         // 3. Update UI Lokal
         setHasToken(false);
         
-        // 4. Redirect Paksa ke Login
-        router.push('/login');
+        // 4. Redirect Paksa ke Landing Page
+        router.push('/');
         router.refresh(); // Refresh agar server component tahu cookie hilang
         
       } catch (error) {
@@ -104,7 +104,7 @@ const Navbar = () => {
         
         // Force logout jika error
         await deleteSession(); 
-        window.location.href = '/login';
+        window.location.href = '/';
       }
     }
   };

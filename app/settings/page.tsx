@@ -91,7 +91,7 @@ export default function SettingsPage() {
         await logout();
 
         // 3. Redirect
-        router.push('/login');
+        router.push('/');
         router.refresh();
 
       } catch (error) {
@@ -99,7 +99,7 @@ export default function SettingsPage() {
         setIsLoggingOut(false);
         // Force logout visual
         await deleteSession();
-        window.location.href = '/login';
+        window.location.href = '/';
       }
     }
   };
