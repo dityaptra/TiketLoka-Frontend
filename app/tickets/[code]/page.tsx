@@ -8,7 +8,6 @@ import {
   ArrowLeft,
   MapPin,
   Calendar,
-  Download,
   Printer,
   Ticket,
   User,
@@ -24,7 +23,7 @@ export default function TicketDetailPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  // Ambil index tiket dari URL (misal: ?index=1 untuk tiket kedua)
+  // Ambil index tiket dari URL
   const ticketIndex = parseInt(searchParams.get("index") || "0");
   
   const { token, isLoading: authLoading } = useAuth();
@@ -95,18 +94,15 @@ export default function TicketDetailPage() {
 
   if (!booking) return null;
 
-  // --- AMBIL DETAIL SPESIFIK BERDASARKAN INDEX ---
-  // Jika tiket ke-2 dibeli, maka detail diambil dari array index ke-1
   const detail = booking.details[ticketIndex] || booking.details[0];
-  
-  // Gunakan Ticket Code jika ada (unik), jika tidak fallback ke Booking Code
   const displayCode = detail.ticket_code || booking.booking_code;
   const bgPageColor = "bg-[#F5F6F8]";
 
   return (
-    <main className={`min-h-screen ${bgPageColor} pb-20 font-sans text-gray-800`}>
-      {/* --- NAVBAR --- */}
-      <div className="bg-white px-4 py-3 shadow-sm sticky top-0 z-20 border-b border-gray-200">
+    <main className={`min-h-screen ${bgPageColor} pb-20 font-sans text-gray-800 print:bg-white print:pb-0`}>
+      
+      {/* --- NAVBAR (Disembunyikan saat print) --- */}
+      <div className="bg-white px-4 py-3 shadow-sm sticky top-0 z-20 border-b border-gray-200 print:hidden">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/tickets" className="hover:bg-gray-100 p-2 rounded-full transition text-gray-600">
@@ -114,20 +110,23 @@ export default function TicketDetailPage() {
             </Link>
             <h1 className="font-bold text-lg text-[#0B2F5E]">E-Ticket</h1>
           </div>
-          <button onClick={() => window.print()} className="flex items-center gap-2 text-gray-600 hover:bg-gray-100 px-3 py-1.5 rounded-lg text-sm font-medium transition">
+          {/* Tombol Cetak Kecil di Navbar */}
+          <button onClick={() => window.print()} className="flex items-center gap-2 text-gray-600 hover:bg-gray-100 px-3 py-1.5 rounded-lg text-sm font-medium transition cursor-pointer">
             <Printer className="w-4 h-4" /> <span className="hidden sm:inline">Cetak</span>
           </button>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 mt-8 md:mt-12">
-        <div className="relative w-full max-w-4xl mx-auto drop-shadow-2xl">
-          <div className="flex flex-col md:flex-row bg-white rounded-3xl overflow-hidden">
+      <div className="max-w-5xl mx-auto px-4 mt-8 md:mt-12 print:mt-0 print:px-0">
+        <div className="relative w-full max-w-4xl mx-auto drop-shadow-2xl print:drop-shadow-none">
+          
+          {/* Container Tiket */}
+          <div className="flex flex-col md:flex-row bg-white rounded-3xl overflow-hidden print:rounded-none print:border print:border-gray-300">
             
             {/* === KIRI: DETAIL === */}
             <div className="flex-1 relative">
-              <div className="bg-[#0B2F5E] p-6 text-white flex justify-between items-start relative overflow-hidden">
-                <div className="absolute -right-10 -top-10 w-32 h-32 bg-white opacity-5 rounded-full blur-2xl"></div>
+              <div className="bg-[#0B2F5E] p-6 text-white flex justify-between items-start relative overflow-hidden print:bg-[#0B2F5E] print:text-white">
+                <div className="absolute -right-10 -top-10 w-32 h-32 bg-white opacity-5 rounded-full blur-2xl print:hidden"></div>
                 <div>
                   <div className="flex items-center gap-2 opacity-90 mb-1">
                     <Ticket className="w-4 h-4" />
@@ -135,7 +134,8 @@ export default function TicketDetailPage() {
                   </div>
                   <h2 className="text-xl md:text-2xl font-bold leading-tight max-w-md">{detail.destination.name}</h2>
                 </div>
-                <div className="w-16 h-16 md:w-20 md:h-20 bg-white rounded-xl p-1 shadow-lg shrink-0 ml-4">
+                <div className="w-16 h-16 md:w-20 md:h-20 bg-white rounded-xl p-1 shadow-lg shrink-0 ml-4 print:shadow-none">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={getImageUrl(detail.destination.image_url)} alt="Destinasi" className="w-full h-full object-cover rounded-lg" />
                 </div>
               </div>
@@ -152,7 +152,6 @@ export default function TicketDetailPage() {
                     <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Jumlah Pax</p>
                     <div className="flex items-center gap-2 text-[#0B2F5E] font-bold">
                       <User className="w-4 h-4 text-[#F57C00]" />
-                      {/* Tampilkan 1 Orang karena ini tiket per individu (hasil pecahan) */}
                       <span>{detail.quantity} Orang</span> 
                     </div>
                   </div>
@@ -166,26 +165,25 @@ export default function TicketDetailPage() {
 
                 <div className="border-t border-gray-100 my-4"></div>
 
-                <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 flex items-center justify-between">
+                <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 flex items-center justify-between print:bg-gray-100">
                   <div><p className="text-xs text-gray-400">Dipesan Oleh</p><p className="font-bold text-gray-800">{booking.user?.name}</p></div>
-                  <div className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full border border-green-200">LUNAS</div>
+                  <div className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full border border-green-200 print:border-green-700 print:text-green-800">LUNAS</div>
                 </div>
               </div>
               <div className="px-6 pb-6 md:px-8 md:pb-8"><p className="text-[10px] text-gray-400 text-center md:text-left">* Tunjukkan tiket ini di loket masuk.<br />* Tiket yang sudah dipindai tidak dapat digunakan kembali.</p></div>
             </div>
 
             {/* === TENGAH: GARIS POTONG === */}
-            <div className="relative md:w-0 w-full md:h-auto h-0 md:border-l-2 border-t-2 border-dashed border-gray-300 flex-shrink-0">
-              <div className={`absolute w-8 h-8 rounded-full ${bgPageColor} top-1/2 -left-4 -translate-y-1/2 md:left-1/2 md:top-0 md:-translate-x-1/2 md:-translate-y-1/2 shadow-inner box-border z-10`}></div>
-              <div className={`absolute w-8 h-8 rounded-full ${bgPageColor} top-1/2 -right-4 -translate-y-1/2 md:left-1/2 md:bottom-0 md:-translate-x-1/2 md:translate-y-1/2 shadow-inner box-border z-10`}></div>
+            <div className="relative md:w-0 w-full md:h-auto h-0 md:border-l-2 border-t-2 border-dashed border-gray-300 shrink-0">
+              <div className={`absolute w-8 h-8 rounded-full ${bgPageColor} top-1/2 -left-4 -translate-y-1/2 md:left-1/2 md:top-0 md:-translate-x-1/2 md:-translate-y-1/2 shadow-inner box-border z-10 print:hidden`}></div>
+              <div className={`absolute w-8 h-8 rounded-full ${bgPageColor} top-1/2 -right-4 -translate-y-1/2 md:left-1/2 md:bottom-0 md:-translate-x-1/2 md:translate-y-1/2 shadow-inner box-border z-10 print:hidden`}></div>
             </div>
 
             {/* === KANAN: QR CODE === */}
-            <div className="md:w-80 w-full bg-gray-50 flex flex-col items-center justify-center p-8 relative">
+            <div className="md:w-80 w-full bg-gray-50 flex flex-col items-center justify-center p-8 relative print:bg-gray-50 print:border-l print:border-gray-200">
               <h3 className="text-[#0B2F5E] font-bold mb-4 tracking-widest text-sm uppercase">Scan Here</h3>
 
-              <div className="bg-white p-3 rounded-2xl shadow-sm border border-gray-200 mb-4">
-                {/* Gunakan displayCode (kode unik tiket) untuk QR */}
+              <div className="bg-white p-3 rounded-2xl shadow-sm border border-gray-200 mb-4 print:border-gray-400">
                 <QRCodeSVG value={displayCode} size={140} level={"H"} />
               </div>
 
@@ -198,9 +196,9 @@ export default function TicketDetailPage() {
                   <span className={`font-mono text-lg font-bold tracking-wider ${isCopied ? "text-green-600" : "text-[#0B2F5E]"}`}>
                     {displayCode}
                   </span>
-                  {isCopied ? <Check className="w-4 h-4 text-green-600 scale-110" /> : <Copy className="w-3 h-3 text-gray-400 group-hover:text-[#F57C00]" />}
+                  {isCopied ? <Check className="w-4 h-4 text-green-600 scale-110" /> : <Copy className="w-3 h-3 text-gray-400 group-hover:text-[#F57C00] print:hidden" />}
                 </div>
-                <p className={`text-[10px] mt-1 transition-all h-4 ${isCopied ? "text-green-600 opacity-100" : "opacity-0"}`}>Berhasil disalin!</p>
+                <p className={`text-[10px] mt-1 transition-all h-4 ${isCopied ? "text-green-600 opacity-100" : "opacity-0"} print:hidden`}>Berhasil disalin!</p>
               </div>
 
               <div className="mt-4">
@@ -209,13 +207,30 @@ export default function TicketDetailPage() {
             </div>
           </div>
 
-          <div className="mt-8 flex justify-center">
-            <button className="flex items-center gap-2 bg-[#F57C00] hover:bg-orange-600 text-white px-8 py-3 rounded-full font-bold shadow-lg shadow-orange-200 hover:shadow-orange-300 transition transform hover:-translate-y-1">
-              <Download className="w-5 h-5" /> Download E-Tiket (PDF)
+          {/* === TOMBOL ACTION (Disembunyikan saat Print) === */}
+          <div className="mt-8 flex justify-center print:hidden">
+            <button 
+              onClick={() => window.print()} 
+              className="flex items-center gap-2 bg-[#F57C00] hover:bg-orange-600 text-white px-8 py-3 rounded-full font-bold shadow-lg shadow-orange-200 hover:shadow-orange-300 transition transform hover:-translate-y-1 cursor-pointer"
+            >
+              <Printer className="w-5 h-5" /> Cetak / Simpan PDF
             </button>
           </div>
+
         </div>
       </div>
+
+      {/* === STYLE KHUSUS PRINT === */}
+      {/* Memastikan warna background (biru header, abu-abu, dll) ikut tercetak */}
+      <style jsx global>{`
+        @media print {
+          @page { margin: 0; size: auto; }
+          body { 
+            -webkit-print-color-adjust: exact !important; 
+            print-color-adjust: exact !important; 
+          }
+        }
+      `}</style>
     </main>
   );
 }
