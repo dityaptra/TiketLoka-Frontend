@@ -67,9 +67,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(newToken); // Simpan di memori sementara
     setUser(userData);
     
-    // ❌ JANGAN SIMPAN TOKEN KE LOCALSTORAGE
-    // localStorage.setItem("token", newToken); <--- INI DIHAPUS
-    
     // Simpan data user saja (aman)
     localStorage.setItem("user", JSON.stringify(userData));
 
@@ -96,7 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("token");
 
     // 2. REDIRECT SEGERA (Optimistic UI)
-    router.replace("/login"); 
+    router.replace("/"); 
     router.refresh();
 
     // 3. PANGGIL API LOGOUT DI BACKGROUND
