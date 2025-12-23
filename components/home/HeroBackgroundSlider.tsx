@@ -7,7 +7,6 @@ const HeroBackgroundSlider = () => {
   const originalImages = [
     '/images/herobg/pura.avif',
     '/images/herobg/candi.avif',
-    '/images/herobg/gunung.avif',
     '/images/herobg/komodo.avif'
   ];
 
