@@ -242,7 +242,7 @@ function LoginContent() {
 
               <div className="text-right">
                 <Link
-                  href="/forgot-password"
+                  href="/auth/forgot-password"
                   className="text-xs text-gray-500 hover:text-[#F57C00] transition-colors"
                 >
                   Lupa Password?
