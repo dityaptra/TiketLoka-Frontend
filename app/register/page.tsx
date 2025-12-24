@@ -290,7 +290,7 @@ function RegisterContent() {
                 className={`w-full font-semibold py-3 rounded-lg transition-all transform flex items-center justify-center gap-2 mt-8 
                   ${
                     isFormValid && !isLoading
-                      ? "bg-[#F57C00] hover:bg-[#E65100] text-white shadow-md cursor-pointer"
+                      ? "bg-[#F57C00] hover:bg-[#E65100] text-white cursor-pointer"
                       : "bg-gray-300 border border-gray-300 text-gray-400 cursor-not-allowed"
                   }`}
               >
@@ -305,7 +305,7 @@ function RegisterContent() {
             <div className="flex items-center justify-center my-6 w-full">
               <div className="flex-1 h-px bg-gray-300"></div>
               <span className="px-4 text-xs font-medium text-gray-500 tracking-wider">
-                atau daftar dengan
+                atau
               </span>
               <div className="flex-1 h-px bg-gray-300"></div>
             </div>
@@ -315,9 +315,9 @@ function RegisterContent() {
               <button
                 type="button"
                 onClick={handleGoogleLogin}
-                className="w-full flex items-center justify-center cursor-pointer gap-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium py-3 rounded-lg transition-all text-sm shadow-sm hover:shadow"
+                className="w-full flex items-center justify-center cursor-pointer gap-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-3 rounded-lg transition-all text-sm"
               >
-                <GoogleIcon /> <span>Google</span>
+                <GoogleIcon /> <span>Daftar dengan Google</span>
               </button>
             </div>
 
