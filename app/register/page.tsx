@@ -315,13 +315,13 @@ function RegisterContent() {
               <button
                 type="button"
                 onClick={handleGoogleLogin}
-                className="w-full flex items-center justify-center cursor-pointer gap-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium py-2 rounded-lg transition-all text-sm shadow-sm hover:shadow"
+                className="w-full flex items-center justify-center cursor-pointer gap-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium py-3 rounded-lg transition-all text-sm shadow-sm hover:shadow"
               >
                 <GoogleIcon /> <span>Google</span>
               </button>
             </div>
 
-            <div className="text-center text-[10px] md:text-xs text-gray-500 leading-relaxed px-2 border-t mt-1 pt-4 border-gray-100">
+            <div className="text-center text-[10px] md:text-xs text-gray-500 leading-relaxed px-2 border-t pt-4 border-gray-100">
               Dengan mendaftar, Anda menyetujui{" "}
               <Link href="/privacy" className="underline text-[#F57C00]">
                 Kebijakan Privasi
