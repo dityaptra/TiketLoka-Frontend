@@ -29,7 +29,7 @@ export default function ForgotPassword() {
         throw new Error(data.message || data.email?.[0] || 'Gagal mengirim email.');
       }
       
-      setStatus('Link reset password telah dikirim ke email Anda! Cek inbox Mailtrap.');
+      setStatus('Link reset password telah dikirim ke email Anda! Cek inbox Gmail.');
     } catch (err: any) {
       setError(err.message || 'Terjadi kesalahan.');
     } finally {
