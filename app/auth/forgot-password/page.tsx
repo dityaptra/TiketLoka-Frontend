@@ -69,7 +69,7 @@ export default function ForgotPassword() {
         </form>
 
         <div className="mt-6 text-center">
-            <Link href="/auth/login" className="text-sm text-gray-500 hover:text-blue-600">
+            <Link href="/login/page" className="text-sm text-gray-500 hover:text-blue-600">
               ← Kembali ke Login
             </Link>
         </div>
