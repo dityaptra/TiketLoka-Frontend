@@ -92,6 +92,10 @@ function LoginContent() {
 
       const data = res.data;
 
+      // 👇 TAMBAHKAN LOG INI UNTUK CEK DI CONSOLE BROWSER
+      console.log("🔥 DATA DARI SERVER:", data);
+      console.log("👤 ROLE USER:", data.user.role);
+
       // --- PERBAIKAN PENTING DI SINI ---
 
       // 3. Set Cookie 'user_role' Manual (Agar Middleware Next.js bisa baca)
