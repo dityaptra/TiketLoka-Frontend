@@ -153,7 +153,7 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between">
         {/* LOGO */}
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="relative h-14 w-52 transition-transform ml-2">
+          <div className="relative h-12 w-50 transition-transform ml-6">
             <Image
               src="/images/navbar.png"
               alt="TiketLoka Logo"
