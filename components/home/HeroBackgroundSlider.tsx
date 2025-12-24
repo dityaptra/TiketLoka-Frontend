@@ -6,7 +6,7 @@ import Image from 'next/image'; // 1. Import komponen Image
 const HeroBackgroundSlider = () => {
   const originalImages = [
     '/images/herobg/pura.avif',
-    '/images/herobg/candi.avif',
+    '/images/herobg/candiborobudur.avif',
     '/images/herobg/gunung.avif',
     '/images/herobg/komodo.avif'
   ];
