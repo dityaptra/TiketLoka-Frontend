@@ -47,7 +47,7 @@ function ResetForm() {
 
       setStatus('Berhasil! Password Anda sudah diperbarui.');
       // Redirect ke login setelah 3 detik
-      setTimeout(() => router.push('/login/page'), 3000);
+      setTimeout(() => router.push('/login'), 3000);
       
     } catch (err: any) {
       setError(err.message || 'Token tidak valid atau kedaluwarsa.');
