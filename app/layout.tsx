@@ -12,7 +12,7 @@ const inter = Inter({ subsets: ["latin"] });
 // --- KONFIGURASI SEO GLOBAL ---
 export const metadata: Metadata = {
   // Base URL (Penting untuk SEO Gambar & Link Absolut)
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://tiketloka.web.id'),
+  metadataBase: new URL('https://www.tiketloka.web.id'),
 
   // Title Template (Halaman lain cukup set title: "Nama Wisata", otomatis jadi "Nama Wisata | TiketLoka")
   title: {
@@ -23,6 +23,10 @@ export const metadata: Metadata = {
   // Deskripsi Global
   description: "Platform pemesanan tiket wisata terbaik di Indonesia. Temukan destinasi impianmu, pesan tiket dengan mudah, dan nikmati liburan tanpa ribet.",
 
+  alternates: {
+    canonical: './',
+  },
+  
   verification: {
     google: '-ouFo0FTrUYzyZGFTpAm45HapZ2E8iPkw434J2btUvQ', 
   },
