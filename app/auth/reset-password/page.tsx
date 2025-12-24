@@ -31,7 +31,7 @@ function ResetForm() {
     }
 
     try {
-      const res = await fetch('https://tiketloka.web.id/api/reset-password', {
+      const res = await fetch('https://www.tiketloka.web.id/api/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

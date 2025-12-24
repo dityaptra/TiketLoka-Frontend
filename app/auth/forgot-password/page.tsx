@@ -17,7 +17,7 @@ export default function ForgotPassword() {
 
     try {
       // PENTING: Tembak ke URL Hosting Anda
-      const res = await fetch('https://tiketloka.web.id/api/forgot-password', {
+      const res = await fetch('https://www.tiketloka.web.id/api/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
