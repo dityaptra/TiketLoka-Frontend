@@ -113,11 +113,30 @@ function LoginContent() {
   };
 
   const handleGoogleLogin = async () => {
+  setIsLoading(true); // Opsional: Aktifkan loading state agar user tahu sedang memproses
+  try {
     console.log('🔵 Initiating Google OAuth...');
-    // Pastikan sesi bersih sebelum mulai
+    
+    // 1. Bersihkan sesi lama
     await deleteSession();
-    window.location.href = `${BASE_URL}/auth/google`;
-  };
+
+    // 2. Minta URL Login Google dari Backend Laravel
+    // Endpoint ini yang kita buat di SocialAuthController sebelumnya
+    const res = await fetch(`${BASE_URL}/api/auth/google/url`);
+    const data = await res.json();
+
+    // 3. Redirect user ke URL Google
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      throw new Error("Gagal mendapatkan URL Google Auth");
+    }
+  } catch (err) {
+    console.error("Google Auth Error:", err);
+    setError("Gagal terhubung ke Google Login.");
+    setIsLoading(false);
+  }
+};
 
   const inputWrapperClass = "relative flex items-center";
   const iconClass = "absolute left-3 text-gray-400 w-5 h-5";
