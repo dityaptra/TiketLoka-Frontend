@@ -7,7 +7,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Loader2, Mail, Lock, Eye, EyeOff } from "lucide-react";
-import { createSession, deleteSession } from "@/app/actions/auth";
+// 1. IMPORT AXIOS
+import api from "@/lib/axios";
+// Hapus createSession karena cookie sekarang diurus otomatis oleh Backend & Browser
+import { deleteSession } from "@/app/actions/auth";
 
 // --- KOMPONEN ICON ---
 const GoogleIcon = () => (
@@ -32,21 +35,19 @@ function LoginContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   
-  // Kita hilangkan checking session client-side yang berat
-  // Biarkan Middleware yang menangani redirect jika user sudah login
   const [isCheckingSession, setIsCheckingSession] = useState(true);
 
-  const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+  // BASE_URL sudah dihandle oleh axios instance, tapi jika butuh referensi lain:
+  // const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
   useEffect(() => {
     const handleOAuthAndCleanup = async () => {
-      // 1. CEK ERROR DARI OAUTH (Jika ada redirect dari Google)
+      // 1. CEK ERROR DARI OAUTH
       const oauthError = searchParams.get('error');
       const oauthMessage = searchParams.get('message');
       
       if (oauthError) {
         console.log('🔴 OAuth Error Detected:', oauthError);
-        // Panggil Server Action untuk hapus cookie (jika ada sisa)
         await deleteSession();
         
         if (oauthMessage) {
@@ -55,10 +56,6 @@ function LoginContent() {
         window.history.replaceState({}, '', '/login');
       }
 
-      // NOTE: Pengecekan "Apakah user sudah login?" sebaiknya dilakukan di Middleware.
-      // Karena cookie sekarang HttpOnly, JavaScript di sini tidak bisa membacanya 
-      // untuk melakukan validasi otomatis saat halaman dimuat.
-      
       setIsCheckingSession(false);
     };
 
@@ -73,23 +70,26 @@ function LoginContent() {
     setError("");
 
     try {
-      // 1. Request ke Backend Laravel
-      const res = await fetch(`${BASE_URL}/api/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+      // 1. CSRF HANDSHAKE (WAJIB untuk Sanctum/HttpOnly)
+      // Ini meminta "izin" (token XSRF) ke server sebelum melakukan POST
+      await api.get("/sanctum/csrf-cookie");
+
+      // 2. Request Login ke Backend
+      // Axios otomatis menyisipkan token XSRF ke header
+      const res = await api.post("/api/login", { 
+        email, 
+        password 
       });
-      const data = await res.json();
+      
+      const data = res.data;
 
-      if (!res.ok) throw new Error(data.message || "Login gagal");
-
-      // 2. SET COOKIE HTTPONLY (Server Action) - AMAN
-      // Token dari Laravel dikirim ke Next.js Server untuk dijadikan Cookie
-      await createSession(data.access_token, data.user.role);
-
-      // 3. Update Context React (Untuk UI State)
-      // Context tetap memegang data di memori agar UI responsif
-      login(data.access_token, data.user);
+      // 3. SET COOKIE & SESSION
+      // Backend sekarang mengirim header 'Set-Cookie'.
+      // Browser otomatis menyimpannya. Kita tidak perlu 'createSession' manual lagi.
+      
+      // 4. Update Context React (Untuk UI State)
+      // Kita kirim null untuk token karena token tersimpan rahasia di cookie
+      login(null, data.user); 
 
       addNotification(
         "system",
@@ -97,7 +97,7 @@ function LoginContent() {
         `Selamat datang kembali, ${data.user.name}!`
       );
       
-      // 4. Redirect
+      // 5. Redirect
       if (data.user.role === 'admin') {
         router.push('/admin/dashboard');
       } else {
@@ -105,37 +105,39 @@ function LoginContent() {
       }
 
     } catch (err: any) {
-      setError(err.message);
+      console.error("Login Error:", err);
+      // Tangkap pesan error dari response Laravel
+      const msg = err.response?.data?.message || err.message || "Login gagal";
+      setError(msg);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleGoogleLogin = async () => {
-  setIsLoading(true); // Opsional: Aktifkan loading state agar user tahu sedang memproses
-  try {
-    console.log('🔵 Initiating Google OAuth...');
-    
-    // 1. Bersihkan sesi lama
-    await deleteSession();
+    setIsLoading(true);
+    try {
+      console.log('🔵 Initiating Google OAuth...');
+      
+      // 1. Bersihkan sesi lama
+      await deleteSession();
 
-    // 2. Minta URL Login Google dari Backend Laravel
-    // Endpoint ini yang kita buat di SocialAuthController sebelumnya
-    const res = await fetch(`${BASE_URL}/api/auth/google/url`);
-    const data = await res.json();
+      // 2. Minta URL Login Google (Pakai Axios)
+      const res = await api.get("/api/auth/google/url");
+      const data = res.data;
 
-    // 3. Redirect user ke URL Google
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      throw new Error("Gagal mendapatkan URL Google Auth");
+      // 3. Redirect user ke URL Google
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error("Gagal mendapatkan URL Google Auth");
+      }
+    } catch (err: any) {
+      console.error("Google Auth Error:", err);
+      setError("Gagal terhubung ke Google Login.");
+      setIsLoading(false);
     }
-  } catch (err) {
-    console.error("Google Auth Error:", err);
-    setError("Gagal terhubung ke Google Login.");
-    setIsLoading(false);
-  }
-};
+  };
 
   const inputWrapperClass = "relative flex items-center";
   const iconClass = "absolute left-3 text-gray-400 w-5 h-5";

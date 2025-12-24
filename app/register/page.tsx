@@ -3,11 +3,13 @@
 import { useState, Suspense } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useNotification } from "@/context/NotificationContext";
-import { useRouter } from "next/navigation"; // 1. Import useRouter untuk redirect
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Loader2, User, Mail, Phone, Lock, Eye, EyeOff } from "lucide-react";
-import { createSession, deleteSession } from "@/app/actions/auth";
+// 1. IMPORT AXIOS & HAPUS createSession
+import api from "@/lib/axios";
+import { deleteSession } from "@/app/actions/auth";
 
 // --- KOMPONEN ICON ---
 const GoogleIcon = () => (
@@ -35,7 +37,7 @@ const GoogleIcon = () => (
 function RegisterContent() {
   const { login } = useAuth();
   const { addNotification } = useNotification();
-  const router = useRouter(); // Inisialisasi router
+  const router = useRouter();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -48,8 +50,6 @@ function RegisterContent() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-
-  const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -74,23 +74,16 @@ function RegisterContent() {
     }
 
     try {
-      // 1. Request ke Backend Laravel
-      const res = await fetch(`${BASE_URL}/api/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-      const data = await res.json();
-      
-      if (!res.ok)
-        throw new Error(data.message || "Gagal melakukan pendaftaran");
+      // 1. CSRF HANDSHAKE (Wajib untuk Sanctum)
+      await api.get("/sanctum/csrf-cookie");
 
-      // 2. SIMPAN COOKIE HTTPONLY (PENTING!)
-      // Ini memastikan user tetap login saat halaman direfresh
-      await createSession(data.access_token, data.user.role);
+      // 2. Request Register ke Backend
+      const res = await api.post("/api/register", formData);
+      const data = res.data;
 
       // 3. Update State UI (Context)
-      login(data.access_token, data.user);
+      // Kita kirim null untuk token, user data tetap dikirim
+      login(null, data.user);
 
       addNotification(
         "system",
@@ -102,37 +95,39 @@ function RegisterContent() {
       router.push('/');
 
     } catch (err: any) {
-      setError(err.message);
+      console.error("Register Error:", err);
+      // Tangkap pesan error validasi dari Laravel
+      const msg = err.response?.data?.message || err.message || "Gagal melakukan pendaftaran";
+      setError(msg);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleGoogleLogin = async () => {
-  setIsLoading(true); // Opsional: Aktifkan loading state agar user tahu sedang memproses
-  try {
-    console.log('🔵 Initiating Google OAuth...');
-    
-    // 1. Bersihkan sesi lama
-    await deleteSession();
+    setIsLoading(true);
+    try {
+      console.log('🔵 Initiating Google OAuth...');
+      
+      // 1. Bersihkan sesi lama
+      await deleteSession();
 
-    // 2. Minta URL Login Google dari Backend Laravel
-    // Endpoint ini yang kita buat di SocialAuthController sebelumnya
-    const res = await fetch(`${BASE_URL}/api/auth/google/url`);
-    const data = await res.json();
+      // 2. Minta URL Login Google (Pakai Axios)
+      const res = await api.get("/api/auth/google/url");
+      const data = res.data;
 
-    // 3. Redirect user ke URL Google
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      throw new Error("Gagal mendapatkan URL Google Auth");
+      // 3. Redirect user ke URL Google
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error("Gagal mendapatkan URL Google Auth");
+      }
+    } catch (err: any) {
+      console.error("Google Auth Error:", err);
+      setError("Gagal terhubung ke Google Login.");
+      setIsLoading(false);
     }
-  } catch (err) {
-    console.error("Google Auth Error:", err);
-    setError("Gagal terhubung ke Google Login.");
-    setIsLoading(false);
-  }
-};
+  };
 
   const inputWrapperClass = "relative flex items-center";
   const iconClass = "absolute left-3 text-gray-400 w-5 h-5";
