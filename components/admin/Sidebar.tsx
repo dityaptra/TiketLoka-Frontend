@@ -67,7 +67,7 @@ export default function Sidebar() {
       <div className="h-16 flex items-center justify-center border-b border-gray-100">
         <div className="relative h-8 w-32">
           <Image
-            src="/images/logonama.png"
+            src="/images/logodiadmin.png"
             alt="Logo TiketLoka"
             fill
             className="object-contain"
