@@ -58,7 +58,7 @@ function ResetForm() {
 
   return (
     <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-md border">
-        <h2 className="text-2xl font-bold text-center mb-6">Password Baru</h2>
+        <h2 className="text-2xl font-bold text-center mb-6 text-gray-600">Password Baru</h2>
 
         {status && <div className="bg-green-100 text-green-700 p-3 rounded mb-4 text-sm">{status}</div>}
         {error && <div className="bg-red-100 text-red-700 p-3 rounded mb-4 text-sm">{error}</div>}
@@ -70,7 +70,7 @@ function ResetForm() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
               required
               minLength={8}
             />
@@ -81,7 +81,7 @@ function ResetForm() {
               type="password"
               value={passwordConfirmation}
               onChange={(e) => setPasswordConfirmation(e.target.value)}
-              className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
               required
             />
           </div>

@@ -40,7 +40,7 @@ export default function ForgotPassword() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-center mb-6">Lupa Password?</h2>
+        <h2 className="text-2xl font-bold text-center text-gray-600 mb-6">Lupa Password?</h2>
         <p className="text-sm text-gray-600 text-center mb-6">
           Masukkan email Anda, kami akan mengirimkan link untuk mereset password.
         </p>
@@ -56,7 +56,7 @@ export default function ForgotPassword() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="contoh@email.com"
-              className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
               required
             />
           </div>
