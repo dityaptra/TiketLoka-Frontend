@@ -289,7 +289,7 @@ function LoginContent() {
       </div>
 
       <footer className="w-full py-4 text-center text-xs text-gray-500 relative z-10">
-        &copy; {new Date().getFullYear()} TiketLoka. All Rights Reserved.
+        &copy; 2025 - {new Date().getFullYear()} TiketLoka. All Rights Reserved.
       </footer>
     </div>
   );
