@@ -118,8 +118,8 @@ export default function AdminDashboard() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 bg-white p-2 rounded-xl border border-gray-400">
-          <div className="flex items-center gap-2 px-2 border-r border-gray-200">
+        <div className="flex items-center gap-2 bg-white p-2 rounded-xl border border-gray-300">
+          <div className="flex items-center gap-2 px-2 border-r border-gray-300">
             <Clock size={16} className="text-gray-400" />
             <span className="text-xs font-bold text-gray-500 uppercase">
               Periode
@@ -185,7 +185,7 @@ export default function AdminDashboard() {
       {/* DUA GRAFIK UTAMA */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* GRAFIK 1: Tren Pendapatan */}
-        <div className="bg-white p-6 rounded-xl border border-gray-400 shadow-sm">
+        <div className="bg-white p-6 rounded-xl border border-gray-300 shadow-sm">
           <div className="flex items-center gap-2 mb-6">
             <TrendingUp className="text-[#0B2F5E]" size={20} />
             <h3 className="font-bold text-gray-800">Tren Pendapatan</h3>
@@ -241,7 +241,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* GRAFIK 2: Wisata Terpopuler */}
-        <div className="bg-white p-6 rounded-xl border border-gray-400 shadow-sm">
+        <div className="bg-white p-6 rounded-xl border border-gray-300 shadow-sm">
           <div className="flex items-center gap-2 mb-6">
             <BarChart3 className="text-[#F57C00]" size={20} />
             <h3 className="font-bold text-gray-800">
