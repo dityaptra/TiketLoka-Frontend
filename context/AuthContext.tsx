@@ -1,10 +1,15 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 import { useRouter } from "next/navigation";
-import Cookies from "js-cookie"; // Import js-cookie
-import api from "@/lib/axios";   // Import axios instance kita
 
+// Tipe data User
 interface User {
   id: number;
   name: string;
@@ -25,60 +30,94 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// KONFIGURASI URL API
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null); // Token dummy state
+  // Token hanya disimpan di Memori (State), HILANG saat refresh.
+  // Ini AMAN karena autentikasi utama sekarang dipegang oleh Cookie HttpOnly.
+  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  // Load User saat refresh
+  // Cek LocalStorage saat aplikasi pertama kali dimuat
   useEffect(() => {
+    // ❌ KITA HAPUS LOGIKA GET TOKEN DARI SINI
+    // Kita hanya mengambil data User agar tampilan profil tetap ada
     const storedUser = localStorage.getItem("user");
-    // Cek juga apakah cookie token masih ada (opsional, via js-cookie tak bisa baca httponly)
-    // Tapi kita bisa cek 'user_role' sebagai indikator sesi aktif
-    const roleCookie = Cookies.get('user_role');
 
-    if (storedUser && roleCookie) {
+    if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
-        setToken("session_active"); // Restore dummy token biar UI gak logout
       } catch (e) {
+        console.error("Error parsing user data", e);
         localStorage.removeItem("user");
       }
     }
+    
+    // Pastikan tidak ada sisa token lama di LocalStorage pengguna
+    localStorage.removeItem("token"); 
+    
     setIsLoading(false);
   }, []);
 
-  // FUNGSI LOGIN
+  // Fungsi Login (Simpan data)
   const login = (newToken: string, userData: User) => {
-    setToken(newToken);
+    setToken(newToken); // Simpan di memori sementara
     setUser(userData);
+    
+    // Simpan data user saja (aman)
     localStorage.setItem("user", JSON.stringify(userData));
-    // Cookie 'user_role' sudah diset di halaman Login Page
+
+    // Redirect sesuai role
+    // (Opsional: Bisa dihapus jika redirect sudah ditangani di page login)
+    /* if (userData.role === "admin") {
+      router.push("/admin/dashboard");
+    } else {
+      router.push("/");
+    }
+    */
   };
 
-  // FUNGSI LOGOUT (REVISI PENTING)
+  // Fungsi Logout (Hapus data)
   const logout = async () => {
+    const currentToken = token;
+
+    // 1. BERSIHKAN CLIENT SIDE
+    setToken(null);
+    setUser(null);
+    // Hapus data user dari storage
+    localStorage.removeItem("user");
+    // Pastikan token bersih (jaga-jaga)
+    localStorage.removeItem("token");
+
+    // 2. REDIRECT SEGERA (Optimistic UI)
+    router.replace("/"); 
+    router.refresh();
+
+    // 3. PANGGIL API LOGOUT DI BACKGROUND
+    // Karena token di localstorage sudah tidak ada, fetch ini mungkin perlu
+    // cookie credentials agar backend tahu siapa yg logout.
     try {
-      // 1. Request Logout ke Backend (Axios otomatis bawa cookie token)
-      await api.post("/api/logout");
+      await fetch(`${BASE_URL}/api/logout`, {
+        method: "POST",
+        headers: {
+          // Jika backend butuh Bearer dan kita punya di state, kirim.
+          // Tapi jika refresh, token null. Backend harus bisa baca cookie.
+          ...(currentToken ? { Authorization: `Bearer ${currentToken}` } : {}),
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        // PENTING: Kirim cookie HttpOnly ke backend Laravel
+        credentials: "include", 
+      });
     } catch (error) {
-      console.warn("Logout backend gagal/offline, tetap bersihkan client.");
-    } finally {
-      // 2. Bersihkan Client Side (Apapun yang terjadi)
-      setToken(null);
-      setUser(null);
-      localStorage.removeItem("user");
-      
-      // 3. HAPUS COOKIE ROLE AGAR MIDDLEWARE MEMBLOKIR AKSES
-      Cookies.remove('user_role'); 
-      
-      // 4. Redirect
-      router.replace("/login");
-      router.refresh();
+      console.warn("Server logout failed, but client session is cleared.");
     }
   };
 
+  // Fungsi Update User
   const updateUser = (userData: Partial<User>) => {
     if (user) {
       const updatedUser = { ...user, ...userData };
@@ -88,12 +127,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, updateUser, isLoading }}>
+    <AuthContext.Provider
+      value={{ user, token, login, logout, updateUser, isLoading }}
+    >
       {children}
     </AuthContext.Provider>
   );
 }
 
+// Custom Hook
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {

@@ -7,31 +7,15 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Loader2, Mail, Lock, Eye, EyeOff } from "lucide-react";
-import Cookies from "js-cookie"; // Import JS Cookie untuk simpan Role
-
-// 1. IMPORT AXIOS CUSTOM KITA
-import api from "@/lib/axios";
-import { deleteSession } from "@/app/actions/auth";
+import { createSession, deleteSession } from "@/app/actions/auth";
 
 // --- KOMPONEN ICON ---
 const GoogleIcon = () => (
   <svg className="w-5 h-5" viewBox="0 0 24 24">
-    <path
-      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-      fill="#4285F4"
-    />
-    <path
-      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-      fill="#34A853"
-    />
-    <path
-      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-      fill="#FBBC05"
-    />
-    <path
-      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-      fill="#EA4335"
-    />
+    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
   </svg>
 );
 
@@ -41,31 +25,40 @@ function LoginContent() {
   const { addNotification } = useNotification();
   const router = useRouter();
   const searchParams = useSearchParams();
-
+  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-
+  
+  // Kita hilangkan checking session client-side yang berat
+  // Biarkan Middleware yang menangani redirect jika user sudah login
   const [isCheckingSession, setIsCheckingSession] = useState(true);
+
+  const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
   useEffect(() => {
     const handleOAuthAndCleanup = async () => {
-      // 1. CEK ERROR DARI OAUTH
-      const oauthError = searchParams.get("error");
-      const oauthMessage = searchParams.get("message");
-
+      // 1. CEK ERROR DARI OAUTH (Jika ada redirect dari Google)
+      const oauthError = searchParams.get('error');
+      const oauthMessage = searchParams.get('message');
+      
       if (oauthError) {
-        console.log("🔴 OAuth Error Detected:", oauthError);
+        console.log('🔴 OAuth Error Detected:', oauthError);
+        // Panggil Server Action untuk hapus cookie (jika ada sisa)
         await deleteSession();
-
+        
         if (oauthMessage) {
           setError(decodeURIComponent(oauthMessage));
         }
-        window.history.replaceState({}, "", "/login");
+        window.history.replaceState({}, '', '/login');
       }
 
+      // NOTE: Pengecekan "Apakah user sudah login?" sebaiknya dilakukan di Middleware.
+      // Karena cookie sekarang HttpOnly, JavaScript di sini tidak bisa membacanya 
+      // untuk melakukan validasi otomatis saat halaman dimuat.
+      
       setIsCheckingSession(false);
     };
 
@@ -80,78 +73,69 @@ function LoginContent() {
     setError("");
 
     try {
-      // 1. CSRF HANDSHAKE (WAJIB)
-      // Meminta token XSRF sebelum POST login agar tidak error 419
-      await api.get("/sanctum/csrf-cookie");
-
-      // 2. REQUEST LOGIN (Axios)
-      const res = await api.post("/api/login", {
-        email,
-        password,
+      // 1. Request ke Backend Laravel
+      const res = await fetch(`${BASE_URL}/api/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
+      const data = await res.json();
 
-      const data = res.data;
+      if (!res.ok) throw new Error(data.message || "Login gagal");
 
-      // 👇 TAMBAHKAN LOG INI UNTUK CEK DI CONSOLE BROWSER
-      console.log("🔥 DATA DARI SERVER:", data);
-      console.log("👤 ROLE USER:", data.user.role);
+      // 2. SET COOKIE HTTPONLY (Server Action) - AMAN
+      // Token dari Laravel dikirim ke Next.js Server untuk dijadikan Cookie
+      await createSession(data.access_token, data.user.role);
 
-      // --- PERBAIKAN PENTING DI SINI ---
-
-      // 3. Set Cookie 'user_role' Manual (Agar Middleware Next.js bisa baca)
-      // Token asli (HttpOnly) tidak bisa dibaca JS, tapi Role aman untuk dibaca.
-      Cookies.set("user_role", data.user.role, { expires: 1 }); // Expire 1 hari
-
-      // 4. Update Context React (Agar UI berubah jadi Logged In)
-      // Kita kirim string dummy "session_active" sebagai pengganti token
-      login("session_active", data.user);
+      // 3. Update Context React (Untuk UI State)
+      // Context tetap memegang data di memori agar UI responsif
+      login(data.access_token, data.user);
 
       addNotification(
         "system",
         "Login Berhasil",
         `Selamat datang kembali, ${data.user.name}!`
       );
-
-      // 5. Redirect Berdasarkan Role
-      if (data.user.role === "admin") {
-        router.push("/admin/dashboard");
+      
+      // 4. Redirect
+      if (data.user.role === 'admin') {
+        router.push('/admin/dashboard');
       } else {
-        router.push("/");
+        router.push('/');
       }
 
     } catch (err: any) {
-      console.error("Login Error:", err);
-      const msg = err.response?.data?.message || err.message || "Login gagal";
-      setError(msg);
+      setError(err.message);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleGoogleLogin = async () => {
-    setIsLoading(true);
-    try {
-      console.log("🔵 Initiating Google OAuth...");
+  setIsLoading(true); // Opsional: Aktifkan loading state agar user tahu sedang memproses
+  try {
+    console.log('🔵 Initiating Google OAuth...');
+    
+    // 1. Bersihkan sesi lama
+    await deleteSession();
 
-      // 1. Bersihkan sesi lama
-      await deleteSession();
+    // 2. Minta URL Login Google dari Backend Laravel
+    // Endpoint ini yang kita buat di SocialAuthController sebelumnya
+    const res = await fetch(`${BASE_URL}/api/auth/google/url`);
+    const data = await res.json();
 
-      // 2. Minta URL Login Google (Pakai Axios)
-      const res = await api.get("/api/auth/google/url");
-      const data = res.data;
-
-      // 3. Redirect user ke URL Google
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error("Gagal mendapatkan URL Google Auth");
-      }
-    } catch (err: any) {
-      console.error("Google Auth Error:", err);
-      setError("Gagal terhubung ke Google Login.");
-      setIsLoading(false);
+    // 3. Redirect user ke URL Google
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      throw new Error("Gagal mendapatkan URL Google Auth");
     }
-  };
+  } catch (err) {
+    console.error("Google Auth Error:", err);
+    setError("Gagal terhubung ke Google Login.");
+    setIsLoading(false);
+  }
+};
 
   const inputWrapperClass = "relative flex items-center";
   const iconClass = "absolute left-3 text-gray-400 w-5 h-5";
@@ -177,6 +161,7 @@ function LoginContent() {
 
       <div className="flex-1 flex items-center justify-center p-4 md:p-6 pt-10 relative z-10">
         <div className="w-full max-w-4xl bg-white/90 backdrop-blur-sm rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden grid grid-cols-1 lg:grid-cols-2 min-h-[550px]">
+          
           {/* Left Side - Image/Branding */}
           <div className="hidden lg:flex flex-col justify-center items-center bg-[#005eff] relative overflow-hidden p-10 text-center">
             <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-[#005eff] to-[#0046b0] opacity-100 z-0"></div>
@@ -313,13 +298,11 @@ function LoginContent() {
 // --- BAGIAN 2: EXPORT UTAMA DENGAN SUSPENSE ---
 export default function LoginPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center bg-white">
-          <Loader2 className="animate-spin text-[#F57C00] w-10 h-10" />
-        </div>
-      }
-    >
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <Loader2 className="animate-spin text-[#F57C00] w-10 h-10" />
+      </div>
+    }>
       <LoginContent />
     </Suspense>
   );
