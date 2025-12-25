@@ -62,7 +62,7 @@ export default function Sidebar() {
         <div className="relative h-8 w-32">
           {/* Pastikan menggunakan logo versi Putih/Terang jika ada, atau logo ini masih terlihat jelas */}
           <Image
-            src="/images/logonama.png" // Saran: Gunakan logo putih (misal: logoputih.png) agar kontras
+            src="/images/logonamaputih.png" // Saran: Gunakan logo putih (misal: logoputih.png) agar kontras
             alt="Logo TiketLoka"
             fill
             className="object-contain"
