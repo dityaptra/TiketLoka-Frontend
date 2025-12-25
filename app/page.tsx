@@ -5,7 +5,6 @@ import { useState } from "react";
 import { motion } from "framer-motion"; 
 import Link from 'next/link';
 import {
-  ArrowRight,
   TrendingUp,
   Calendar,
   Shield,
@@ -151,7 +150,7 @@ export default function HomePage() {
                 <div className="flex flex-wrap gap-4">
                   <Link href="/events">
                   <button className="bg-[#F57C00] text-white px-8 py-4 rounded-xl font-bold hover:bg-[#E65100] hover:scale-105 transition-all flex items-center gap-2">
-                    Pesan Tiket <ArrowRight size={20} />
+                    Pesan Tiket
                   </button>
                   </Link>
                 </div>
