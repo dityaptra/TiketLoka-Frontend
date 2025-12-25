@@ -30,7 +30,7 @@ export default function Footer() {
               />
             </div>
             
-            <p className="text-gray-300 text-sm leading-relaxed mb-6">
+            <p className="text-white text-sm leading-relaxed mb-6">
               Platform pemesanan tiket wisata termudah dan terpercaya. Temukan
               destinasi impianmu bersama TiketLoka.
             </p>
@@ -47,7 +47,7 @@ export default function Footer() {
           {/* KOLOM 2: Perusahaan */}
           <div className="flex flex-col h-full">
             <h3 className="text-white font-bold text-lg mb-6">Perusahaan</h3>
-            <ul className="space-y-3 text-sm text-gray-300">
+            <ul className="space-y-3 text-sm text-white">
               <FooterLink href="/about" text="Tentang Kami" />
               <FooterLink href="/blog" text="Blog Travel" />
               <FooterLink href="/careers" text="Karir" />
@@ -58,7 +58,7 @@ export default function Footer() {
           {/* KOLOM 3: Dukungan */}
           <div className="flex flex-col h-full">
             <h3 className="text-white font-bold text-lg mb-6">Dukungan</h3>
-            <ul className="space-y-3 text-sm text-gray-300">
+            <ul className="space-y-3 text-sm text-white">
               <FooterLink href="/help" text="Pusat Bantuan" />
               <FooterLink href="/how-to-book" text="Cara Pemesanan" />
               <FooterLink href="/faq" text="Pertanyaan Umum (FAQ)" />
@@ -71,7 +71,7 @@ export default function Footer() {
             <h3 className="text-white font-bold text-lg mb-6">
               Hubungi Kami
             </h3>
-            <ul className="space-y-4 text-sm text-gray-300">
+            <ul className="space-y-4 text-sm text-white">
               <li className="flex items-start gap-3 group">
                 <div className="p-1.5 bg-[#F57C00] rounded-full shrink-0 mt-0.5">
                     <MapPin className="w-3.5 h-3.5 text-white"/>
@@ -98,11 +98,11 @@ export default function Footer() {
 
         {/* --- BAGIAN BAWAH (Copyright) --- */}
         <div className="border-t border-gray-700/50 pt-8 flex flex-col-reverse md:flex-row justify-between items-center gap-4">
-          <p className="text-gray-400 text-xs md:text-sm text-center md:text-left">
+          <p className="text-white text-xs md:text-sm text-center md:text-left">
             &copy; 2025 - {currentYear} TiketLoka. All Rights Reserved.
           </p>
 
-          <div className="flex gap-6 text-xs md:text-sm text-gray-400">
+          <div className="flex gap-6 text-xs md:text-sm text-white">
             <Link href="/privacy" className="hover:text-[#F57C00] transition-colors">
               Privacy Policy
             </Link>
