@@ -22,7 +22,7 @@ export default function Footer() {
             {/* Ubah mb-4 menjadi mb-6 agar jaraknya sama dengan judul kolom lain */}
             <div className="relative h-10 w-48 mb-6">
               <Image
-                src="/images/ikonfooter.png"
+                src="/images/logonamaputih.png"
                 alt="TiketLoka Logo"
                 fill
                 className="object-contain object-left"
