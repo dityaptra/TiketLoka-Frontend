@@ -118,7 +118,7 @@ export default function AdminDashboard() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm border border-gray-200">
+        <div className="flex items-center gap-2 bg-white p-2 rounded-xl border border-gray-200">
           <div className="flex items-center gap-2 px-2 border-r border-gray-200">
             <Clock size={16} className="text-gray-400" />
             <span className="text-xs font-bold text-gray-500 uppercase">
@@ -157,28 +157,28 @@ export default function AdminDashboard() {
           // Icon warna putih
           icon={<DollarSign size={24} className="text-white" />}
           // Background Solid Hijau
-          bgClass="bg-green-500 shadow-green-200"
+          bgClass="bg-green-500"
         />
         <StatCard
           label="Total Transaksi"
           value={stats.total_bookings}
           icon={<ShoppingBag size={24} className="text-white" />}
           // Background Solid Biru
-          bgClass="bg-blue-500 shadow-blue-200"
+          bgClass="bg-blue-500"
         />
         <StatCard
           label="Tiket Terjual"
           value={stats.total_tickets_sold}
           icon={<Ticket size={24} className="text-white" />}
           // Background Solid Oranye
-          bgClass="bg-[#F57C00] shadow-orange-200"
+          bgClass="bg-[#F57C00]"
         />
         <StatCard
           label="Total User"
           value={stats.total_users}
           icon={<Users size={24} className="text-white" />}
           // Background Solid Ungu
-          bgClass="bg-purple-500 shadow-purple-200"
+          bgClass="bg-purple-500"
         />
       </div>
 
@@ -306,7 +306,7 @@ export default function AdminDashboard() {
 // 3. Komponen StatCard (DIUBAH TOTAL TAMPILANNYA)
 function StatCard({ label, value, icon, bgClass }: StatCardProps) {
   return (
-    <div className={`p-5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-between ${bgClass}`}>
+    <div className={`p-5 rounded-xl transition-all duration-300 flex items-center justify-between ${bgClass}`}>
       <div className="text-white">
         {/* Label putih transparan agar tidak terlalu mencolok tapi terbaca */}
         <p className="text-xs font-bold text-white/80 uppercase tracking-wide mb-1">
