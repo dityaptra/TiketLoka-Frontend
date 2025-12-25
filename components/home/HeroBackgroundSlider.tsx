@@ -8,6 +8,7 @@ const HeroBackgroundSlider = () => {
     '/images/herobg/pura.avif',
     '/images/herobg/candiborobudur.avif',
     '/images/herobg/gunungbromo.avif',
+    '/images/herobg/pulau.webp',
     '/images/herobg/komodo.avif'
   ];
 

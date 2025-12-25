@@ -138,7 +138,7 @@ export default function TermsAndConditions() {
              <Link href="/" className="hover:underline">Beranda</Link>
              <Link href="/privacy" className="hover:underline">Kebijakan Privasi</Link>
           </div>
-          <p className="text-xs text-gray-400 mt-8">&copy; {new Date().getFullYear()} TiketLoka Indonesia. All rights reserved.</p>
+          <p className="text-xs text-gray-400 mt-8">&copy; 2025 - {new Date().getFullYear()} TiketLoka. All rights reserved.</p>
         </div>
 
       </div>

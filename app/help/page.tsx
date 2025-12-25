@@ -170,14 +170,8 @@ export default function HelpCenterPage() {
                   
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <Link 
-                        href="/" 
-                        className="inline-flex items-center justify-center bg-[#F57C00] text-white px-8 py-3.5 rounded-full font-bold shadow-lg shadow-orange-500/30 hover:bg-orange-600 hover:scale-105 transition-all duration-300"
-                    >
-                        Jelajahi Wisata
-                    </Link>
-                    <Link 
                         href="/contact" 
-                        className="inline-flex items-center justify-center bg-white/10 backdrop-blur-sm text-white border border-white/20 px-8 py-3.5 rounded-full font-bold hover:bg-white hover:text-[#0B2F5E] transition-all duration-300"
+                        className="inline-flex items-center justify-center bg-[#F57C00] text-white px-8 py-3.5 rounded-full font-bold hover:bg-orange-600 hover:scale-105 transition-all duration-300"
                     >
                         Hubungi Kami
                     </Link>

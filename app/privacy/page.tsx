@@ -150,7 +150,7 @@ export default function PrivacyPolicy() {
 
         {/* Footer Navigation */}
         <div className="mt-16 pt-8 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center text-sm text-gray-500">
-          <p>&copy; {currentYear} TiketLoka. Hak Cipta Dilindungi.</p>
+          <p>&copy; 2025 - {new Date().getFullYear()} TiketLoka. All rights reserved.</p>
           <div className="flex gap-4 mt-4 sm:mt-0">
             <Link href="/" className="hover:text-blue-600">Beranda</Link>
             <Link href="/terms" className="hover:text-blue-600">Syarat & Ketentuan</Link>

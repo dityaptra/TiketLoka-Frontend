@@ -1,23 +1,28 @@
 import Image from "next/image";
 import Link from "next/link";
 import { FaInstagram, FaFacebookF, FaYoutube } from "react-icons/fa6";
-import { MapPin, Mail } from "lucide-react";
+import { MapPin, Mail, Phone } from "lucide-react";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-white border-t border-gray-300 pt-16 pb-8">
+    <footer className="bg-[#0B2F5E] border-t border-gray-300 pt-16 pb-8">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
-        {/* --- BAGIAN ATAS (Main Content) --- */}
-        {/* Menggunakan grid-cols-3: Logo (2 bagian) + Kontak (1 bagian) agar lebih seimbang */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-16 mb-12">
+        
+        {/* GRID UTAMA */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-12">
           
-          {/* KOLOM KIRI: Brand & Sosmed (Mengambil 2 kolom di layar besar) */}
-          <div className="space-y-2 lg:col-span-2">
-            <div className="relative h-18 w-64">
+          {/* KOLOM 1: Brand & Sosmed (DIPERBAIKI) */}
+          {/* Tambahkan 'flex flex-col h-full' agar kolom ini mengisi tinggi penuh */}
+          <div className="flex flex-col h-full">
+            
+            {/* Bagian Logo - Ukuran disesuaikan agar sejajar dengan Judul kolom lain */}
+            {/* Ubah h-14 menjadi h-10 agar tidak terlalu mendorong teks ke bawah */}
+            {/* Ubah mb-4 menjadi mb-6 agar jaraknya sama dengan judul kolom lain */}
+            <div className="relative h-10 w-48 mb-6">
               <Image
-                src="/images/logonama.png"
+                src="/images/ikonfooter.png"
                 alt="TiketLoka Logo"
                 fill
                 className="object-contain object-left"
@@ -25,52 +30,79 @@ export default function Footer() {
               />
             </div>
             
-            {/* Max-width ditambahkan agar teks tidak terlalu panjang ke kanan */}
-            <p className="text-gray-500 text-sm leading-relaxed max-w-md">
+            <p className="text-gray-300 text-sm leading-relaxed mb-6">
               Platform pemesanan tiket wisata termudah dan terpercaya. Temukan
               destinasi impianmu bersama TiketLoka.
             </p>
 
-            <div className="flex gap-4">
-              <SocialLink href="#" icon={<FaInstagram size={20} />} />
-              <SocialLink href="#" icon={<FaFacebookF size={18} />} />
-              <SocialLink href="#" icon={<FaYoutube size={20} />} />
+            {/* 'mt-auto' akan mendorong icon sosmed ke paling bawah container */}
+            {/* Ini membuat tampilannya seimbang dengan kolom Hubungi Kami yang panjang */}
+            <div className="mt-auto flex gap-3">
+              <SocialLink href="#" icon={<FaInstagram size={18} />} />
+              <SocialLink href="#" icon={<FaFacebookF size={16} />} />
+              <SocialLink href="#" icon={<FaYoutube size={18} />} />
             </div>
           </div>
 
-          {/* KOLOM KANAN: Kontak */}
-          <div className="lg:pl-8"> 
-            <h3 className="text-[#0B2F5E] font-bold text-lg mb-6">
+          {/* KOLOM 2: Perusahaan */}
+          <div className="flex flex-col h-full">
+            <h3 className="text-white font-bold text-lg mb-6">Perusahaan</h3>
+            <ul className="space-y-3 text-sm text-gray-300">
+              <FooterLink href="/about" text="Tentang Kami" />
+              <FooterLink href="/blog" text="Blog Travel" />
+              <FooterLink href="/careers" text="Karir" />
+              <FooterLink href="/partner" text="Daftar Jadi Partner" />
+            </ul>
+          </div>
+
+          {/* KOLOM 3: Dukungan */}
+          <div className="flex flex-col h-full">
+            <h3 className="text-white font-bold text-lg mb-6">Dukungan</h3>
+            <ul className="space-y-3 text-sm text-gray-300">
+              <FooterLink href="/help" text="Pusat Bantuan" />
+              <FooterLink href="/how-to-book" text="Cara Pemesanan" />
+              <FooterLink href="/faq" text="Pertanyaan Umum (FAQ)" />
+              <FooterLink href="/refund" text="Kebijakan Refund" />
+            </ul>
+          </div>
+
+          {/* KOLOM 4: Kontak */}
+          <div className="flex flex-col h-full"> 
+            <h3 className="text-white font-bold text-lg mb-6">
               Hubungi Kami
             </h3>
-            <ul className="space-y-4 text-sm text-gray-500">
+            <ul className="space-y-4 text-sm text-gray-300">
               <li className="flex items-start gap-3 group">
-                <div className="p-2 bg-[#F57C00] rounded-full shrink-0 transition-colors duration-300">
-                    <MapPin className="w-4 h-4 text-white transition-colors duration-300"/>
+                <div className="p-1.5 bg-[#F57C00] rounded-full shrink-0 mt-0.5">
+                    <MapPin className="w-3.5 h-3.5 text-white"/>
                 </div>
-                <span className="leading-relaxed mt-1">
-                  Jl. Udayana No.11,
-                  <br />
-                  Kabupaten Buleleng, Bali, 81116
+                <span className="leading-relaxed">
+                  Jl. Udayana No.11, Kab. Buleleng, Bali, 81116
                 </span>
               </li>
               <li className="flex items-center gap-3 group">
-                <div className="p-2 bg-[#F57C00] rounded-full shrink-0 transition-colors duration-300">
-                    <Mail className="w-4 h-4 text-white transition-colors duration-300"/>
+                <div className="p-1.5 bg-[#F57C00] rounded-full shrink-0">
+                    <Phone className="w-3.5 h-3.5 text-white"/>
                 </div>
-                <span className="mt-0.5">tiketloka25@gmail.com</span>
+                <span>+62 81234567890</span>
+              </li>
+              <li className="flex items-center gap-3 group">
+                <div className="p-1.5 bg-[#F57C00] rounded-full shrink-0">
+                    <Mail className="w-3.5 h-3.5 text-white"/>
+                </div>
+                <span>tiketloka25@gmail.com</span>
               </li>
             </ul>
           </div>
         </div>
 
         {/* --- BAGIAN BAWAH (Copyright) --- */}
-        <div className="border-t border-gray-300 pt-8 flex flex-col-reverse md:flex-row justify-between items-center gap-4">
-          <p className="text-gray-500 text-xs md:text-sm text-center md:text-left">
-            &copy; {currentYear} TiketLoka. All Rights Reserved.
+        <div className="border-t border-gray-700/50 pt-8 flex flex-col-reverse md:flex-row justify-between items-center gap-4">
+          <p className="text-gray-400 text-xs md:text-sm text-center md:text-left">
+            &copy; 2025 - {currentYear} TiketLoka. All Rights Reserved.
           </p>
 
-          <div className="flex gap-6 text-xs md:text-sm text-gray-500">
+          <div className="flex gap-6 text-xs md:text-sm text-gray-400">
             <Link href="/privacy" className="hover:text-[#F57C00] transition-colors">
               Privacy Policy
             </Link>
@@ -83,15 +115,28 @@ export default function Footer() {
     </footer>
   );
 }
-
 // Komponen Kecil untuk Social Link
 function SocialLink({ href, icon }: { href: string; icon: React.ReactNode }) {
   return (
     <Link
       href={href}
-      className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-50 text-[#0B2F5E] hover:bg-[#F57C00] hover:text-white transition-all duration-300 hover:shadow-md transform hover:-translate-y-1"
+      className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-[#F57C00] hover:text-white transition-all duration-300 hover:shadow-md transform hover:-translate-y-1"
     >
       {icon}
     </Link>
+  );
+}
+
+// Komponen Kecil untuk Link Footer Biasa
+function FooterLink({ href, text }: { href: string; text: string }) {
+  return (
+    <li>
+      <Link 
+        href={href} 
+        className="hover:text-[#F57C00] hover:translate-x-1 transition-all duration-200 inline-block"
+      >
+        {text}
+      </Link>
+    </li>
   );
 }
