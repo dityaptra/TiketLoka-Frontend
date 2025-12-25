@@ -91,7 +91,7 @@ export default function Sidebar() {
                 size={20}
                 className={
                   isActive
-                    ? "text-[#F57C00]" // Icon Aktif jadi Oranye (aksen TiketLoka) agar cantik di atas putih
+                    ? "text-[#0B2F5E]"
                     : "text-blue-300 group-hover:text-white" // Icon mati biru pudar
                 }
               />
