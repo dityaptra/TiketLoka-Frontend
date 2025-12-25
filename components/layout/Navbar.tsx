@@ -8,7 +8,6 @@ import { useCartContext } from "@/context/CartContext";
 import { useNotification } from "@/context/NotificationContext"; 
 import Swal from "sweetalert2";
 import Cookies from "js-cookie"; 
-// 1. IMPORT Server Action untuk hapus cookie HttpOnly
 import { deleteSession } from "@/app/actions/auth"; 
 
 import {
@@ -22,7 +21,6 @@ import {
   Settings,
   Home,
   LucideIcon,
-  Loader2,
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
