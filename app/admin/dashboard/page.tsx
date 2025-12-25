@@ -34,12 +34,12 @@ interface DashboardData {
   chart_popular: { name: string; total: number }[];
 }
 
-// 2. Interface Props untuk StatCard
+// 2. Interface Props untuk StatCard (Update prop 'color' untuk class background solid)
 interface StatCardProps {
   label: string;
   value: string | number;
   icon: React.ReactNode;
-  color: string;
+  bgClass: string; // Ubah nama prop agar lebih jelas fungsinya
 }
 
 export default function AdminDashboard() {
@@ -51,12 +51,10 @@ export default function AdminDashboard() {
   const [endDate, setEndDate] = useState("");
 
   async function fetchStats() {
-    // Cegah fetch jika token belum ada
     if (!token) return;
 
     setLoading(true);
     try {
-      // PERBAIKAN: Gunakan Environment Variable
       const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
       const url = new URL(`${BASE_URL}/api/admin/dashboard`);
 
@@ -93,7 +91,6 @@ export default function AdminDashboard() {
     setEndDate("");
   };
 
-  // 1. TAMPILAN LOADING
   if (loading)
     return (
       <div className="h-full flex items-center justify-center min-h-[400px]">
@@ -101,7 +98,6 @@ export default function AdminDashboard() {
       </div>
     );
 
-  // 2. TAMPILAN ERROR / KOSONG
   if (!stats)
     return (
       <div className="h-full flex items-center justify-center min-h-[400px] text-red-500 font-bold">
@@ -109,7 +105,6 @@ export default function AdminDashboard() {
       </div>
     );
 
-  // 3. TAMPILAN UTAMA
   return (
     <div className="space-y-8">
       {/* HEADER & FILTER */}
@@ -154,31 +149,36 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* STATS CARDS */}
+      {/* STATS CARDS (Updated Colors) */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
         <StatCard
           label="Total Pendapatan"
           value={`Rp ${Number(stats.total_revenue).toLocaleString("id-ID")}`}
-          icon={<DollarSign size={20} className="text-green-600" />}
-          color="border-green-200 bg-green-50"
+          // Icon warna putih
+          icon={<DollarSign size={24} className="text-white" />}
+          // Background Solid Hijau
+          bgClass="bg-green-500 shadow-green-200"
         />
         <StatCard
           label="Total Transaksi"
           value={stats.total_bookings}
-          icon={<ShoppingBag size={20} className="text-blue-600" />}
-          color="border-blue-200 bg-blue-50"
+          icon={<ShoppingBag size={24} className="text-white" />}
+          // Background Solid Biru
+          bgClass="bg-blue-500 shadow-blue-200"
         />
         <StatCard
           label="Tiket Terjual"
           value={stats.total_tickets_sold}
-          icon={<Ticket size={20} className="text-orange-600" />}
-          color="border-orange-200 bg-orange-50"
+          icon={<Ticket size={24} className="text-white" />}
+          // Background Solid Oranye
+          bgClass="bg-[#F57C00] shadow-orange-200"
         />
         <StatCard
           label="Total User"
           value={stats.total_users}
-          icon={<Users size={20} className="text-purple-600" />}
-          color="border-purple-200 bg-purple-50"
+          icon={<Users size={24} className="text-white" />}
+          // Background Solid Ungu
+          bgClass="bg-purple-500 shadow-purple-200"
         />
       </div>
 
@@ -303,17 +303,25 @@ export default function AdminDashboard() {
   );
 }
 
-// 3. Komponen StatCard
-function StatCard({ label, value, icon, color }: StatCardProps) {
+// 3. Komponen StatCard (DIUBAH TOTAL TAMPILANNYA)
+function StatCard({ label, value, icon, bgClass }: StatCardProps) {
   return (
-    <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-start justify-between hover:shadow-md transition">
-      <div>
-        <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">
+    <div className={`p-5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-between ${bgClass}`}>
+      <div className="text-white">
+        {/* Label putih transparan agar tidak terlalu mencolok tapi terbaca */}
+        <p className="text-xs font-bold text-white/80 uppercase tracking-wide mb-1">
           {label}
         </p>
-        <h3 className="text-2xl font-extrabold text-gray-800">{value}</h3>
+        {/* Value putih tebal */}
+        <h3 className="text-2xl font-extrabold text-white tracking-tight">
+            {value}
+        </h3>
       </div>
-      <div className={`p-2 rounded-lg ${color}`}>{icon}</div>
+      
+      {/* Container Icon Putih Transparan */}
+      <div className="p-3 rounded-lg bg-white/20 backdrop-blur-sm border border-white/10">
+        {icon}
+      </div>
     </div>
   );
 }
