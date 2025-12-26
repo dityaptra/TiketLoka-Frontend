@@ -100,7 +100,7 @@ export default function EventDetailView({ slug }: { slug: string }) {
     return (
         <main className="min-h-screen bg-white text-gray-800 pb-20 font-sans">
             <Navbar />
-            <div className="max-w-7xl mx-auto px-4 pt-24 pb-8">
+            <div className="max-w-7xl mx-auto px-4 pt-4 pb-8">
                 <div className="mb-12">
                     <button onClick={() => router.back()} className="text-sm text-gray-500 hover:text-[#0B2F5E] flex items-center gap-2 mb-6 transition font-medium group">
                         <div className="p-2 bg-gray-100 rounded-full group-hover:bg-blue-50 transition-colors"><ArrowLeft className="w-4 h-4"/></div> 
