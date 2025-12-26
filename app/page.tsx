@@ -36,7 +36,7 @@ const galleryImages = [
     alt: "Lempuyang Temple Gate",
   },
   {
-    src: "https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?auto=format&fit=crop&w=600&q=80",
+    src: "/images/gwk.jpg?auto=format&fit=crop&w=600&q=80",
     alt: "Balinese Dance Culture",
   },
   {
