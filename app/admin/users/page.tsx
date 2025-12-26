@@ -13,7 +13,6 @@ interface AdminUser {
 }
 
 export default function ManageAdmins() {
-  // Ambil user & token dari Context
   const { user, token } = useAuth();
   
   const [admins, setAdmins] = useState<AdminUser[]>([]);
@@ -27,9 +26,11 @@ export default function ManageAdmins() {
 
   const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
-  // -------------------------------------------------------------------------
-  // 1. FUNGSI FETCH (Dibungkus useCallback agar stabil & tidak looping)
-  // -------------------------------------------------------------------------
+  // --- STYLE UNTUK INPUT FORM (Didefinisikan di sini agar rapi) ---
+  const inputClassName = "w-full p-3 border border-gray-300 rounded-lg text-gray-800 bg-white focus:ring-2 focus:ring-blue-100 focus:border-[#0B2F5E] outline-none transition-all placeholder-gray-400";
+  const labelClassName = "block text-sm font-bold text-gray-700 mb-1";
+
+  // 1. FETCH DATA
   const fetchAdmins = useCallback(async () => {
     if (!token) return; 
 
@@ -53,20 +54,13 @@ export default function ManageAdmins() {
     } finally {
       setIsLoading(false);
     }
-  }, [token, BASE_URL]); // Dependencies: Hanya dibuat ulang jika token/url berubah
+  }, [token, BASE_URL]);
 
-  // -------------------------------------------------------------------------
-  // 2. USE EFFECT (Panggil fetch saat komponen dimuat)
-  // -------------------------------------------------------------------------
   useEffect(() => {
     fetchAdmins();
-  }, [fetchAdmins]); // Aman, tidak perlu eslint-disable lagi
+  }, [fetchAdmins]);
 
-  // -------------------------------------------------------------------------
-  // 3. PROTEKSI HALAMAN (Mencegah Layar Hitam / Error Hydration)
-  // -------------------------------------------------------------------------
-  
-  // A. Loading State (Tunggu data user siap)
+  // PROTEKSI Loading & Role
   if (!user) {
     return (
         <div className="flex flex-col items-center justify-center h-[80vh]">
@@ -76,7 +70,6 @@ export default function ManageAdmins() {
     );
   }
 
-  // B. Role Check (Tolak jika bukan Owner)
   if (user.role !== 'owner') {
       return (
         <div className="flex flex-col items-center justify-center h-[80vh] text-center opacity-80 animate-in fade-in duration-500">
@@ -91,14 +84,9 @@ export default function ManageAdmins() {
       );
   }
 
-  // -------------------------------------------------------------------------
-  // 4. HANDLERS (CRUD)
-  // -------------------------------------------------------------------------
-
-  // TAMBAH ADMIN
+  // --- HANDLERS ---
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!name || !email || !password || !phone) {
         Swal.fire("Error", "Semua kolom wajib diisi!", "error");
         return;
@@ -110,7 +98,7 @@ export default function ManageAdmins() {
       const res = await fetch(`${BASE_URL}/api/owner/admins`, {
           method: "POST",
           headers: {
-              "Accept": "application/json", // Penting agar Laravel return JSON jika error
+              "Accept": "application/json",
               "Content-Type": "application/json",
               "Authorization": `Bearer ${token}`
           },
@@ -122,7 +110,7 @@ export default function ManageAdmins() {
       if (res.ok) {
           Swal.fire("Sukses", "Admin berhasil ditambahkan", "success");
           setName(""); setEmail(""); setPassword(""); setPhone("");
-          fetchAdmins(); // Refresh tabel
+          fetchAdmins();
       } else {
           throw new Error(json.message || "Gagal menambahkan admin");
       }
@@ -131,7 +119,6 @@ export default function ManageAdmins() {
     }
   };
 
-  // HAPUS ADMIN
   const handleDelete = async (id: number) => {
     const result = await Swal.fire({
       title: "Hapus Admin?", 
@@ -147,25 +134,18 @@ export default function ManageAdmins() {
         Swal.fire({ didOpen: () => Swal.showLoading() });
         const res = await fetch(`${BASE_URL}/api/owner/admins/${id}`, {
             method: "DELETE",
-            headers: {
-                "Accept": "application/json",
-                "Authorization": `Bearer ${token}`
-            }
+            headers: { "Authorization": `Bearer ${token}` }
         });
-
         if (res.ok) {
             Swal.fire("Terhapus", "Admin telah dihapus.", "success");
             fetchAdmins();
         } else {
             Swal.fire("Gagal", "Gagal menghapus admin", "error");
         }
-      } catch (e) { 
-        Swal.fire("Gagal", "Error koneksi", "error"); 
-      }
+      } catch (e) { Swal.fire("Gagal", "Error koneksi", "error"); }
     }
   };
 
-  // EDIT ADMIN
   const handleEdit = async (admin: AdminUser) => {
     const { value: formValues } = await Swal.fire({
       title: `Edit ${admin.name}`,
@@ -192,7 +172,7 @@ export default function ManageAdmins() {
       focusConfirm: false,
       showCancelButton: true,
       confirmButtonColor: '#0B2F5E',
-      confirmButtonText: 'Simpan Perubahan',
+      confirmButtonText: 'Simpan',
       preConfirm: () => {
         return {
           name: (document.getElementById('swal-name') as HTMLInputElement).value,
@@ -206,52 +186,90 @@ export default function ManageAdmins() {
     if (formValues) {
       try {
         Swal.fire({ title: 'Mengupdate...', didOpen: () => Swal.showLoading() });
-        
         const res = await fetch(`${BASE_URL}/api/owner/admins/${admin.id}`, {
             method: "PUT",
             headers: {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
+                "Accept": "application/json", "Content-Type": "application/json", "Authorization": `Bearer ${token}`
             },
             body: JSON.stringify(formValues)
         });
-
-        const json = await res.json();
-
         if (res.ok) {
             Swal.fire("Sukses", "Data berhasil diperbarui", "success");
             fetchAdmins();
         } else {
+             const json = await res.json();
             throw new Error(json.message || "Gagal update");
         }
-      } catch (error: any) {
-        Swal.fire("Gagal", error.message, "error");
-      }
+      } catch (error: any) { Swal.fire("Gagal", error.message, "error"); }
     }
   };
 
-  // -------------------------------------------------------------------------
-  // 5. RENDER UI
-  // -------------------------------------------------------------------------
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-[#0B2F5E]">Kelola Admin (Super Admin)</h1>
 
-      {/* FORM CREATE */}
+      {/* FORM CREATE - DIPERBAIKI STYLINGNYA */}
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-        <h3 className="font-bold text-gray-700 mb-4 flex items-center gap-2">
+        <h3 className="font-bold text-gray-700 mb-6 flex items-center gap-2 border-b pb-4">
             <UserPlus size={20} className="text-[#F57C00]"/> Tambah Admin Baru
         </h3>
-        <form onSubmit={handleAdd} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input value={name} onChange={e=>setName(e.target.value)} placeholder="Nama Lengkap" className="input-std" required/>
-            <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" type="email" className="input-std" required/>
-            <input value={phone} onChange={e=>setPhone(e.target.value)} placeholder="No. Telepon" className="input-std" required/>
-            <input value={password} onChange={e=>setPassword(e.target.value)} placeholder="Password" type="password" className="input-std" required/>
+        
+        <form onSubmit={handleAdd} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Nama Lengkap */}
+            <div>
+                <label className={labelClassName}>Nama Lengkap</label>
+                <input 
+                    value={name} 
+                    onChange={e=>setName(e.target.value)} 
+                    placeholder="Contoh: Budi Santoso" 
+                    className={inputClassName} 
+                    required
+                />
+            </div>
+
+            {/* Email */}
+            <div>
+                <label className={labelClassName}>Email Login</label>
+                <input 
+                    value={email} 
+                    onChange={e=>setEmail(e.target.value)} 
+                    placeholder="Contoh: budi@tiketloka.com" 
+                    type="email" 
+                    className={inputClassName} 
+                    required
+                />
+            </div>
+
+            {/* Telepon */}
+            <div>
+                <label className={labelClassName}>No. Telepon</label>
+                <input 
+                    value={phone} 
+                    onChange={e=>setPhone(e.target.value)} 
+                    placeholder="Contoh: 08123456789" 
+                    className={inputClassName} 
+                    required
+                />
+            </div>
+
+            {/* Password */}
+            <div>
+                <label className={labelClassName}>Password</label>
+                <input 
+                    value={password} 
+                    onChange={e=>setPassword(e.target.value)} 
+                    placeholder="Minimal 6 karakter" 
+                    type="password" 
+                    className={inputClassName} 
+                    required
+                />
+            </div>
             
-            <button type="submit" className="md:col-span-2 bg-[#0B2F5E] text-white py-2.5 rounded-lg font-bold hover:bg-blue-900 transition flex items-center justify-center gap-2 shadow-lg shadow-blue-900/10">
-                <Shield size={18}/> Simpan Admin
-            </button>
+            <div className="md:col-span-2 pt-2">
+                <button type="submit" className="w-full bg-[#0B2F5E] text-white py-3 rounded-lg font-bold hover:bg-blue-900 transition flex items-center justify-center gap-2 shadow-lg shadow-blue-900/10">
+                    <Shield size={18}/> Simpan Admin
+                </button>
+            </div>
         </form>
       </div>
 
@@ -278,8 +296,8 @@ export default function ManageAdmins() {
                             <td className="p-4 text-gray-600 text-sm">{adm.email}</td>
                             <td className="p-4 text-gray-600 text-sm">{adm.phone_number}</td>
                             <td className="p-4 text-center flex justify-center gap-2">
-                                <button onClick={()=>handleEdit(adm)} className="p-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-600 hover:text-white transition" title="Edit Data"><Pencil size={18}/></button>
-                                <button onClick={()=>handleDelete(adm.id)} className="p-2 text-red-600 bg-red-50 rounded-lg hover:bg-red-600 hover:text-white transition" title="Hapus Admin"><Trash2 size={18}/></button>
+                                <button onClick={()=>handleEdit(adm)} className="p-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-600 hover:text-white transition"><Pencil size={18}/></button>
+                                <button onClick={()=>handleDelete(adm.id)} className="p-2 text-red-600 bg-red-50 rounded-lg hover:bg-red-600 hover:text-white transition"><Trash2 size={18}/></button>
                             </td>
                         </tr>
                     ))
@@ -287,11 +305,6 @@ export default function ManageAdmins() {
             </tbody>
         </table>
       </div>
-
-      {/* CSS Helper Inline */}
-      <style jsx>{`
-        .input-std { @apply p-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 w-full text-sm text-gray-700 placeholder-gray-400 transition; }
-      `}</style>
     </div>
   );
 }
