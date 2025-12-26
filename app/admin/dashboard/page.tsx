@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import {
   DollarSign, Ticket, Users, ShoppingBag, Clock, X, TrendingUp, BarChart3, Loader2
@@ -9,7 +9,6 @@ import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from "recharts";
 
-// Interface
 interface DashboardData {
   total_revenue: number;
   total_bookings: number;
@@ -27,8 +26,7 @@ interface StatCardProps {
 }
 
 export default function AdminDashboard() {
-  // 1. Ambil 'user' untuk pengecekan Loading Auth
-  const { user, token } = useAuth();
+  const { user, token } = useAuth(); // Ambil User & Token
   
   const [stats, setStats] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -37,61 +35,57 @@ export default function AdminDashboard() {
 
   const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
-  useEffect(() => {
-    // Fungsi Fetch didefinisikan di dalam useEffect atau dipanggil di sini
-    const fetchStats = async () => {
-      // Jika token belum ada, jangan fetch (tapi loading state dihandle oleh Auth Guard di bawah)
-      if (!token) return;
+  // 1. FETCH DATA (Pakai useCallback seperti Kelola Admin)
+  const fetchStats = useCallback(async () => {
+    if (!token) return;
 
-      setLoading(true);
-      try {
-        const url = new URL(`${BASE_URL}/api/admin/dashboard`);
-        if (startDate) url.searchParams.append("start_date", startDate);
-        if (endDate) url.searchParams.append("end_date", endDate);
+    setLoading(true);
+    try {
+      const url = new URL(`${BASE_URL}/api/admin/dashboard`);
+      if (startDate) url.searchParams.append("start_date", startDate);
+      if (endDate) url.searchParams.append("end_date", endDate);
 
-        const res = await fetch(url.toString(), {
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Accept": "application/json",
-          },
-        });
+      const res = await fetch(url.toString(), {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      });
 
-        const json = await res.json();
-        if (res.ok) {
-          setStats(json.data);
-        } else {
-          console.error("Gagal memuat dashboard:", json.message);
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
+      const json = await res.json();
+      if (res.ok) {
+        setStats(json.data);
+      } else {
+        console.error("Gagal memuat dashboard:", json.message);
       }
-    };
-
-    // Jalankan fetch jika token sudah tersedia
-    if (token) {
-        fetchStats();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-  }, [token, startDate, endDate, BASE_URL]); // Dependency Array Lengkap
+  }, [token, startDate, endDate, BASE_URL]);
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
 
   const resetFilter = () => {
     setStartDate("");
     setEndDate("");
   };
 
-  // 2. AUTH GUARD: Tahan Render Sampai User/Token Siap
-  // Ini mencegah "Infinite Loading" karena kita menunggu useAuth selesai dulu
+  // 2. PROTEKSI Loading (Persis seperti Kelola Admin)
+  // Ini kuncinya: Jangan render apapun sampai User siap!
   if (!user) {
     return (
         <div className="flex flex-col items-center justify-center h-[80vh]">
             <Loader2 size={48} className="text-[#0B2F5E] animate-spin mb-4" />
-            <p className="text-gray-500 font-medium">Memuat Data Akun...</p>
+            <p className="text-gray-500 font-medium">Memeriksa izin akses...</p>
         </div>
     );
   }
 
-  // 3. Render Dashboard (Data Loading)
+  // 3. Render Dashboard
   if (loading) {
     return (
       <div className="h-full flex items-center justify-center min-h-[400px]">
@@ -141,7 +135,6 @@ export default function AdminDashboard() {
 
       {/* GRAFIK */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Grafik 1 */}
         <div className="bg-white p-6 rounded-xl border border-gray-300 shadow-sm">
           <div className="flex items-center gap-2 mb-6">
             <TrendingUp className="text-[#0B2F5E]" size={20} />
@@ -160,7 +153,6 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Grafik 2 */}
         <div className="bg-white p-6 rounded-xl border border-gray-300 shadow-sm">
           <div className="flex items-center gap-2 mb-6">
             <BarChart3 className="text-[#F57C00]" size={20} />

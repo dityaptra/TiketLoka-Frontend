@@ -19,7 +19,7 @@ interface PaginationMeta {
 }
 
 export default function AdminBookings() {
-  const { user, token } = useAuth(); // Ambil User
+  const { user, token } = useAuth(); // Ambil User & Token
   
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [meta, setMeta] = useState<PaginationMeta | null>(null);
@@ -34,8 +34,8 @@ export default function AdminBookings() {
 
   const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
+  // 1. FETCH DATA (useCallback)
   const fetchBookings = useCallback(async () => {
-    // Cegah eksekusi jika token belum siap (menghindari deadlock)
     if (!token) return;
 
     setLoading(true);
@@ -50,8 +50,8 @@ export default function AdminBookings() {
 
       const res = await fetch(url.toString(), {
         headers: {
-          "Authorization": `Bearer ${token}`,
-          "Accept": "application/json",
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
         },
       });
 
@@ -73,26 +73,24 @@ export default function AdminBookings() {
   }, [page, startDate, endDate, search, status, token, BASE_URL]);
 
   useEffect(() => {
-    if (token) {
-        fetchBookings();
-    }
-  }, [fetchBookings, token]);
+    fetchBookings();
+  }, [fetchBookings]);
 
   const handleReset = () => {
     setStartDate(""); setEndDate(""); setSearch(""); setStatus(""); setPage(1);
   };
 
-  // 1. AUTH GUARD: Tunggu sampai User siap dulu
+  // 2. PROTEKSI UTAMA: Tahan Render Sampai User Siap (Persis Kelola Admin)
   if (!user) {
     return (
         <div className="flex flex-col items-center justify-center h-[80vh]">
             <Loader2 size={48} className="text-[#0B2F5E] animate-spin mb-4" />
-            <p className="text-gray-500 font-medium">Memuat Data Akun...</p>
+            <p className="text-gray-500 font-medium">Memeriksa izin akses...</p>
         </div>
     );
   }
 
-  // 2. Render Halaman Transaksi
+  // 3. Render
   return (
     <div className="space-y-6 p-6 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -189,7 +187,7 @@ export default function AdminBookings() {
         )}
       </div>
       
-      {/* Pagination (Tetap sama) */}
+      {/* Pagination */}
       {meta && meta.last_page > 1 && (
         <div className="flex justify-between items-center bg-white p-4 rounded-xl border shadow-sm">
            <span className="text-xs text-gray-400 font-medium">Data {meta.from} - {meta.to} dari {meta.total}</span>
