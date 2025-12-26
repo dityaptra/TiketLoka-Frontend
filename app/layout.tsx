@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "TiketLoka - Jelajahi Indonesia",
     description: "Pesan tiket wisata favoritmu sekarang di TiketLoka.",
-    url: "https://tiketloka.com",
+    url: "https://www.tiketloka.web.id",
     siteName: "TiketLoka",
     images: [
       {
@@ -58,13 +58,6 @@ export const metadata: Metadata = {
     title: "TiketLoka - Booking Wisata Mudah",
     description: "Liburan impian tinggal satu klik.",
     // images: ["/images/og-image-default.jpg"],
-  },
-
-  // Ikon Aplikasi
-  icons: {
-    icon: "/icon.png",
-    shortcut: "/icon-16x16.png",
-    apple: "/apple-touch-icon.png",
   },
 };
 
