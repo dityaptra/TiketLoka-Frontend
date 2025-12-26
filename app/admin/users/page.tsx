@@ -146,7 +146,17 @@ export default function ManageAdmins() {
             <input id="swal-name" class="swal2-input w-full m-0" placeholder="Nama" value="${admin.name}">
             <input id="swal-email" class="swal2-input w-full m-0" placeholder="Email" value="${admin.email}">
             <input id="swal-phone" class="swal2-input w-full m-0" placeholder="Telepon" value="${admin.phone_number}">
-            <input id="swal-pass" type="password" class="swal2-input w-full m-0" placeholder="Password Baru (Opsional)">
+            <input id="swal-pass" type="password" class="swal2-input w-full m-0" placeholder="Password Baru (Opsional)"><button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
+                </button>
         </div>
       `,
       focusConfirm: false,
@@ -195,15 +205,15 @@ export default function ManageAdmins() {
       <h1 className="text-2xl font-bold text-[#0B2F5E]">Kelola Admin (Super Admin)</h1>
 
       {/* FORM CREATE */}
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-300">
         <h3 className="font-bold text-gray-700 mb-4 flex items-center gap-2">
             <UserPlus size={20} className="text-[#F57C00]"/> Tambah Admin Baru
         </h3>
-        <form onSubmit={handleAdd} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input value={name} onChange={e=>setName(e.target.value)} placeholder="Nama Lengkap" className="input-std" required/>
-            <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" type="email" className="input-std" required/>
-            <input value={phone} onChange={e=>setPhone(e.target.value)} placeholder="No. Telepon" className="input-std" required/>
-            <input value={password} onChange={e=>setPassword(e.target.value)} placeholder="Password" type="password" className="input-std" required/>
+        <form onSubmit={handleAdd} className="grid grid-cols-1 md:grid-cols-2 gap-4 border-gray-300">
+            <input value={name} onChange={e=>setName(e.target.value)} placeholder="Nama Lengkap" className="input-std text-gray-700 border-gray-300" required/>
+            <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" type="email" className="input-std text-gray-700 border-gray-300" required/>
+            <input value={phone} onChange={e=>setPhone(e.target.value)} placeholder="No. Telepon" className="input-std text-gray-700 border-gray-300" required/>
+            <input value={password} onChange={e=>setPassword(e.target.value)} placeholder="Password" type="password" className="input-std text-gray-700 border-gray-300" required/>
             <button type="submit" className="md:col-span-2 bg-[#0B2F5E] text-white py-2 rounded-lg font-bold hover:bg-blue-900 transition flex items-center justify-center gap-2">
                 <Shield size={18}/> Simpan Admin
             </button>
