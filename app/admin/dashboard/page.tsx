@@ -11,6 +11,7 @@ import {
   X,
   BarChart3,
   TrendingUp,
+  Loader2, // Import Loader2
 } from "lucide-react";
 import {
   LineChart,
@@ -24,7 +25,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-// 1. Interface Data Dashboard (Respons API)
 interface DashboardData {
   total_revenue: number;
   total_bookings: number;
@@ -34,16 +34,17 @@ interface DashboardData {
   chart_popular: { name: string; total: number }[];
 }
 
-// 2. Interface Props untuk StatCard (Update prop 'color' untuk class background solid)
 interface StatCardProps {
   label: string;
   value: string | number;
   icon: React.ReactNode;
-  bgClass: string; // Ubah nama prop agar lebih jelas fungsinya
+  bgClass: string;
 }
 
 export default function AdminDashboard() {
-  const { token } = useAuth();
+  // 1. Ambil User & Token
+  const { user, token } = useAuth();
+  
   const [stats, setStats] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -51,6 +52,7 @@ export default function AdminDashboard() {
   const [endDate, setEndDate] = useState("");
 
   async function fetchStats() {
+    // Logika fetch tetap sama, tapi sekarang aman karena dipanggil setelah token siap
     if (!token) return;
 
     setLoading(true);
@@ -82,7 +84,10 @@ export default function AdminDashboard() {
   }
 
   useEffect(() => {
-    if (token) fetchStats();
+    // Hanya fetch jika token sudah ada
+    if (token) {
+        fetchStats();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, startDate, endDate]);
 
@@ -91,10 +96,21 @@ export default function AdminDashboard() {
     setEndDate("");
   };
 
+  // 2. PERBAIKAN UTAMA: Tahan Render Sampai User Siap
+  if (!user) {
+    return (
+        <div className="flex flex-col items-center justify-center h-[600px]">
+            <Loader2 size={48} className="text-[#0B2F5E] animate-spin mb-4" />
+            <p className="text-gray-500 font-medium">Memuat Data...</p>
+        </div>
+    );
+  }
+
+  // Loading Data Fetching
   if (loading)
     return (
       <div className="h-full flex items-center justify-center min-h-[400px]">
-        <div className="w-10 h-10 border-4 border-gray-200 border-t-[#0B2F5E] rounded-full animate-spin"></div>
+         <Loader2 size={48} className="text-[#0B2F5E] animate-spin" />
       </div>
     );
 
@@ -106,7 +122,7 @@ export default function AdminDashboard() {
     );
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in fade-in duration-500">
       {/* HEADER & FILTER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -149,35 +165,30 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* STATS CARDS (Updated Colors) */}
+      {/* STATS CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
         <StatCard
           label="Total Pendapatan"
           value={`Rp ${Number(stats.total_revenue).toLocaleString("id-ID")}`}
-          // Icon warna putih
           icon={<DollarSign size={24} className="text-white" />}
-          // Background Solid Hijau
           bgClass="bg-green-500"
         />
         <StatCard
           label="Total Transaksi"
           value={stats.total_bookings}
           icon={<ShoppingBag size={24} className="text-white" />}
-          // Background Solid Biru
           bgClass="bg-blue-500"
         />
         <StatCard
           label="Tiket Terjual"
           value={stats.total_tickets_sold}
           icon={<Ticket size={24} className="text-white" />}
-          // Background Solid Oranye
           bgClass="bg-[#F57C00]"
         />
         <StatCard
           label="Total User"
           value={stats.total_users}
           icon={<Users size={24} className="text-white" />}
-          // Background Solid Ungu
           bgClass="bg-purple-500"
         />
       </div>
@@ -303,22 +314,17 @@ export default function AdminDashboard() {
   );
 }
 
-// 3. Komponen StatCard (DIUBAH TOTAL TAMPILANNYA)
 function StatCard({ label, value, icon, bgClass }: StatCardProps) {
   return (
     <div className={`p-5 rounded-xl transition-all duration-300 flex items-center justify-between ${bgClass}`}>
       <div className="text-white">
-        {/* Label putih transparan agar tidak terlalu mencolok tapi terbaca */}
         <p className="text-xs font-bold text-white/80 uppercase tracking-wide mb-1">
           {label}
         </p>
-        {/* Value putih tebal */}
         <h3 className="text-2xl font-extrabold text-white tracking-tight">
             {value}
         </h3>
       </div>
-      
-      {/* Container Icon Putih Transparan */}
       <div className="p-3 rounded-lg bg-white/20 backdrop-blur-sm border border-white/10">
         {icon}
       </div>

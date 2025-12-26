@@ -28,7 +28,9 @@ interface PaginationMeta {
 }
 
 export default function AdminBookings() {
-  const { token } = useAuth();
+  // 1. Ambil User untuk pengecekan
+  const { user, token } = useAuth();
+  
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [meta, setMeta] = useState<PaginationMeta | null>(null);
   const [loading, setLoading] = useState(true);
@@ -37,10 +39,11 @@ export default function AdminBookings() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState(""); // State baru untuk filter status
+  const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
 
   const fetchBookings = useCallback(async () => {
+    // Cegah fetch jika token belum siap (menghindari return early yang bikin loading nyangkut)
     if (!token) return;
 
     setLoading(true);
@@ -54,7 +57,7 @@ export default function AdminBookings() {
       if (startDate) url.searchParams.append("start_date", startDate);
       if (endDate) url.searchParams.append("end_date", endDate);
       if (search) url.searchParams.append("search", search);
-      if (status) url.searchParams.append("status", status); // Tambahkan status ke API
+      if (status) url.searchParams.append("status", status);
 
       const res = await fetch(url.toString(), {
         headers: {
@@ -83,11 +86,13 @@ export default function AdminBookings() {
     } finally {
       setLoading(false);
     }
-  }, [page, startDate, endDate, search, status, token]); // Tambahkan status ke deps
+  }, [page, startDate, endDate, search, status, token]);
 
   useEffect(() => {
-    fetchBookings();
-  }, [fetchBookings]);
+    if (token) {
+        fetchBookings();
+    }
+  }, [fetchBookings, token]);
 
   const handleReset = () => {
     setStartDate("");
@@ -97,8 +102,18 @@ export default function AdminBookings() {
     setPage(1);
   };
 
+  // 2. PERBAIKAN UTAMA: Tahan Render Sampai User Siap
+  if (!user) {
+    return (
+        <div className="flex flex-col items-center justify-center h-[600px]">
+            <Loader2 size={48} className="text-[#0B2F5E] animate-spin mb-4" />
+            <p className="text-gray-500 font-medium">Memuat Data...</p>
+        </div>
+    );
+  }
+
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-6 animate-in fade-in duration-500">
       {/* HEADER & FILTER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -124,16 +139,15 @@ export default function AdminBookings() {
 
           {/* Search Input */}
           <div className="relative">
-    <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" /> {/* Icon juga saya gelapkan sedikit */}
-    <input 
-      type="text" 
-      placeholder="Cari user/kode..." 
-      // 👇 PERUBAHAN ADA DI SINI (text-gray-800 & placeholder:text-gray-500)
-      className="pl-9 pr-4 py-2 border rounded-xl text-sm text-gray-800 placeholder:text-gray-500 focus:ring-2 focus:ring-[#0B2F5E] outline-none w-full md:w-48 shadow-sm"
-      value={search}
-      onChange={(e) => {setSearch(e.target.value); setPage(1);}}
-    />
-</div>
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+            <input 
+              type="text" 
+              placeholder="Cari user/kode..." 
+              className="pl-9 pr-4 py-2 border rounded-xl text-sm text-gray-800 placeholder:text-gray-500 focus:ring-2 focus:ring-[#0B2F5E] outline-none w-full md:w-48 shadow-sm"
+              value={search}
+              onChange={(e) => {setSearch(e.target.value); setPage(1);}}
+            />
+          </div>
 
           {/* Date Picker Range */}
           <div className="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm border border-gray-200">
@@ -215,9 +229,9 @@ export default function AdminBookings() {
                   <tr>
                     <td colSpan={8} className="text-center py-20">
                       <div className="flex flex-col items-center opacity-40">
-                         <X size={40} />
-                         <p className="mt-2 font-bold">Tidak ada data ditemukan</p>
-                         <button onClick={handleReset} className="text-[#0B2F5E] text-xs underline mt-1">Reset Semua Filter</button>
+                          <X size={40} />
+                          <p className="mt-2 font-bold">Tidak ada data ditemukan</p>
+                          <button onClick={handleReset} className="text-[#0B2F5E] text-xs underline mt-1">Reset Semua Filter</button>
                       </div>
                     </td>
                   </tr>
