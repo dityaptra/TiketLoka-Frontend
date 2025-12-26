@@ -98,7 +98,7 @@ function LoginContent() {
       );
       
       // 4. Redirect
-      if (data.user.role === 'admin') {
+      if (data.user.role === 'admin' || data.user.role === 'owner') {
         router.push('/admin/dashboard');
       } else {
         router.push('/');
