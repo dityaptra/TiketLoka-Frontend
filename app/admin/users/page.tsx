@@ -146,7 +146,7 @@ export default function ManageAdmins() {
             <input id="swal-name" class="swal2-input w-full m-0" placeholder="Nama" value="${admin.name}">
             <input id="swal-email" class="swal2-input w-full m-0" placeholder="Email" value="${admin.email}">
             <input id="swal-phone" class="swal2-input w-full m-0" placeholder="Telepon" value="${admin.phone_number}">
-            <input id="swal-pass" type="password" class="swal2-input w-full m-0" placeholder="Password Baru (Opsional)"><button
+            <input id="swal-pass" type="password" class="swal2-input w-full m-0" placeholder="Password Baru (Opsional)"<button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 text-gray-400 hover:text-gray-600 transition-colors"
@@ -156,7 +156,7 @@ export default function ManageAdmins() {
                   ) : (
                     <Eye className="w-5 h-5" />
                   )}
-                </button>
+                </button>>
         </div>
       `,
       focusConfirm: false,
