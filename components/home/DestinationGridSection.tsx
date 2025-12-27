@@ -111,13 +111,13 @@ export default function DestinationGridSection({ endpoint, title, limit }: { end
                 <Link 
                   href={`/events/${item.slug}`} 
                   key={item.id} 
-                  className="group block bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-gray-300 transition-colors duration-200 h-full flex flex-col"
+                  className="group block bg-white rounded-xl overflow-hidden border border-gray-300 hover:-translate-y-2 transition duration-200"
                 >
                   <div className="relative h-44 overflow-hidden bg-gray-100 border-b border-gray-100">
                     <img
                       src={getImageUrl(item.image_url)}
                       alt={item.name}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      className="w-full h-full object-cover transition-transform duration-700"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1517400508535-b2a1a062776c?q=80&w=2070';
                       }}
