@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation'; 
-import { Search, MapPin, Star, ChevronDown, Check, X, ArrowUpRight, Zap, Tag } from 'lucide-react'; // Tambah icon Zap (Petir) & Tag
+import { Search, MapPin, Star, ChevronDown, Check, X, Zap, Tag } from 'lucide-react'; 
 import { Destination } from '@/types';
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -136,7 +136,7 @@ function AllDestinationsContent() {
         </div>
       </div>
 
-      {/* HASIL PENCARIAN - STYLE KLOOK */}
+      {/* HASIL PENCARIAN - STYLE CLEAN & BORDERED */}
       <div className="max-w-7xl mx-auto px-4 py-8 min-h-[60vh]">
         {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-5 gap-y-8 animate-pulse">
@@ -154,31 +154,27 @@ function AllDestinationsContent() {
                     <Link 
                         href={`/events/${item.slug}`} 
                         key={item.id} 
-                        className="group block bg-white rounded-xl overflow-hidden hover:shadow-[0_8px_25px_-5px_rgba(0,0,0,0.1)] transition-all duration-300 hover:-translate-y-1.5 border border-transparent hover:border-gray-100"
+                        // 👇 PERUBAHAN STYLE KARTU DI SINI:
+                        // - Hapus shadow-md, ganti border border-gray-200
+                        // - Hapus hover:-translate-y
+                        className="group block bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-gray-300 transition-colors duration-200"
                     >
                         {/* 1. IMAGE SECTION */}
-                        <div className="relative h-44 overflow-hidden rounded-t-xl bg-gray-100">
+                        <div className="relative h-44 overflow-hidden bg-gray-100 border-b border-gray-100">
                             <img 
                                 src={getImageUrl(item.image_url)} 
                                 alt={item.name} 
                                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
                             />
                             
-                            {/* Label Lokasi di atas Gambar */}
+                            {/* Label Lokasi */}
                             <div className="absolute top-3 left-3">
                                 <span className="bg-black/60 backdrop-blur-[2px] text-white text-[10px] font-bold px-2 py-1 rounded-[4px] flex items-center gap-1">
                                     <MapPin size={10} /> {item.location.split(',')[0]}
                                 </span>
                             </div>
-
-                            {/* Label Promo (Opsional - Simulasi) */}
-                            {item.id % 2 === 0 && (
-                                <div className="absolute top-3 right-0">
-                                    <span className="bg-[#FF5B00] text-white text-[10px] font-bold px-2 py-1 rounded-l-[4px] shadow-sm flex items-center gap-1">
-                                        Promo Spesial
-                                    </span>
-                                </div>
-                            )}
+                            
+                            {/* ❌ LABEL PROMO SPESIAL SUDAH DIHAPUS ❌ */}
                         </div>
 
                         {/* 2. CONTENT SECTION */}
@@ -188,7 +184,7 @@ function AllDestinationsContent() {
                                 {item.category?.name || 'Wisata & Tur'} • Indonesia
                             </span>
 
-                            {/* Judul Produk (Line Clamp 2) */}
+                            {/* Judul Produk */}
                             <h3 className="text-[15px] font-bold text-gray-900 leading-snug mb-2 line-clamp-2 group-hover:text-[#FF5B00] transition-colors">
                                 {item.name}
                             </h3>
@@ -202,7 +198,7 @@ function AllDestinationsContent() {
                                 <span className="text-xs text-gray-400">({Math.floor(Math.random() * 500) + 50}) • 2K+ dipesan</span>
                             </div>
 
-                            {/* Fitur Kilat (Konfirmasi Instan) */}
+                            {/* Fitur Kilat */}
                             <div className="flex flex-wrap gap-2 mb-4">
                                 <span className="inline-flex items-center gap-1 bg-gray-50 text-gray-500 text-[10px] px-1.5 py-0.5 rounded border border-gray-100">
                                     <Zap size={10} className="text-orange-500 fill-orange-500" /> Konfirmasi Instan
