@@ -430,21 +430,15 @@ function BookingCard({ destination }: { destination: Destination }) {
                             );
                         })}
                     </div>
-                    {/* Legend Singkat */}
-                    <div className="flex gap-3 mt-3 justify-center">
-                         <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-[#0B2F5E]"></div><span className="text-[10px] text-gray-500">Dipilih</span></div>
-                         <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-red-100 border border-red-200"></div><span className="text-[10px] text-gray-500">Libur</span></div>
-                         <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-white border border-gray-200"></div><span className="text-[10px] text-gray-500">Tersedia</span></div>
-                    </div>
                 </div>
 
                 {/* --- JUMLAH PESERTA --- */}
                 <div>
                     <label className="text-xs font-bold text-gray-700 uppercase mb-2 block">Jumlah Peserta</label>
                     <div className="flex justify-between items-center p-1.5 bg-gray-50 rounded-xl border border-gray-200">
-                        <button onClick={() => setQty(q => Math.max(1, q - 1))} className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-100 transition shadow-sm"><Minus className="w-4 h-4"/></button>
+                        <button onClick={() => setQty(q => Math.max(1, q - 1))} className="w-10 h-10 flex items-center justify-center bg-[#0B2F5E] text-white rounded-lg hover:bg-[#09254A]"><Minus className="w-4 h-4"/></button>
                         <span className="font-bold text-[#0B2F5E] text-xl min-w-[30px] text-center">{qty}</span>
-                        <button onClick={() => setQty(q => q + 1)} className="w-10 h-10 flex items-center justify-center bg-[#0B2F5E] text-white rounded-lg hover:bg-[#09254A] transition shadow-md shadow-blue-900/20"><Plus className="w-4 h-4"/></button>
+                        <button onClick={() => setQty(q => q + 1)} className="w-10 h-10 flex items-center justify-center bg-[#0B2F5E] text-white rounded-lg hover:bg-[#09254A] transition"><Plus className="w-4 h-4"/></button>
                     </div>
                 </div>
 
@@ -487,7 +481,7 @@ function BookingCard({ destination }: { destination: Destination }) {
                     onClick={() => { if(!token) return router.push('/login'); if(!date) return toast.error('Pilih tanggal!'); setModalOpen(true); }} 
                     className="flex-[2] bg-[#0B2F5E] text-white py-3.5 rounded-xl font-bold transition hover:bg-[#09254A] shadow-lg shadow-blue-900/20 active:scale-95"
                 >
-                    Pesan Sekarang
+                    Beli Langsung
                 </button>
             </div>
 
