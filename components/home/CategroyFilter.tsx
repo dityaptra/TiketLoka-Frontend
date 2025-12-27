@@ -48,26 +48,23 @@ export default function CategoryFilter({ selectedSlug, onSelectCategory }: Props
   };
 
   return (
-    <div className="sticky top-[80px] z-30 py-4 pointer-events-none">
+    // Sticky agar filter menempel saat discroll
+    <div className="sticky top-[70px] md:top-[80px] z-30 py-4 pointer-events-none">
       <div className="max-w-7xl mx-auto px-4">
         
-        {/* Container Utama */}
+        {/* Container Utama Filter */}
         <div className="bg-white/95 backdrop-blur-xl border border-gray-200 rounded-full shadow-lg p-2 pointer-events-auto mx-auto max-w-5xl relative group flex items-center">
           
-          {/* Tombol Panah KIRI */}
+          {/* Tombol Panah KIRI (Hanya di Laptop) */}
           <button 
             onClick={() => scroll('left')}
-            className="absolute left-2 z-20 bg-[#0B2F5E] shadow-md rounded-full p-2 text-white hover:scale-110 transition-all hidden md:flex border border-white/20"
+            className="absolute left-2 z-20 bg-[#0B2F5E] shadow-md rounded-full p-2 text-white hover:scale-110 transition-all hidden md:flex border border-white/20 active:scale-95 cursor-pointer"
           >
             <ChevronLeft size={20} />
           </button>
 
           {/* Area Scrollable */}
-          {/* PERUBAHAN PENTING: 
-             Saya menambahkan 'md:px-12'. 
-             Ini memberi ruang kosong (padding) di kiri & kanan hanya saat di desktop (saat tombol panah muncul),
-             sehingga item pertama dan terakhir tidak tertutup tombol.
-          */}
+          {/* PERUBAHAN: Saya tambahkan 'md:px-12' agar item tidak tertutup tombol panah */}
           <div 
             ref={scrollRef}
             className="overflow-x-auto flex flex-nowrap items-center gap-3 py-1 no-scrollbar scroll-smooth px-2 md:px-12 w-full"
@@ -77,10 +74,10 @@ export default function CategoryFilter({ selectedSlug, onSelectCategory }: Props
             <button
               onClick={() => onSelectCategory('')}
               className={`
-                flex-shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 whitespace-nowrap border
+                flex-shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 whitespace-nowrap border cursor-pointer select-none
                 ${selectedSlug === '' 
-                  ? 'bg-[#F57C00] border-[#F57C00] text-white shadow-md shadow-orange-200' 
-                  : 'bg-gray-100 border-gray-200 text-gray-600 hover:bg-gray-200 hover:border-gray-300 hover:text-[#0B2F5E]'
+                  ? 'bg-[#F57C00] border-[#F57C00] text-white shadow-md shadow-orange-200 scale-105' 
+                  : 'bg-gray-50 border-gray-100 text-gray-600 hover:bg-white hover:border-gray-300 hover:text-[#0B2F5E]'
                 }
               `}
             >
@@ -96,10 +93,10 @@ export default function CategoryFilter({ selectedSlug, onSelectCategory }: Props
                   key={cat.id}
                   onClick={() => onSelectCategory(cat.slug)}
                   className={`
-                    flex-shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 border whitespace-nowrap
+                    flex-shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 border whitespace-nowrap cursor-pointer select-none
                     ${isActive
-                      ? 'bg-[#F57C00] border-[#F57C00] text-white shadow-md shadow-orange-200' 
-                      : 'bg-gray-100 border-gray-200 text-gray-600 hover:bg-gray-200 hover:border-gray-300 hover:text-[#0B2F5E]'
+                      ? 'bg-[#F57C00] border-[#F57C00] text-white shadow-md shadow-orange-200 scale-105' 
+                      : 'bg-gray-50 border-gray-100 text-gray-600 hover:bg-white hover:border-gray-300 hover:text-[#0B2F5E]'
                     }
                   `}
                 >
@@ -109,10 +106,10 @@ export default function CategoryFilter({ selectedSlug, onSelectCategory }: Props
             })}
           </div>
 
-          {/* Tombol Panah KANAN */}
+          {/* Tombol Panah KANAN (Hanya di Laptop) */}
           <button 
             onClick={() => scroll('right')}
-            className="absolute right-2 z-20 bg-[#0B2F5E] shadow-md rounded-full p-2 text-white hover:scale-110 transition-all hidden md:flex border border-white/20"
+            className="absolute right-2 z-20 bg-[#0B2F5E] shadow-md rounded-full p-2 text-white hover:scale-110 transition-all hidden md:flex border border-white/20 active:scale-95 cursor-pointer"
           >
             <ChevronRight size={20} />
           </button>

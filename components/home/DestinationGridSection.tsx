@@ -9,7 +9,6 @@ export default function DestinationGridSection({ endpoint, title, limit }: { end
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // KONFIGURASI URL API
   const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
   // --- Helper: URL Gambar ---
@@ -17,9 +16,7 @@ export default function DestinationGridSection({ endpoint, title, limit }: { end
     if (!url) return 'https://images.unsplash.com/photo-1517400508535-b2a1a062776c?q=80&w=2070';
     if (url.startsWith('http')) return url;
     const cleanPath = url.startsWith('/') ? url.substring(1) : url;
-    // Hapus 'storage/' jika sudah ada di path untuk menghindari double prefix
     const finalPath = cleanPath.startsWith('storage/') ? cleanPath.substring(8) : cleanPath;
-    
     return `${BASE_URL}/storage/${finalPath}`;
   };
 
@@ -33,7 +30,6 @@ export default function DestinationGridSection({ endpoint, title, limit }: { end
     }).format(Number(price));
   };
 
-  // --- Fetching Data ---
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
@@ -58,16 +54,17 @@ export default function DestinationGridSection({ endpoint, title, limit }: { end
 
   // --- RENDER SKELETON LOADING ---
   if (loading) return (
-    <section className="py-12 px-4">
+    <section className="py-8 md:py-12 px-4">
       <div className="max-w-7xl mx-auto">
-        <div className="h-10 w-64 bg-gray-200 rounded-lg animate-pulse mb-10"></div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="h-8 md:h-10 w-48 md:w-64 bg-gray-200 rounded-lg animate-pulse mb-6 md:mb-10"></div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm h-[400px]">
-              <div className="h-56 bg-gray-200 animate-pulse"></div>
-              <div className="p-5 space-y-4">
-                <div className="h-6 w-3/4 bg-gray-200 rounded animate-pulse"></div>
+            <div key={i} className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm h-[350px]">
+              <div className="h-48 bg-gray-200 animate-pulse"></div>
+              <div className="p-4 space-y-3">
+                <div className="h-5 w-3/4 bg-gray-200 rounded animate-pulse"></div>
                 <div className="h-4 w-1/2 bg-gray-200 rounded animate-pulse"></div>
+                <div className="mt-4 h-8 w-full bg-gray-200 rounded animate-pulse"></div>
               </div>
             </div>
           ))}
@@ -77,30 +74,42 @@ export default function DestinationGridSection({ endpoint, title, limit }: { end
   );
 
   if (destinations.length === 0) return (
-    <div className="py-20 text-center">
-      <p className="text-gray-400 font-medium">Belum ada destinasi untuk kategori ini.</p>
+    <div className="py-20 text-center px-4">
+      <p className="text-gray-400 font-medium bg-gray-50 py-8 rounded-xl border border-dashed border-gray-300">
+        Belum ada destinasi untuk kategori ini.
+      </p>
     </div>
   );
 
   return (
-    <section className="py-12 px-4">
+    <section className="py-8 md:py-12 px-4">
       <div className="max-w-7xl mx-auto">
         
-        {/* --- 1. HEADER SECTION (CLEAN) --- */}
-        <div className="mb-10">
-          <h2 className="text-4xl font-bold text-gray-800 mb-2">{title}</h2>
-          <p className="text-gray-600">Tempat wisata terfavorit pilihan traveler</p>
+        {/* --- 1. HEADER SECTION --- */}
+        <div className="mb-8 md:mb-10 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
+          <div>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">{title}</h2>
+            <p className="text-gray-600 text-sm md:text-base">Tempat wisata terfavorit pilihan traveler</p>
+          </div>
+          
+          {/* Tombol Lihat Semua (Desktop Only) */}
+          {limit && (
+            <Link href="/events" className="hidden sm:flex items-center gap-2 text-[#0B2F5E] font-bold hover:underline">
+              Lihat Semua <ArrowUpRight size={18} />
+            </Link>
+          )}
         </div>
         
         {/* --- 2. GRID KARTU --- */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {destinations.map((item) => (
-            <div 
+            <Link 
+              href={`/events/${item.slug}`} 
               key={item.id} 
-              className="group block bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-100 relative"
+              className="group block bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 h-full flex flex-col"
             >
               {/* Image Section */}
-              <div className="relative h-56 overflow-hidden bg-gray-100">
+              <div className="relative h-48 sm:h-56 overflow-hidden bg-gray-100">
                 <img
                   src={getImageUrl(item.image_url)}
                   alt={item.name}
@@ -111,63 +120,50 @@ export default function DestinationGridSection({ endpoint, title, limit }: { end
                 />
                 
                 {/* Rating Badge */}
-                <div className="absolute top-4 right-4 bg-white px-3 py-1.5 rounded-full flex items-center gap-1 shadow-lg z-10">
-                  <Star size={14} fill="#F57C00" className="text-[#F57C00]" />
-                  <span className="text-sm font-bold text-gray-800">
+                <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm z-10">
+                  <Star size={12} fill="#F57C00" className="text-[#F57C00]" />
+                  <span className="text-xs font-bold text-gray-800">
                     {item.rating ? Number(item.rating).toFixed(1) : 'New'}
                   </span>
                 </div>
               </div>
 
               {/* Content Section */}
-              <div className="p-5">
-                <h3 className="text-lg font-bold text-gray-800 mb-2 line-clamp-1 group-hover:text-[#0B2F5E] transition-colors">
+              <div className="p-4 flex flex-col flex-1">
+                <h3 className="text-lg font-bold text-gray-800 mb-1 line-clamp-1 group-hover:text-[#0B2F5E] transition-colors">
                   {item.name}
                 </h3>
                 
-                <p className="text-sm text-gray-500 mb-4 flex items-center gap-1">
-                  <MapPin size={14} className="text-[#F57C00]"/>
+                <p className="text-sm text-gray-500 mb-4 flex items-center gap-1 line-clamp-1">
+                  <MapPin size={14} className="text-[#F57C00] flex-shrink-0"/>
                   {item.location}
                 </p>
 
-                <div className="flex items-center justify-between mt-auto">
+                <div className="mt-auto pt-3 border-t border-gray-50 flex items-center justify-between">
                   <div>
-                    <span className="text-xs text-gray-500">Mulai dari</span>
-                    <p className="text-xl font-bold text-[#F57C00]">
+                    <span className="text-[10px] uppercase tracking-wider text-gray-400 font-medium">Mulai dari</span>
+                    <p className="text-lg font-bold text-[#F57C00]">
                       {formatRupiah(item.price)}
                     </p>
                   </div>
                   
-                  {/* Tombol Lihat Detail (Kecil di kartu) */}
-                  <Link href={`/events/${item.slug}`}>
-                    <button className="px-5 py-2.5 bg-[#0B2F5E] text-white rounded-xl font-semibold hover:bg-[#1a457e] transition-colors shadow-md text-sm cursor-pointer">
-                      Lihat
-                    </button>
-                  </Link>
+                  {/* Icon Panah Kecil sebagai indikator klik */}
+                  <div className="w-8 h-8 bg-blue-50 rounded-full flex items-center justify-center text-[#0B2F5E] group-hover:bg-[#0B2F5E] group-hover:text-white transition-colors">
+                     <ArrowUpRight size={16} />
+                  </div>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 
-        {/* --- 3. TOMBOL LIHAT SEMUA (POSISI BAWAH) --- */}
-        {/* Hanya muncul jika limit aktif (artinya di Homepage) */}
+        {/* --- 3. TOMBOL LIHAT SEMUA (MOBILE ONLY) --- */}
         {limit && (
-          <div className="mt-12 flex justify-center">
+          <div className="mt-8 sm:hidden">
             <Link href="/events">
-              <button className="
-                group flex items-center gap-3
-                px-8 py-3.5
-                bg-white border-2 border-[#0B2F5E] text-[#0B2F5E]
-                rounded-full font-bold text-base
-                hover:bg-[#0B2F5E] hover:text-white
-                transition-all duration-300
-                shadow-sm hover:shadow-lg hover:-translate-y-1
-              ">
+              <button className="w-full py-3.5 bg-white border border-[#0B2F5E] text-[#0B2F5E] rounded-xl font-bold text-sm shadow-sm active:scale-95 transition-transform flex items-center justify-center gap-2">
                 Lihat Semua Destinasi
-                <ArrowUpRight 
-                  className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" 
-                />
+                <ArrowUpRight size={16} />
               </button>
             </Link>
           </div>

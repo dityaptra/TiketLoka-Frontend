@@ -274,7 +274,7 @@ function ReviewSection({ destination, onRefresh }: { destination: Destination, o
     );
 }
 
-// --- FIXED BOOKING CARD ---
+// --- FIXED BOOKING CARD (VERSI PERBAIKAN) ---
 function BookingCard({ destination }: { destination: Destination }) {
     const { token } = useAuth();
     const router = useRouter();
@@ -289,7 +289,6 @@ function BookingCard({ destination }: { destination: Destination }) {
     const [addingToCart, setAddingToCart] = useState(false); 
     const [currentViewDate, setCurrentViewDate] = useState(new Date());
 
-    // PERBAIKAN: Gunakan Number() untuk memastikan harga bukan string
     const total = useMemo(() => {
         const basePrice = Number(destination.price) || 0;
         const addonPriceSum = addons.reduce((acc, id) => {
@@ -301,12 +300,23 @@ function BookingCard({ destination }: { destination: Destination }) {
 
     const toggleAddon = (id: number) => setAddons(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
 
+    // Generate Calendar Logic
     const getDaysInViewMonth = () => {
         const year = currentViewDate.getFullYear();
         const month = currentViewDate.getMonth();
         const date = new Date(year, month, 1);
         const days = [];
-        while (date.getMonth() === month) { days.push(new Date(date)); date.setDate(date.getDate() + 1); }
+        
+        // Isi kekosongan hari sebelum tanggal 1 (agar kalender rapi mulai hari Minggu/Senin)
+        const firstDayIndex = date.getDay(); // 0 = Minggu, 1 = Senin, dst.
+        for (let i = 0; i < firstDayIndex; i++) {
+            days.push(null); // Slot kosong
+        }
+
+        while (date.getMonth() === month) { 
+            days.push(new Date(date)); 
+            date.setDate(date.getDate() + 1); 
+        }
         return days;
     };
 
@@ -351,76 +361,193 @@ function BookingCard({ destination }: { destination: Destination }) {
         } catch { toast.error('Error server'); } finally { setProcessing(false); }
     };
 
+    // Helper Nama Hari Singkat
+    const dayHeaders = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+
     return (
-        <div className="sticky top-28 bg-white border border-gray-200 rounded-2xl p-6 shadow-xl shadow-gray-200/40">
+        // Sticky Top disesuaikan agar tidak ketutup Navbar (biasanya navbar tinggi 64px-80px)
+        <div className="sticky top-24 z-10 bg-white border border-gray-200 rounded-2xl p-6 shadow-xl shadow-gray-200/40">
+            
+            {/* --- HARGA --- */}
             <div className="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">
                 <div>
-                    <span className="text-xs text-gray-400 font-medium block">Mulai dari</span>
+                    <span className="text-xs text-gray-400 font-medium block uppercase tracking-wider mb-1">Mulai dari</span>
                     <div className="text-3xl font-extrabold text-[#F57C00]">Rp {Number(destination.price).toLocaleString('id-ID')}</div>
                 </div>
-                <span className="text-sm bg-gray-100 text-gray-500 px-3 py-1 rounded-full font-medium">per orang</span>
+                <span className="text-xs bg-gray-100 text-gray-500 px-3 py-1.5 rounded-full font-bold">/ pax</span>
             </div>
             
-            <div className="space-y-6 mb-6">
+            <div className="space-y-6 mb-8">
+                {/* --- KALENDER (PERBAIKAN UTAMA) --- */}
                 <div>
-                    <label className="text-xs font-bold text-gray-700 uppercase mb-3 flex items-center gap-2"><CalendarIcon className="w-4 h-4 text-[#F57C00]"/> Pilih Tanggal Kunjungan</label>
-                    <div className="flex justify-between items-center bg-gray-50 p-2 rounded-xl mb-2 border border-gray-100">
-                        <button onClick={() => changeMonth(-1)} disabled={currentViewDate.getMonth() === today.getMonth()} className="p-1 disabled:opacity-30"><ChevronLeft className="w-5 h-5"/></button>
+                    <label className="text-xs font-bold text-gray-700 uppercase mb-3 flex items-center gap-2">
+                        <CalendarIcon className="w-4 h-4 text-[#F57C00]"/> Pilih Tanggal
+                    </label>
+                    
+                    {/* Month Navigator */}
+                    <div className="flex justify-between items-center bg-gray-50 p-2 rounded-xl mb-3 border border-gray-100">
+                        <button onClick={() => changeMonth(-1)} disabled={currentViewDate.getMonth() === today.getMonth() && currentViewDate.getFullYear() === today.getFullYear()} className="p-1 hover:bg-white rounded-lg transition disabled:opacity-30"><ChevronLeft className="w-5 h-5 text-gray-600"/></button>
                         <span className="text-sm font-bold text-[#0B2F5E]">{currentViewDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}</span>
-                        <button onClick={() => changeMonth(1)} className="p-1"><ChevronRight className="w-5 h-5"/></button>
+                        <button onClick={() => changeMonth(1)} className="p-1 hover:bg-white rounded-lg transition"><ChevronRight className="w-5 h-5 text-gray-600"/></button>
                     </div>
-                    <div className="grid grid-cols-4 gap-2 max-h-[220px] overflow-y-auto pr-1 custom-scrollbar">
+
+                    {/* Day Headers (S M T W T F S) */}
+                    <div className="grid grid-cols-7 gap-1 mb-2 text-center">
+                        {dayHeaders.map(day => (
+                            <span key={day} className="text-[10px] font-bold text-gray-400 uppercase">{day}</span>
+                        ))}
+                    </div>
+
+                    {/* Date Grid (7 Kolom) */}
+                    <div className="grid grid-cols-7 gap-1">
                         {daysInView.map((d, i) => {
-                            const val = formatDateValue(d); const isSelected = date === val; const isRed = isHoliday(d); const isPast = d < today;
+                            if (!d) return <div key={i} className="aspect-square"></div>; // Slot kosong
+
+                            const val = formatDateValue(d); 
+                            const isSelected = date === val; 
+                            const isRed = isHoliday(d); 
+                            const isPast = d < today;
+
                             return (
-                                <button key={i} onClick={() => !isPast && setDate(val)} disabled={isPast} className={`flex flex-col items-center p-2 rounded-xl border transition-all ${isPast ? 'bg-gray-100 opacity-50' : isSelected ? 'bg-[#0B2F5E] text-white border-[#0B2F5E]' : isRed ? 'bg-red-50 text-red-600 border-red-200' : 'bg-white text-gray-600 border-gray-200'}`}>
-                                    <span className="text-[10px] uppercase">{getDayName(d)}</span>
-                                    <span className="text-base font-bold">{d.getDate()}</span>
+                                <button 
+                                    key={i} 
+                                    onClick={() => !isPast && setDate(val)} 
+                                    disabled={isPast} 
+                                    className={`
+                                        aspect-square flex items-center justify-center rounded-lg text-sm font-bold transition-all border
+                                        ${isPast 
+                                            ? 'bg-gray-50 text-gray-300 border-transparent cursor-not-allowed' 
+                                            : isSelected 
+                                                ? 'bg-[#0B2F5E] text-white border-[#0B2F5E] shadow-md scale-105 z-10' 
+                                                : isRed 
+                                                    ? 'bg-red-50 text-red-500 border-red-100 hover:border-red-300' 
+                                                    : 'bg-white text-gray-700 border-gray-100 hover:border-[#F57C00] hover:text-[#F57C00]'
+                                        }
+                                    `}
+                                >
+                                    {d.getDate()}
                                 </button>
                             );
                         })}
                     </div>
-                </div>
-                <div>
-                    <label className="text-xs font-bold text-gray-700 uppercase mb-2 block">Jumlah Peserta</label>
-                    <div className="flex justify-between items-center p-1 bg-gray-50 rounded-xl border border-gray-200">
-                        <button onClick={() => setQty(q => Math.max(1, q - 1))} className="w-10 h-10 flex items-center justify-center bg-[#0B2F5E] text-white rounded-lg transition cursor-pointer"><Minus className="w-4 h-4"/></button>
-                        <span className="font-bold text-gray-800 text-lg">{qty}</span>
-                        <button onClick={() => setQty(q => q + 1)} className="w-10 h-10 flex items-center justify-center bg-[#0B2F5E] text-white rounded-lg transition cursor-pointer"><Plus className="w-4 h-4"/></button>
+                    {/* Legend Singkat */}
+                    <div className="flex gap-3 mt-3 justify-center">
+                         <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-[#0B2F5E]"></div><span className="text-[10px] text-gray-500">Dipilih</span></div>
+                         <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-red-100 border border-red-200"></div><span className="text-[10px] text-gray-500">Libur</span></div>
+                         <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-white border border-gray-200"></div><span className="text-[10px] text-gray-500">Tersedia</span></div>
                     </div>
                 </div>
+
+                {/* --- JUMLAH PESERTA --- */}
+                <div>
+                    <label className="text-xs font-bold text-gray-700 uppercase mb-2 block">Jumlah Peserta</label>
+                    <div className="flex justify-between items-center p-1.5 bg-gray-50 rounded-xl border border-gray-200">
+                        <button onClick={() => setQty(q => Math.max(1, q - 1))} className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-100 transition shadow-sm"><Minus className="w-4 h-4"/></button>
+                        <span className="font-bold text-[#0B2F5E] text-xl min-w-[30px] text-center">{qty}</span>
+                        <button onClick={() => setQty(q => q + 1)} className="w-10 h-10 flex items-center justify-center bg-[#0B2F5E] text-white rounded-lg hover:bg-[#09254A] transition shadow-md shadow-blue-900/20"><Plus className="w-4 h-4"/></button>
+                    </div>
+                </div>
+
+                {/* --- ADD-ONS --- */}
                 {destination.addons && destination.addons.length > 0 && (
-                    <div className="space-y-2">
-                        <label className="text-xs font-bold text-gray-700 flex gap-1 items-center"><Tag className="w-3 h-3"/> Add-ons</label>
+                    <div className="space-y-3 pt-4 border-t border-gray-100">
+                        <label className="text-xs font-bold text-gray-700 flex gap-1 items-center uppercase"><Tag className="w-3 h-3 text-[#F57C00]"/> Tambahan (Opsional)</label>
                         {destination.addons.map(a => (
-                            <div key={a.id} onClick={() => toggleAddon(a.id)} className={`p-3 rounded-xl border flex justify-between items-center cursor-pointer transition ${addons.includes(a.id) ? 'border-blue-500 bg-blue-50' : 'hover:border-gray-300'}`}>
-                                <div className="flex gap-2 items-center"><div className={`w-4 h-4 rounded border flex items-center justify-center ${addons.includes(a.id) ? 'bg-blue-500 border-blue-500' : ''}`}>{addons.includes(a.id) && <Check className="w-3 h-3 text-white"/>}</div><span className="text-sm font-medium text-gray-700">{a.name}</span></div>
+                            <div key={a.id} onClick={() => toggleAddon(a.id)} className={`p-3 rounded-xl border flex justify-between items-center cursor-pointer transition group ${addons.includes(a.id) ? 'border-[#0B2F5E] bg-blue-50/50 ring-1 ring-[#0B2F5E]' : 'border-gray-200 hover:border-gray-300 bg-white'}`}>
+                                <div className="flex gap-3 items-center">
+                                    <div className={`w-5 h-5 rounded border flex items-center justify-center transition ${addons.includes(a.id) ? 'bg-[#0B2F5E] border-[#0B2F5E]' : 'bg-white border-gray-300'}`}>
+                                        {addons.includes(a.id) && <Check className="w-3.5 h-3.5 text-white"/>}
+                                    </div>
+                                    <span className={`text-sm font-medium ${addons.includes(a.id) ? 'text-[#0B2F5E]' : 'text-gray-600'}`}>{a.name}</span>
+                                </div>
                                 <span className="text-sm font-bold text-[#F57C00]">+Rp {Number(a.price).toLocaleString('id-ID')}</span>
                             </div>
                         ))}
                     </div>
                 )}
-                <div className="flex justify-between pt-4 border-t border-gray-100"><span className="font-medium text-gray-500">Total Harga</span><span className="font-extrabold text-2xl text-[#0B2F5E]">Rp {total.toLocaleString('id-ID')}</span></div>
+                
+                {/* --- TOTAL HARGA --- */}
+                <div className="flex justify-between items-end pt-4 border-t border-dashed border-gray-300">
+                    <span className="font-medium text-gray-500 text-sm mb-1">Total Pembayaran</span>
+                    <span className="font-extrabold text-2xl text-[#0B2F5E]">Rp {total.toLocaleString('id-ID')}</span>
+                </div>
             </div>
+
+            {/* --- ACTION BUTTONS --- */}
             <div className="flex gap-3">
-                <button onClick={handleAddToCart} disabled={addingToCart} className="flex-1 flex justify-center py-3.5 border-2 border-[#F57C00] text-[#F57C00] rounded-xl font-bold transition disabled:opacity-50 cursor-pointer">{addingToCart ? <Loader2 className="animate-spin"/> : <ShoppingCart/>}</button>
-                <button onClick={() => { if(!token) return router.push('/login'); if(!date) return toast.error('Pilih tanggal!'); setModalOpen(true); }} className="flex-[1.5] bg-[#0B2F5E] text-white py-3.5 rounded-xl font-bold transition cursor-pointer">Beli Langsung</button>
+                <button 
+                    onClick={handleAddToCart} 
+                    disabled={addingToCart} 
+                    className="flex-1 flex items-center justify-center py-3.5 border-2 border-[#F57C00] text-[#F57C00] rounded-xl font-bold transition hover:bg-orange-50 active:scale-95 disabled:opacity-50 disabled:active:scale-100"
+                    title="Masukkan Keranjang"
+                >
+                    {addingToCart ? <Loader2 className="animate-spin w-5 h-5"/> : <ShoppingCart className="w-5 h-5"/>}
+                </button>
+                <button 
+                    onClick={() => { if(!token) return router.push('/login'); if(!date) return toast.error('Pilih tanggal!'); setModalOpen(true); }} 
+                    className="flex-[2] bg-[#0B2F5E] text-white py-3.5 rounded-xl font-bold transition hover:bg-[#09254A] shadow-lg shadow-blue-900/20 active:scale-95"
+                >
+                    Pesan Sekarang
+                </button>
             </div>
+
+            {/* --- MODAL CHECKOUT (SAMA SEPERTI SEBELUMNYA) --- */}
             {modalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in">
-                    <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95">
-                        <div className="bg-[#0B2F5E] px-6 py-4 flex justify-between text-white font-bold items-center"><span>Konfirmasi</span><button onClick={() => setModalOpen(false)}><X/></button></div>
-                        <div className="p-6 space-y-5">
-                            <div className="space-y-3">
-                                <div className="flex justify-between border-b border-gray-100 pb-2"><span className="text-gray-500">Tiket ({qty}x)</span><span className="font-medium">Rp {(Number(destination.price) * qty).toLocaleString('id-ID')}</span></div>
-                                {addons.length > 0 && <div className="flex justify-between border-b border-gray-100 pb-2"><span className="text-gray-500">Add-ons</span><span className="font-medium">Rp {(total - (Number(destination.price) * qty)).toLocaleString('id-ID')}</span></div>}
+                <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 shadow-2xl">
+                        <div className="bg-[#0B2F5E] px-6 py-4 flex justify-between text-white font-bold items-center shadow-md">
+                            <span>Konfirmasi Pesanan</span>
+                            <button onClick={() => setModalOpen(false)} className="hover:bg-white/20 p-1 rounded-full transition"><X className="w-5 h-5"/></button>
+                        </div>
+                        <div className="p-6 space-y-6">
+                            <div className="bg-gray-50 p-4 rounded-xl space-y-3 border border-gray-100">
+                                <div className="flex justify-between border-b border-gray-200 pb-2 border-dashed">
+                                    <span className="text-gray-500 text-sm">Tiket Masuk ({qty}x)</span>
+                                    <span className="font-bold text-gray-800">Rp {(Number(destination.price) * qty).toLocaleString('id-ID')}</span>
+                                </div>
+                                {addons.length > 0 && (
+                                    <div className="flex justify-between border-b border-gray-200 pb-2 border-dashed">
+                                        <span className="text-gray-500 text-sm">Add-ons Tambahan</span>
+                                        <span className="font-bold text-gray-800">Rp {(total - (Number(destination.price) * qty)).toLocaleString('id-ID')}</span>
+                                    </div>
+                                )}
+                                <div className="flex justify-between items-center pt-1">
+                                    <span className="text-gray-500 text-sm">Tanggal Kunjungan</span>
+                                    <span className="font-bold text-[#0B2F5E] bg-white px-2 py-1 rounded border border-gray-200 text-xs">
+                                        {new Date(date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                    </span>
+                                </div>
                             </div>
-                            <div className="grid grid-cols-1 gap-2">
-                                <div onClick={() => setPaymentMethod('qris')} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer ${paymentMethod === 'qris' ? 'border-[#F57C00] bg-orange-50' : 'border-gray-200'}`}><ScanLine/><span className="text-sm font-bold">QRIS (Instant)</span></div>
-                                <div onClick={() => setPaymentMethod('bca')} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer ${paymentMethod === 'bca' ? 'border-[#F57C00] bg-orange-50' : 'border-gray-200'}`}><Building2/><span className="text-sm font-bold">Bank Transfer (BCA)</span></div>
+
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-gray-500 uppercase">Metode Pembayaran</label>
+                                <div onClick={() => setPaymentMethod('qris')} className={`flex items-center gap-4 p-3 rounded-xl border cursor-pointer transition ${paymentMethod === 'qris' ? 'border-[#F57C00] bg-orange-50 ring-1 ring-[#F57C00]' : 'border-gray-200 hover:border-gray-300'}`}>
+                                    <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center border border-gray-100 shadow-sm"><ScanLine className="text-[#F57C00]"/></div>
+                                    <div>
+                                        <span className="text-sm font-bold block text-gray-800">QRIS (Instant)</span>
+                                        <span className="text-xs text-gray-500">Gopay, OVO, Dana, ShopeePay</span>
+                                    </div>
+                                    {paymentMethod === 'qris' && <CheckCircle className="ml-auto text-[#F57C00] w-5 h-5"/>}
+                                </div>
+                                <div onClick={() => setPaymentMethod('bca')} className={`flex items-center gap-4 p-3 rounded-xl border cursor-pointer transition ${paymentMethod === 'bca' ? 'border-[#F57C00] bg-orange-50 ring-1 ring-[#F57C00]' : 'border-gray-200 hover:border-gray-300'}`}>
+                                    <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center border border-gray-100 shadow-sm"><Building2 className="text-[#0B2F5E]"/></div>
+                                    <div>
+                                        <span className="text-sm font-bold block text-gray-800">Bank Transfer</span>
+                                        <span className="text-xs text-gray-500">BCA (Manual Check)</span>
+                                    </div>
+                                    {paymentMethod === 'bca' && <CheckCircle className="ml-auto text-[#F57C00] w-5 h-5"/>}
+                                </div>
                             </div>
-                            <div className="flex justify-between font-bold text-lg pt-2 border-t"><span>Total Bayar</span><span className="text-[#F57C00]">Rp {total.toLocaleString('id-ID')}</span></div>
-                            <button onClick={handleCheckout} disabled={processing} className="w-full bg-[#0B2F5E] text-white py-3 rounded-xl font-bold">{processing ? 'Memproses...' : 'Bayar Sekarang'}</button>
+
+                            <div className="pt-2">
+                                <div className="flex justify-between font-bold text-lg mb-4">
+                                    <span>Total Bayar</span>
+                                    <span className="text-[#F57C00] text-xl">Rp {total.toLocaleString('id-ID')}</span>
+                                </div>
+                                <button onClick={handleCheckout} disabled={processing} className="w-full bg-[#0B2F5E] hover:bg-[#09254A] text-white py-3.5 rounded-xl font-bold shadow-lg shadow-blue-900/20 transition active:scale-95 disabled:opacity-70 flex items-center justify-center gap-2">
+                                    {processing ? <Loader2 className="animate-spin"/> : 'Bayar Sekarang'}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
