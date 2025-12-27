@@ -154,7 +154,7 @@ function AllDestinationsContent() {
                     <Link 
                         href={`/events/${item.slug}`} 
                         key={item.id} 
-                        className="group block bg-white rounded-xl overflow-hidden hover:translate-y-1 border border-gray-300 transition-colors duration-200"
+                        className="group block bg-white rounded-xl overflow-hidden hover:-translate-y-2 border border-gray-300 transition duration-200"
                     >
                         {/* 1. IMAGE SECTION */}
                         <div className="relative h-44 overflow-hidden bg-gray-100 border-b border-gray-100">
