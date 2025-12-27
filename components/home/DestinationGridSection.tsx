@@ -2,17 +2,17 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Destination } from '@/types'; 
-// 👇 Import icon tambahan untuk tampilan card baru
+// Hapus import Destination type jika menyebabkan konflik tipe, kita pakai 'any' dulu untuk keamanan rendering
+// import { Destination } from '@/types'; 
 import { MapPin, Star, ArrowUpRight, Zap, Tag } from 'lucide-react';
 
 export default function DestinationGridSection({ endpoint, title, limit }: { endpoint: string, title: string, limit?: number }) {
-  const [destinations, setDestinations] = useState<Destination[]>([]);
+  // Gunakan 'any[]' sementara untuk menghindari crash tipe data yang tidak sinkron antara string/object
+  const [destinations, setDestinations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
-  // --- Helper: URL Gambar ---
   const getImageUrl = (url: string | null) => {
     if (!url) return 'https://images.unsplash.com/photo-1517400508535-b2a1a062776c?q=80&w=2070';
     if (url.startsWith('http')) return url;
@@ -21,7 +21,6 @@ export default function DestinationGridSection({ endpoint, title, limit }: { end
     return `${BASE_URL}/storage/${finalPath}`;
   };
 
-  // --- Helper: Format Rupiah ---
   const formatRupiah = (price: number | string) => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
@@ -53,7 +52,6 @@ export default function DestinationGridSection({ endpoint, title, limit }: { end
     fetchData();
   }, [endpoint, limit]);
 
-  // --- RENDER SKELETON LOADING ---
   if (loading) return (
     <section className="py-8 md:py-12 px-4">
       <div className="max-w-7xl mx-auto">
@@ -86,14 +84,13 @@ export default function DestinationGridSection({ endpoint, title, limit }: { end
     <section className="py-8 md:py-12 px-4">
       <div className="max-w-7xl mx-auto">
         
-        {/* --- 1. HEADER SECTION --- */}
+        {/* HEADER */}
         <div className="mb-8 md:mb-10 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
           <div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">{title}</h2>
             <p className="text-gray-500 text-sm md:text-base">Tempat wisata terfavorit pilihan traveler</p>
           </div>
           
-          {/* Tombol Lihat Semua (Desktop Only) */}
           {limit && (
             <Link href="/events" className="hidden sm:flex items-center gap-2 text-[#FF5B00] font-bold hover:underline transition-all">
               Lihat Semua <ArrowUpRight size={18} />
@@ -101,88 +98,85 @@ export default function DestinationGridSection({ endpoint, title, limit }: { end
           )}
         </div>
         
-        {/* --- 2. GRID KARTU (TAMPILAN BARU - CLEAN & BORDERED) --- */}
+        {/* GRID KARTU */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {destinations.map((item) => (
-            <Link 
-              href={`/events/${item.slug}`} 
-              key={item.id} 
-              // 👇 Style Card: Border, Rounded, No Shadow Hover
-              className="group block bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-gray-300 transition-colors duration-200 h-full flex flex-col"
-            >
-              {/* Image Section */}
-              <div className="relative h-44 overflow-hidden bg-gray-100 border-b border-gray-100">
-                <img
-                  src={getImageUrl(item.image_url)}
-                  alt={item.name}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1517400508535-b2a1a062776c?q=80&w=2070';
-                  }}
-                />
-                
-                {/* Label Lokasi */}
-                <div className="absolute top-3 left-3">
-                    <span className="bg-black/60 backdrop-blur-[2px] text-white text-[10px] font-bold px-2 py-1 rounded-[4px] flex items-center gap-1">
-                        <MapPin size={10} /> {item.location.split(',')[0]}
-                    </span>
-                </div>
-              </div>
+          {destinations.map((item) => {
+            // FIX: Logika aman untuk mengambil nama kategori
+            // Cek apakah item.category itu object (punya .name) atau string langsung
+            const categoryName = typeof item.category === 'object' && item.category !== null 
+                ? item.category.name 
+                : (item.category || 'Wisata & Tur');
 
-              {/* Content Section */}
-              <div className="p-3 pt-4 flex flex-col flex-1">
-                {/* Kategori Kecil */}
-                <span className="text-[11px] text-gray-400 mb-1 block">
-                    {item.category || 'Wisata & Tur'} • Indonesia
-                </span>
-
-                {/* Judul Produk */}
-                <h3 className="text-[15px] font-bold text-gray-900 leading-snug mb-2 line-clamp-2 group-hover:text-[#FF5B00] transition-colors">
-                  {item.name}
-                </h3>
-                
-                {/* Rating & Review */}
-                <div className="flex items-center gap-1.5 mb-3">
-                    <div className="flex items-center gap-0.5">
-                        <Star size={12} className="fill-[#FFB800] text-[#FFB800]" />
-                        <span className="text-sm font-bold text-[#FFB800]">{item.rating ? Number(item.rating).toFixed(1) : '5.0'}</span>
+            return (
+                <Link 
+                  href={`/events/${item.slug}`} 
+                  key={item.id} 
+                  className="group block bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-gray-300 transition-colors duration-200 h-full flex flex-col"
+                >
+                  <div className="relative h-44 overflow-hidden bg-gray-100 border-b border-gray-100">
+                    <img
+                      src={getImageUrl(item.image_url)}
+                      alt={item.name}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1517400508535-b2a1a062776c?q=80&w=2070';
+                      }}
+                    />
+                    <div className="absolute top-3 left-3">
+                        <span className="bg-black/60 backdrop-blur-[2px] text-white text-[10px] font-bold px-2 py-1 rounded-[4px] flex items-center gap-1">
+                            <MapPin size={10} /> {item.location ? item.location.split(',')[0] : 'Indonesia'}
+                        </span>
                     </div>
-                    {/* Menggunakan ID untuk angka random statis */}
-                    <span className="text-xs text-gray-400">({(item.id * 17) % 300 + 50}) • 2K+ dipesan</span>
-                </div>
-
-                {/* Fitur Kilat */}
-                <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="inline-flex items-center gap-1 bg-gray-50 text-gray-500 text-[10px] px-1.5 py-0.5 rounded border border-gray-100">
-                        <Zap size={10} className="text-orange-500 fill-orange-500" /> Konfirmasi Instan
-                    </span>
-                </div>
-
-                {/* Harga Section */}
-                <div className="mt-auto border-t border-dashed border-gray-100 pt-3">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-xs text-gray-400 line-through">
-                         {formatRupiah(Number(item.price) * 1.2)}
-                    </span>
-                    <span className="text-lg font-bold text-[#FF5B00]">
-                      {formatRupiah(item.price)}
-                    </span>
                   </div>
-                  
-                  <div className="flex items-center justify-between mt-1">
-                      {/* Label Diskon */}
-                      <div className="flex items-center gap-1 text-[10px] text-[#FF5B00] font-bold bg-orange-50 px-1.5 py-0.5 rounded border border-orange-100">
-                          <Tag size={10} /> Hemat 20%
+
+                  <div className="p-3 pt-4 flex flex-col flex-1">
+                    {/* Menggunakan variable categoryName yang sudah diamankan */}
+                    <span className="text-[11px] text-gray-400 mb-1 block">
+                        {categoryName} • Indonesia
+                    </span>
+
+                    <h3 className="text-[15px] font-bold text-gray-900 leading-snug mb-2 line-clamp-2 group-hover:text-[#FF5B00] transition-colors">
+                      {item.name}
+                    </h3>
+                    
+                    <div className="flex items-center gap-1.5 mb-3">
+                        <div className="flex items-center gap-0.5">
+                            <Star size={12} className="fill-[#FFB800] text-[#FFB800]" />
+                            <span className="text-sm font-bold text-[#FFB800]">{item.rating ? Number(item.rating).toFixed(1) : '5.0'}</span>
+                        </div>
+                        {/* Menggunakan Math Statis berdasarkan ID agar tidak error hydration */}
+                        <span className="text-xs text-gray-400">({(item.id * 17) % 300 + 50}) • 2K+ dipesan</span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 mb-4">
+                        <span className="inline-flex items-center gap-1 bg-gray-50 text-gray-500 text-[10px] px-1.5 py-0.5 rounded border border-gray-100">
+                            <Zap size={10} className="text-orange-500 fill-orange-500" /> Konfirmasi Instan
+                        </span>
+                    </div>
+
+                    <div className="mt-auto border-t border-dashed border-gray-100 pt-3">
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-xs text-gray-400 line-through">
+                            {formatRupiah(Number(item.price) * 1.2)}
+                        </span>
+                        <span className="text-lg font-bold text-[#FF5B00]">
+                          {formatRupiah(item.price)}
+                        </span>
                       </div>
-                      <span className="text-[10px] text-gray-400">/ orang</span>
+                      
+                      <div className="flex items-center justify-between mt-1">
+                          <div className="flex items-center gap-1 text-[10px] text-[#FF5B00] font-bold bg-orange-50 px-1.5 py-0.5 rounded border border-orange-100">
+                              <Tag size={10} /> Hemat 20%
+                          </div>
+                          <span className="text-[10px] text-gray-400">/ orang</span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </Link>
-          ))}
+                </Link>
+            );
+          })}
         </div>
 
-        {/* --- 3. TOMBOL LIHAT SEMUA (MOBILE ONLY) --- */}
         {limit && (
           <div className="mt-8 sm:hidden">
             <Link href="/events">
