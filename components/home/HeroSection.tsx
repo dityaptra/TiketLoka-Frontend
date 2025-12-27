@@ -37,7 +37,7 @@ const HeroSection = () => {
           style={{ textShadow: "0 4px 20px rgba(0,0,0,0.5)" }}
         >
           Telusuri
-          <br className="block md:hidden" /> {/* Enter di HP biar rapi */}
+          <br className="block" />
           <span className="text-[#F57C00] md:ml-3">Wisata Dunia</span>
         </h1>
 
@@ -73,7 +73,7 @@ const HeroSection = () => {
           {/* Tombol Cari */}
           <button 
             type="submit"
-            className="bg-[#F57C00] hover:bg-[#E65100] text-white p-3 md:px-8 md:py-4 rounded-full md:rounded-xl font-bold transition-all shadow-lg flex-shrink-0 active:scale-95 cursor-pointer"
+            className="bg-[#F57C00] hover:bg-[#E65100] text-white p-3 md:px-8 md:py-4 rounded-full font-bold transition-all shadow-lg flex-shrink-0 active:scale-95 cursor-pointer"
           >
             {/* Teks muncul di Laptop, Icon muncul di HP */}
             <span className="hidden md:inline">Cari</span>
