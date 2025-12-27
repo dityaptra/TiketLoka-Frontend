@@ -15,7 +15,7 @@ import {
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import DestinationGridSection from "@/components/home/DestinationGridSection";
-import CategoryFilter from "@/components/home/CategoryFilter"; // Pastikan nama file diperbaiki (Typo: Categroy -> Category)
+import CategoryFilter from "@/components/home/CategoryFilter";
 import HeroSection from "@/components/home/HeroSection"; 
 
 // --- DATA GAMBAR WISATA ---
