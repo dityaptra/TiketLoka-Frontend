@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 
   // Title Template (Halaman lain cukup set title: "Nama Wisata", otomatis jadi "Nama Wisata | TiketLoka")
   title: {
-    default: "TiketLoka - Pesan Tiket Wisata Online Termurah & Termudah",
+    default: "TiketLoka: Pesan Tiket Wisata Online Termurah",
     template: "%s | TiketLoka",
   },
 
