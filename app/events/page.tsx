@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation'; 
-import { Search, MapPin, Star, ChevronDown, Check, X, ArrowUpRight } from 'lucide-react'; 
+import { Search, MapPin, Star, ChevronDown, Check, X } from 'lucide-react'; 
 // Hapus import icon Zap & Tag karena data palsu dihapus
 import { Destination } from '@/types';
 import Navbar from "@/components/layout/Navbar";
@@ -88,13 +88,6 @@ function AllDestinationsContent() {
       {/* HEADER & SEARCH AREA */}
       <div className="bg-white border-b border-gray-100 sticky top-16 z-30 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)]">
         <div className="max-w-7xl mx-auto py-5 px-4">
-            <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                Jelajahi Dunia 
-                <span className="bg-orange-100 text-orange-600 text-xs px-2 py-0.5 rounded-full border border-orange-200">
-                    {filteredDestinations.length}+ Destinasi
-                </span>
-            </h1>
-            
             <div className="flex flex-col md:flex-row gap-3">
                 {/* Dropdown Kategori */}
                 <div className="relative w-full md:w-56 z-40">
@@ -148,7 +141,7 @@ function AllDestinationsContent() {
         </div>
       </div>
 
-      {/* HASIL PENCARIAN (REAL DATA ONLY) */}
+      {/* HASIL PENCARIAN */}
       <div className="max-w-7xl mx-auto px-4 py-8 min-h-[60vh]">
         {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-5 gap-y-8 animate-pulse">
@@ -172,7 +165,7 @@ function AllDestinationsContent() {
                         <Link 
                             href={`/events/${item.slug}`} 
                             key={item.id} 
-                            className="group block bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-gray-300 transition-colors duration-200 flex flex-col h-full"
+                            className="group block bg-white rounded-xl overflow-hidden border border-gray-300 transition hover:-translate-y-2 duration-200 flex-col h-full"
                         >
                             {/* IMAGE SECTION */}
                             <div className="relative h-44 overflow-hidden bg-gray-100 border-b border-gray-100">
@@ -220,11 +213,6 @@ function AllDestinationsContent() {
                                         <span className="text-lg font-bold text-[#FF5B00]">
                                             {formatRupiah(item.price)}
                                         </span>
-                                    </div>
-                                    
-                                    {/* Tombol Panah Kecil */}
-                                    <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-[#FF5B00] group-hover:text-white transition-all">
-                                        <ArrowUpRight size={16} />
                                     </div>
                                 </div>
                             </div>

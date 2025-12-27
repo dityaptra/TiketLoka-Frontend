@@ -2,12 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-// Hapus import Destination type jika menyebabkan konflik tipe, kita pakai 'any' dulu untuk keamanan rendering
+// Gunakan 'any' sementara jika tipe data belum fix
 // import { Destination } from '@/types'; 
-import { MapPin, Star, ArrowUpRight, Zap, Tag } from 'lucide-react';
+import { MapPin, Star, ArrowUpRight } from 'lucide-react';
 
 export default function DestinationGridSection({ endpoint, title, limit }: { endpoint: string, title: string, limit?: number }) {
-  // Gunakan 'any[]' sementara untuk menghindari crash tipe data yang tidak sinkron antara string/object
   const [destinations, setDestinations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -98,21 +97,21 @@ export default function DestinationGridSection({ endpoint, title, limit }: { end
           )}
         </div>
         
-        {/* GRID KARTU */}
+        {/* GRID KARTU (CLEAN & REAL DATA) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {destinations.map((item) => {
-            // FIX: Logika aman untuk mengambil nama kategori
-            // Cek apakah item.category itu object (punya .name) atau string langsung
+            // Logika aman mengambil nama kategori
             const categoryName = typeof item.category === 'object' && item.category !== null 
                 ? item.category.name 
-                : (item.category || 'Wisata & Tur');
+                : (item.category || 'Wisata');
 
             return (
                 <Link 
                   href={`/events/${item.slug}`} 
                   key={item.id} 
-                  className="group block bg-white rounded-xl overflow-hidden border border-gray-300 hover:-translate-y-2 transition duration-200"
+                  className="group block bg-white rounded-xl overflow-hidden border border-gray-300 hover:-translate-y-2 transition duration-200 h-full flex-col"
                 >
+                  {/* IMAGE SECTION */}
                   <div className="relative h-44 overflow-hidden bg-gray-100 border-b border-gray-100">
                     <img
                       src={getImageUrl(item.image_url)}
@@ -122,6 +121,7 @@ export default function DestinationGridSection({ endpoint, title, limit }: { end
                         (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1517400508535-b2a1a062776c?q=80&w=2070';
                       }}
                     />
+                    {/* Label Lokasi */}
                     <div className="absolute top-3 left-3">
                         <span className="bg-black/60 backdrop-blur-[2px] text-white text-[10px] font-bold px-2 py-1 rounded-[4px] flex items-center gap-1">
                             <MapPin size={10} /> {item.location ? item.location.split(',')[0] : 'Indonesia'}
@@ -129,46 +129,40 @@ export default function DestinationGridSection({ endpoint, title, limit }: { end
                     </div>
                   </div>
 
+                  {/* CONTENT SECTION */}
                   <div className="p-3 pt-4 flex flex-col flex-1">
-                    {/* Menggunakan variable categoryName yang sudah diamankan */}
-                    <span className="text-[11px] text-gray-400 mb-1 block">
-                        {categoryName} • Indonesia
+                    {/* Kategori */}
+                    <span className="text-[11px] text-gray-400 mb-1 block uppercase tracking-wide">
+                        {categoryName}
                     </span>
 
+                    {/* Judul */}
                     <h3 className="text-[15px] font-bold text-gray-900 leading-snug mb-2 line-clamp-2 group-hover:text-[#FF5B00] transition-colors">
                       {item.name}
                     </h3>
                     
-                    <div className="flex items-center gap-1.5 mb-3">
-                        <div className="flex items-center gap-0.5">
-                            <Star size={12} className="fill-[#FFB800] text-[#FFB800]" />
-                            <span className="text-sm font-bold text-[#FFB800]">{item.rating ? Number(item.rating).toFixed(1) : '5.0'}</span>
+                    {/* Rating (Hanya Tampil Jika Ada Data Rating Asli) */}
+                    <div className="flex items-center gap-1.5 mb-4">
+                        <div className="flex items-center gap-0.5 bg-orange-50 px-1.5 py-0.5 rounded border border-orange-100">
+                            <Star size={10} className="fill-[#FFB800] text-[#FFB800]" />
+                            <span className="text-xs font-bold text-[#FFB800]">
+                                {item.rating ? Number(item.rating).toFixed(1) : 'New'}
+                            </span>
                         </div>
-                        {/* Menggunakan Math Statis berdasarkan ID agar tidak error hydration */}
-                        <span className="text-xs text-gray-400">({(item.id * 17) % 300 + 50}) • 2K+ dipesan</span>
                     </div>
 
-                    <div className="flex flex-wrap gap-2 mb-4">
-                        <span className="inline-flex items-center gap-1 bg-gray-50 text-gray-500 text-[10px] px-1.5 py-0.5 rounded border border-gray-100">
-                            <Zap size={10} className="text-orange-500 fill-orange-500" /> Konfirmasi Instan
-                        </span>
-                    </div>
-
-                    <div className="mt-auto border-t border-dashed border-gray-100 pt-3">
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-xs text-gray-400 line-through">
-                            {formatRupiah(Number(item.price) * 1.2)}
-                        </span>
+                    {/* Harga Asli */}
+                    <div className="mt-auto border-t border-dashed border-gray-100 pt-3 flex items-center justify-between">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] text-gray-400 font-medium">Mulai dari</span>
                         <span className="text-lg font-bold text-[#FF5B00]">
                           {formatRupiah(item.price)}
                         </span>
                       </div>
                       
-                      <div className="flex items-center justify-between mt-1">
-                          <div className="flex items-center gap-1 text-[10px] text-[#FF5B00] font-bold bg-orange-50 px-1.5 py-0.5 rounded border border-orange-100">
-                              <Tag size={10} /> Hemat 20%
-                          </div>
-                          <span className="text-[10px] text-gray-400">/ orang</span>
+                      {/* Tombol Panah Kecil */}
+                      <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-[#FF5B00] group-hover:text-white transition-all">
+                        <ArrowUpRight size={16} />
                       </div>
                     </div>
                   </div>
@@ -177,6 +171,7 @@ export default function DestinationGridSection({ endpoint, title, limit }: { end
           })}
         </div>
 
+        {/* TOMBOL LIHAT SEMUA (MOBILE ONLY) */}
         {limit && (
           <div className="mt-8 sm:hidden">
             <Link href="/events">
