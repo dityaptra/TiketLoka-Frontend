@@ -172,7 +172,7 @@ function AllDestinationsContent() {
                                 <img 
                                     src={getImageUrl(item.image_url)} 
                                     alt={item.name} 
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                                    className="w-full h-full object-cover transition-transform duration-700" 
                                 />
                                 
                                 {/* Label Lokasi Real */}

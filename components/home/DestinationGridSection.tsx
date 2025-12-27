@@ -159,11 +159,6 @@ export default function DestinationGridSection({ endpoint, title, limit }: { end
                           {formatRupiah(item.price)}
                         </span>
                       </div>
-                      
-                      {/* Tombol Panah Kecil */}
-                      <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-[#FF5B00] group-hover:text-white transition-all">
-                        <ArrowUpRight size={16} />
-                      </div>
                     </div>
                   </div>
                 </Link>
