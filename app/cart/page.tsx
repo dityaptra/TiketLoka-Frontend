@@ -261,7 +261,7 @@ export default function CartPage() {
   return (
     <main className="min-h-screen bg-[#FAFAFA] pb-40 font-sans text-gray-800">
       <Navbar />
-      <div className="max-w-6xl mx-auto pt-24 px-4">
+      <div className="max-w-6xl mx-auto pt-4 px-4">
         <div className="mb-6">
             <Link href="/" className="inline-flex items-center text-sm text-gray-500 hover:text-[#F57C00] gap-1">
                 <ArrowLeft className="w-4 h-4" /> Kembali
