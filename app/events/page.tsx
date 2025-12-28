@@ -4,8 +4,6 @@ import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation'; 
 import { Search, MapPin, Star, ChevronDown, Check, X } from 'lucide-react'; 
-// Hapus import icon Zap & Tag karena data palsu dihapus
-import { Destination } from '@/types';
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 
@@ -13,7 +11,6 @@ import Footer from "@/components/layout/Footer";
 function AllDestinationsContent() {
   const searchParams = useSearchParams();
   
-  // Gunakan any[] sementara untuk keamanan jika tipe data API berubah-ubah
   const [destinations, setDestinations] = useState<any[]>([]);
   const [categories, setCategories] = useState<{id: number, name: string}[]>([]);
   
@@ -70,7 +67,6 @@ function AllDestinationsContent() {
     const matchSearch = item.name.toLowerCase().includes(activeSearch.toLowerCase()) || 
                         item.location.toLowerCase().includes(activeSearch.toLowerCase());
     
-    // Logic kategori yang aman (handle jika kategori berupa object atau string)
     let itemCategoryName = 'Umum';
     if (item.category) {
         if (typeof item.category === 'string') itemCategoryName = item.category;
@@ -87,7 +83,7 @@ function AllDestinationsContent() {
 
       {/* HEADER & SEARCH AREA */}
       <div className="bg-white border-b border-gray-100 sticky top-16 z-30 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)]">
-        <div className="max-w-7xl mx-auto py-5 px-4">
+        <div className="max-w-7xl mx-auto py-4 md:py-5 px-4">
             <div className="flex flex-col md:flex-row gap-3">
                 {/* Dropdown Kategori */}
                 <div className="relative w-full md:w-56 z-40">
@@ -101,7 +97,7 @@ function AllDestinationsContent() {
                     {isDropdownOpen && (
                         <>
                             <div className="fixed inset-0 z-10" onClick={() => setIsDropdownOpen(false)}></div>
-                            <div className="absolute top-full left-0 mt-2 w-full bg-white border border-gray-100 rounded-lg shadow-xl z-20 py-1 animate-in fade-in zoom-in-95">
+                            <div className="absolute top-full left-0 mt-2 w-full bg-white border border-gray-100 rounded-lg shadow-xl z-20 py-1 animate-in fade-in zoom-in-95 max-h-60 overflow-y-auto">
                                 <button onClick={() => { setActiveCategory('Semua'); setIsDropdownOpen(false); }} className="w-full px-4 py-2 text-left text-sm hover:bg-orange-50 hover:text-orange-600 flex items-center justify-between transition-colors">
                                     <span className={activeCategory === 'Semua' ? 'font-bold' : ''}>Semua</span>
                                     {activeCategory === 'Semua' && <Check size={14} />}
@@ -142,78 +138,82 @@ function AllDestinationsContent() {
       </div>
 
       {/* HASIL PENCARIAN */}
-      <div className="max-w-7xl mx-auto px-4 py-8 min-h-[60vh]">
+      <div className="max-w-7xl mx-auto px-4 py-6 md:py-8 min-h-[60vh]">
         {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-5 gap-y-8 animate-pulse">
+             // SKELETON LOADER (Disamakan dengan Grid Baru)
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6 animate-pulse">
                 {[1,2,3,4,5,6,7,8].map(i => (
-                    <div key={i}>
-                        <div className="h-44 bg-gray-200 rounded-t-xl mb-3"></div>
-                        <div className="h-4 w-3/4 bg-gray-200 rounded mb-2"></div>
-                        <div className="h-4 w-1/2 bg-gray-200 rounded"></div>
+                    <div key={i} className="bg-white rounded-xl overflow-hidden border border-gray-100">
+                        <div className="h-32 md:h-44 bg-gray-200 mb-2"></div>
+                        <div className="p-3 space-y-2">
+                            <div className="h-3 w-3/4 bg-gray-200 rounded"></div>
+                            <div className="h-3 w-1/2 bg-gray-200 rounded"></div>
+                        </div>
                     </div>
                 ))}
             </div>
         ) : filteredDestinations.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-5 gap-y-8">
+            // GRID BARU: 2 Kolom Mobile, 4 Desktop
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
                 {filteredDestinations.map((item) => {
-                     // Amankan data kategori
-                     const categoryName = typeof item.category === 'object' && item.category !== null 
+                      const categoryName = typeof item.category === 'object' && item.category !== null 
                         ? item.category.name 
                         : (item.category || 'Wisata');
 
-                     return (
+                      return (
                         <Link 
                             href={`/events/${item.slug}`} 
                             key={item.id} 
-                            className="group block bg-white rounded-xl overflow-hidden border border-gray-300 transition hover:-translate-y-2 duration-200 flex-col h-full"
+                            className="group block bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-[#FF5B00]/30 md:border-gray-300 transition hover:-translate-y-1 md:hover:-translate-y-2 duration-200 flex flex-col h-full shadow-sm hover:shadow-md"
                         >
-                            {/* IMAGE SECTION */}
-                            <div className="relative h-44 overflow-hidden bg-gray-100 border-b border-gray-100">
+                            {/* IMAGE SECTION (Kecil di Mobile) */}
+                            <div className="relative h-32 md:h-44 overflow-hidden bg-gray-100 border-b border-gray-100">
                                 <img 
                                     src={getImageUrl(item.image_url)} 
                                     alt={item.name} 
-                                    className="w-full h-full object-cover transition-transform duration-700" 
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                                    onError={(e) => {
+                                        (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1517400508535-b2a1a062776c?q=80&w=2070';
+                                    }}
                                 />
                                 
-                                {/* Label Lokasi Real */}
-                                <div className="absolute top-3 left-3">
-                                    <span className="bg-black/60 backdrop-blur-[2px] text-white text-[10px] font-bold px-2 py-1 rounded-[4px] flex items-center gap-1">
-                                        <MapPin size={10} /> {item.location ? item.location.split(',')[0] : 'Indonesia'}
+                                {/* Label Lokasi (Font Kecil) */}
+                                <div className="absolute top-2 left-2 md:top-3 md:left-3">
+                                    <span className="bg-black/60 backdrop-blur-[2px] text-white text-[8px] md:text-[10px] font-bold px-1.5 py-0.5 md:px-2 md:py-1 rounded-[4px] flex items-center gap-0.5 md:gap-1">
+                                        <MapPin size={8} className="md:w-[10px] md:h-[10px]" /> 
+                                        {item.location ? item.location.split(',')[0] : 'Indonesia'}
                                     </span>
                                 </div>
                             </div>
 
-                            {/* CONTENT SECTION (DATA ASLI) */}
-                            <div className="p-3 pt-4 flex flex-col flex-1">
+                            {/* CONTENT SECTION (Padding & Font Kecil di Mobile) */}
+                            <div className="p-2 md:p-3 pt-3 md:pt-4 flex flex-col flex-1">
                                 {/* Kategori */}
-                                <span className="text-[11px] text-gray-400 mb-1 block uppercase tracking-wide">
+                                <span className="text-[10px] md:text-[11px] text-gray-400 mb-0.5 md:mb-1 block uppercase tracking-wide truncate">
                                     {categoryName}
                                 </span>
 
                                 {/* Judul */}
-                                <h3 className="text-[15px] font-bold text-gray-900 leading-snug mb-2 line-clamp-2 group-hover:text-[#FF5B00] transition-colors">
+                                <h3 className="text-sm md:text-[15px] font-bold text-gray-900 leading-tight md:leading-snug mb-1.5 md:mb-2 line-clamp-2 group-hover:text-[#FF5B00] transition-colors">
                                     {item.name}
                                 </h3>
 
-                                {/* Rating (Hanya jika ada) */}
-                                <div className="flex items-center gap-1.5 mb-4">
-                                    <div className="flex items-center gap-0.5 bg-orange-50 px-1.5 py-0.5 rounded border border-orange-100">
-                                        <Star size={10} className="fill-[#FFB800] text-[#FFB800]" />
-                                        <span className="text-xs font-bold text-[#FFB800]">
+                                {/* Rating */}
+                                <div className="flex items-center gap-1.5 mb-2 md:mb-4">
+                                    <div className="flex items-center gap-0.5 bg-orange-50 px-1 py-0.5 md:px-1.5 rounded border border-orange-100">
+                                        <Star size={8} className="fill-[#FFB800] text-[#FFB800] md:w-[10px] md:h-[10px]" />
+                                        <span className="text-[10px] md:text-xs font-bold text-[#FFB800]">
                                             {item.rating ? Number(item.rating).toFixed(1) : 'New'}
                                         </span>
                                     </div>
-                                    {/* Hapus info terjual palsu. Jika API punya 'reviews_count', baru tampilkan di sini */}
                                 </div>
 
                                 {/* Harga Asli */}
-                                <div className="mt-auto border-t border-dashed border-gray-100 pt-3 flex items-center justify-between">
-                                    <div className="flex flex-col">
-                                        <span className="text-[10px] text-gray-400 font-medium">Mulai dari</span>
-                                        <span className="text-lg font-bold text-[#FF5B00]">
-                                            {formatRupiah(item.price)}
-                                        </span>
-                                    </div>
+                                <div className="mt-auto pt-2 md:pt-3 flex flex-col">
+                                    <span className="text-[9px] md:text-[10px] text-gray-400 font-medium">Mulai dari</span>
+                                    <span className="text-sm md:text-lg font-bold text-[#FF5B00]">
+                                        {formatRupiah(item.price)}
+                                    </span>
                                 </div>
                             </div>
                         </Link>
