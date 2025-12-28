@@ -6,7 +6,6 @@ import { useNotification } from "@/context/NotificationContext";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-// 👇 Tambahkan ArrowLeft di sini
 import { Loader2, Mail, Lock, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { createSession, deleteSession } from "@/app/actions/auth";
 
@@ -139,23 +138,10 @@ function LoginContent() {
         <div className="absolute -bottom-32 -left-20 w-[60vw] h-[60vh] bg-cyan-200 rounded-full mix-blend-multiply filter blur-[120px] opacity-30"></div>
       </div>
 
-      {/* --- TOMBOL KEMBALI KE BERANDA (BARU) --- */}
-      <div className="absolute top-6 left-6 md:top-8 md:left-8 z-50 animate-in fade-in slide-in-from-top-4 duration-700">
-        <Link 
-            href="/" 
-            className="group flex items-center gap-2 px-5 py-2.5 bg-white/70 backdrop-blur-md rounded-full border border-white/50 shadow-sm hover:shadow-md transition-all text-gray-600 hover:text-[#0B2F5E]"
-        >
-            <div className="bg-white p-1.5 rounded-full shadow-sm group-hover:scale-110 transition-transform">
-                <ArrowLeft className="w-4 h-4 text-[#F57C00]" />
-            </div>
-            <span className="text-sm font-bold tracking-wide">Beranda</span>
-        </Link>
-      </div>
-
       <div className="flex-1 flex items-center justify-center p-4 md:p-6 pt-10 relative z-10">
         <div className="w-full max-w-4xl bg-white/90 backdrop-blur-sm rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden grid grid-cols-1 lg:grid-cols-2 min-h-[550px]">
           
-          {/* Left Side - Image/Branding */}
+          {/* Left Side - Image/Branding (Desktop Only) */}
           <div className="hidden lg:flex flex-col justify-center items-center bg-[#005eff] relative overflow-hidden p-10 text-center">
             <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-[#005eff] to-[#0046b0] opacity-100 z-0"></div>
             <div className="absolute -top-24 -left-24 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
@@ -175,7 +161,21 @@ function LoginContent() {
           </div>
 
           {/* Right Side - Form */}
-          <div className="w-full p-6 md:p-10 flex flex-col justify-center">
+          <div className="w-full p-6 md:p-10 flex flex-col justify-center relative">
+            
+            {/* --- TOMBOL KEMBALI (DI DALAM CARD) --- */}
+            <div className="mb-8">
+                <Link 
+                    href="/" 
+                    className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-[#F57C00] transition-colors group"
+                >
+                    <div className="p-1 rounded-full bg-gray-100 group-hover:bg-orange-50 transition-colors">
+                        <ArrowLeft className="w-4 h-4" />
+                    </div>
+                    Kembali ke Beranda
+                </Link>
+            </div>
+
             <div className="mb-6">
               <h3 className="text-2xl font-bold text-gray-800">
                 Masuk ke Akun
