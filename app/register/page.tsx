@@ -3,10 +3,11 @@
 import { useState, Suspense } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useNotification } from "@/context/NotificationContext";
-import { useRouter } from "next/navigation"; // 1. Import useRouter untuk redirect
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Loader2, User, Mail, Phone, Lock, Eye, EyeOff } from "lucide-react";
+// 👇 Tambahkan ArrowLeft
+import { Loader2, User, Mail, Phone, Lock, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { createSession, deleteSession } from "@/app/actions/auth";
 
 // --- KOMPONEN ICON ---
@@ -35,7 +36,7 @@ const GoogleIcon = () => (
 function RegisterContent() {
   const { login } = useAuth();
   const { addNotification } = useNotification();
-  const router = useRouter(); // Inisialisasi router
+  const router = useRouter();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -74,7 +75,6 @@ function RegisterContent() {
     }
 
     try {
-      // 1. Request ke Backend Laravel
       const res = await fetch(`${BASE_URL}/api/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -85,11 +85,8 @@ function RegisterContent() {
       if (!res.ok)
         throw new Error(data.message || "Gagal melakukan pendaftaran");
 
-      // 2. SIMPAN COOKIE HTTPONLY (PENTING!)
-      // Ini memastikan user tetap login saat halaman direfresh
       await createSession(data.access_token, data.user.role);
 
-      // 3. Update State UI (Context)
       login(data.access_token, data.user);
 
       addNotification(
@@ -98,7 +95,6 @@ function RegisterContent() {
         "Akun Anda telah aktif. Selamat bergabung!"
       );
 
-      // 4. Redirect ke Dashboard/Home
       router.push('/');
 
     } catch (err: any) {
@@ -109,30 +105,24 @@ function RegisterContent() {
   };
 
   const handleGoogleLogin = async () => {
-  setIsLoading(true); // Opsional: Aktifkan loading state agar user tahu sedang memproses
-  try {
-    console.log('🔵 Initiating Google OAuth...');
-    
-    // 1. Bersihkan sesi lama
-    await deleteSession();
+    setIsLoading(true);
+    try {
+      console.log('🔵 Initiating Google OAuth...');
+      await deleteSession();
+      const res = await fetch(`${BASE_URL}/api/auth/google/url`);
+      const data = await res.json();
 
-    // 2. Minta URL Login Google dari Backend Laravel
-    // Endpoint ini yang kita buat di SocialAuthController sebelumnya
-    const res = await fetch(`${BASE_URL}/api/auth/google/url`);
-    const data = await res.json();
-
-    // 3. Redirect user ke URL Google
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      throw new Error("Gagal mendapatkan URL Google Auth");
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error("Gagal mendapatkan URL Google Auth");
+      }
+    } catch (err) {
+      console.error("Google Auth Error:", err);
+      setError("Gagal terhubung ke Google Login.");
+      setIsLoading(false);
     }
-  } catch (err) {
-    console.error("Google Auth Error:", err);
-    setError("Gagal terhubung ke Google Login.");
-    setIsLoading(false);
-  }
-};
+  };
 
   const inputWrapperClass = "relative flex items-center";
   const iconClass = "absolute left-3 text-gray-400 w-5 h-5";
@@ -153,7 +143,7 @@ function RegisterContent() {
           
           {/* Kolom Kiri: Ilustrasi & Branding */}
           <div className="hidden lg:flex flex-col justify-center items-center bg-[#005eff] relative overflow-hidden p-10 text-center">
-            <div className="absolute top-0 left-0 w-full h-full bg-linear-to-br from-[#005eff] to-[#0046b0] opacity-100 z-0"></div>
+            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-[#005eff] to-[#0046b0] opacity-100 z-0"></div>
             <div className="absolute -top-24 -left-24 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
             <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#002a6b] opacity-20 rounded-full blur-3xl"></div>
 
@@ -179,6 +169,20 @@ function RegisterContent() {
 
           {/* Kolom Kanan: Form */}
           <div className="w-full p-6 md:p-10 flex flex-col justify-center">
+            
+            {/* --- TOMBOL KEMBALI (DI DALAM CARD) --- */}
+            <div className="mb-6">
+                <Link 
+                    href="/" 
+                    className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-[#F57C00] transition-colors group"
+                >
+                    <div className="p-1 rounded-full bg-gray-100 group-hover:bg-orange-50 transition-colors">
+                        <ArrowLeft className="w-4 h-4" />
+                    </div>
+                    Kembali
+                </Link>
+            </div>
+
             <div className="mb-3">
               <h3 className="text-2xl font-bold text-gray-800">
                 Daftar Sekarang
@@ -321,7 +325,7 @@ function RegisterContent() {
               </button>
             </div>
 
-            <div className="text-center text-[10px] md:text-xs text-gray-500 leading-relaxed px-2 border-t pt-4 border-gray-100">
+            <div className="text-center text-[10px] md:text-xs text-gray-500 leading-relaxed px-2 border-t pt-4 border-gray-100 mt-4">
               Dengan mendaftar, Anda menyetujui{" "}
               <Link href="/privacy" className="underline text-[#F57C00]">
                 Kebijakan Privasi

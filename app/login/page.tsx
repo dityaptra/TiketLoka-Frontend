@@ -172,7 +172,7 @@ function LoginContent() {
                     <div className="p-1 rounded-full bg-gray-100 group-hover:bg-orange-50 transition-colors">
                         <ArrowLeft className="w-4 h-4" />
                     </div>
-                    Kembali ke Beranda
+                    Kembali
                 </Link>
             </div>
 
