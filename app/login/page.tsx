@@ -6,10 +6,11 @@ import { useNotification } from "@/context/NotificationContext";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Loader2, Mail, Lock, Eye, EyeOff } from "lucide-react";
+// 👇 Tambahkan ArrowLeft di sini
+import { Loader2, Mail, Lock, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { createSession, deleteSession } from "@/app/actions/auth";
 
-// --- KOMPONEN ICON ---
+// --- KOMPONEN ICON GOOGLE ---
 const GoogleIcon = () => (
   <svg className="w-5 h-5" viewBox="0 0 24 24">
     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -32,21 +33,17 @@ function LoginContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   
-  // Kita hilangkan checking session client-side yang berat
-  // Biarkan Middleware yang menangani redirect jika user sudah login
   const [isCheckingSession, setIsCheckingSession] = useState(true);
 
   const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
   useEffect(() => {
     const handleOAuthAndCleanup = async () => {
-      // 1. CEK ERROR DARI OAUTH (Jika ada redirect dari Google)
       const oauthError = searchParams.get('error');
       const oauthMessage = searchParams.get('message');
       
       if (oauthError) {
         console.log('🔴 OAuth Error Detected:', oauthError);
-        // Panggil Server Action untuk hapus cookie (jika ada sisa)
         await deleteSession();
         
         if (oauthMessage) {
@@ -54,11 +51,6 @@ function LoginContent() {
         }
         window.history.replaceState({}, '', '/login');
       }
-
-      // NOTE: Pengecekan "Apakah user sudah login?" sebaiknya dilakukan di Middleware.
-      // Karena cookie sekarang HttpOnly, JavaScript di sini tidak bisa membacanya 
-      // untuk melakukan validasi otomatis saat halaman dimuat.
-      
       setIsCheckingSession(false);
     };
 
@@ -73,7 +65,6 @@ function LoginContent() {
     setError("");
 
     try {
-      // 1. Request ke Backend Laravel
       const res = await fetch(`${BASE_URL}/api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -83,12 +74,7 @@ function LoginContent() {
 
       if (!res.ok) throw new Error(data.message || "Login gagal");
 
-      // 2. SET COOKIE HTTPONLY (Server Action) - AMAN
-      // Token dari Laravel dikirim ke Next.js Server untuk dijadikan Cookie
       await createSession(data.access_token, data.user.role);
-
-      // 3. Update Context React (Untuk UI State)
-      // Context tetap memegang data di memori agar UI responsif
       login(data.access_token, data.user);
 
       addNotification(
@@ -97,7 +83,6 @@ function LoginContent() {
         `Selamat datang kembali, ${data.user.name}!`
       );
       
-      // 4. Redirect
       if (data.user.role === 'admin' || data.user.role === 'owner') {
         router.push('/admin/dashboard');
       } else {
@@ -112,30 +97,24 @@ function LoginContent() {
   };
 
   const handleGoogleLogin = async () => {
-  setIsLoading(true); // Opsional: Aktifkan loading state agar user tahu sedang memproses
-  try {
-    console.log('🔵 Initiating Google OAuth...');
-    
-    // 1. Bersihkan sesi lama
-    await deleteSession();
+    setIsLoading(true);
+    try {
+      console.log('🔵 Initiating Google OAuth...');
+      await deleteSession();
+      const res = await fetch(`${BASE_URL}/api/auth/google/url`);
+      const data = await res.json();
 
-    // 2. Minta URL Login Google dari Backend Laravel
-    // Endpoint ini yang kita buat di SocialAuthController sebelumnya
-    const res = await fetch(`${BASE_URL}/api/auth/google/url`);
-    const data = await res.json();
-
-    // 3. Redirect user ke URL Google
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      throw new Error("Gagal mendapatkan URL Google Auth");
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error("Gagal mendapatkan URL Google Auth");
+      }
+    } catch (err) {
+      console.error("Google Auth Error:", err);
+      setError("Gagal terhubung ke Google Login.");
+      setIsLoading(false);
     }
-  } catch (err) {
-    console.error("Google Auth Error:", err);
-    setError("Gagal terhubung ke Google Login.");
-    setIsLoading(false);
-  }
-};
+  };
 
   const inputWrapperClass = "relative flex items-center";
   const iconClass = "absolute left-3 text-gray-400 w-5 h-5";
@@ -152,11 +131,25 @@ function LoginContent() {
 
   return (
     <div className="min-h-screen flex flex-col font-sans relative overflow-hidden bg-white">
-      {/* Background Shapes */}
+      
+      {/* --- BACKGROUND SHAPES --- */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <div className="absolute top-[-10%] left-[-20%] w-[80vw] h-[90vh] bg-blue-400 rounded-full mix-blend-multiply filter blur-[140px] opacity-25 animate-pulse"></div>
         <div className="absolute top-[0%] right-[-15%] w-[70vw] h-[80vh] bg-orange-300 rounded-full mix-blend-multiply filter blur-[140px] opacity-30 animate-pulse"></div>
         <div className="absolute -bottom-32 -left-20 w-[60vw] h-[60vh] bg-cyan-200 rounded-full mix-blend-multiply filter blur-[120px] opacity-30"></div>
+      </div>
+
+      {/* --- TOMBOL KEMBALI KE BERANDA (BARU) --- */}
+      <div className="absolute top-6 left-6 md:top-8 md:left-8 z-50 animate-in fade-in slide-in-from-top-4 duration-700">
+        <Link 
+            href="/" 
+            className="group flex items-center gap-2 px-5 py-2.5 bg-white/70 backdrop-blur-md rounded-full border border-white/50 shadow-sm hover:shadow-md transition-all text-gray-600 hover:text-[#0B2F5E]"
+        >
+            <div className="bg-white p-1.5 rounded-full shadow-sm group-hover:scale-110 transition-transform">
+                <ArrowLeft className="w-4 h-4 text-[#F57C00]" />
+            </div>
+            <span className="text-sm font-bold tracking-wide">Beranda</span>
+        </Link>
       </div>
 
       <div className="flex-1 flex items-center justify-center p-4 md:p-6 pt-10 relative z-10">
