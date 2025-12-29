@@ -6,7 +6,7 @@ import { Mail, ArrowLeft, Loader2, KeyRound, CheckCircle, AlertCircle } from 'lu
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
-  const [isSuccess, setIsSuccess] = useState(false); // State untuk ganti tampilan jika sukses
+  const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -16,7 +16,6 @@ export default function ForgotPassword() {
     setError('');
     
     try {
-      // API Call ke Backend TiketLoka
       const res = await fetch('https://www.tiketloka.web.id/api/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -29,7 +28,6 @@ export default function ForgotPassword() {
         throw new Error(data.message || data.email?.[0] || 'Gagal mengirim email.');
       }
       
-      // Jika sukses, ubah state agar tampilan berganti
       setIsSuccess(true);
       
     } catch (err: any) {
@@ -40,9 +38,16 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12 font-sans">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12 font-sans relative overflow-hidden">
       
-      {/* Background Pattern (Opsional, agar mirip halaman About) */}
+      {/* --- BACKGROUND SHAPES --- */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-10%] left-[-20%] w-[80vw] h-[90vh] bg-blue-400 rounded-full mix-blend-multiply filter blur-[140px] opacity-25 animate-pulse"></div>
+        <div className="absolute top-[0%] right-[-15%] w-[70vw] h-[80vh] bg-orange-300 rounded-full mix-blend-multiply filter blur-[140px] opacity-30 animate-pulse"></div>
+        <div className="absolute -bottom-32 -left-20 w-[60vw] h-[60vh] bg-cyan-200 rounded-full mix-blend-multiply filter blur-[120px] opacity-30"></div>
+      </div>
+      
+      {/* Pattern Overlay */}
       <div className="fixed inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
 
       <div className="max-w-md w-full bg-white p-8 rounded-3xl shadow-xl border border-gray-100 relative z-10">

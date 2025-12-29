@@ -171,7 +171,7 @@ function RegisterContent() {
           <div className="w-full p-6 md:p-10 flex flex-col justify-center">
             
             {/* --- TOMBOL KEMBALI (DI DALAM CARD) --- */}
-            <div className="mb-6">
+            <div className="mb-1">
                 <Link 
                     href="/" 
                     className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-[#F57C00] transition-colors group"
@@ -187,7 +187,7 @@ function RegisterContent() {
               <h3 className="text-2xl font-bold text-gray-800">
                 Daftar Sekarang
               </h3>
-              <div className="mt-2 text-left text-sm mb-3">
+              <div className="mt-2 text-left text-sm mb-2">
                 <span className="text-gray-500">Sudah punya akun? </span>
                 <Link
                   href="/login"
@@ -306,7 +306,7 @@ function RegisterContent() {
               </button>
             </form>
 
-            <div className="flex items-center justify-center my-6 w-full">
+            <div className="flex items-center justify-center my-4 w-full">
               <div className="flex-1 h-px bg-gray-300"></div>
               <span className="px-4 text-xs font-medium text-gray-500 tracking-wider">
                 atau
@@ -315,7 +315,7 @@ function RegisterContent() {
             </div>
 
             {/* Social Login Buttons */}
-            <div className="mt-1">
+            <div className="mt">
               <button
                 type="button"
                 onClick={handleGoogleLogin}
@@ -325,7 +325,7 @@ function RegisterContent() {
               </button>
             </div>
 
-            <div className="text-center text-[10px] md:text-xs text-gray-500 leading-relaxed px-2 border-t pt-4 border-gray-100 mt-4">
+            <div className="text-center text-[11px] md:text-xs text-gray-500 leading-relaxed px-2 pt-4 mt-1">
               Dengan mendaftar, Anda menyetujui{" "}
               <Link href="/privacy" className="underline text-[#F57C00]">
                 Kebijakan Privasi

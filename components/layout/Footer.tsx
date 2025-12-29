@@ -50,7 +50,6 @@ export default function Footer() {
             <ul className="space-y-3 text-sm text-white">
               <FooterLink href="/about" text="Tentang Kami" />
               <FooterLink href="/blog" text="Blog Travel" />
-              <FooterLink href="/careers" text="Karir" />
               <FooterLink href="/partner" text="Daftar Jadi Partner" />
             </ul>
           </div>
@@ -61,8 +60,7 @@ export default function Footer() {
             <ul className="space-y-3 text-sm text-white">
               <FooterLink href="/help" text="Pusat Bantuan" />
               <FooterLink href="/how-to-book" text="Cara Pemesanan" />
-              <FooterLink href="/faq" text="Pertanyaan Umum (FAQ)" />
-              <FooterLink href="/refund" text="Kebijakan Refund" />
+              <FooterLink href="/help" text="Pertanyaan Umum (FAQ)" />
             </ul>
           </div>
 
