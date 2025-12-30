@@ -28,7 +28,7 @@ export default function HomePage() {
     : "Destinasi Populer";
 
   return (
-    <main className="min-h-screen bg-gray-50 overflow-x-hidden">
+    <main className="min-h-screen bg-gray-50 overflow-x-hidden pt-15">
       <Navbar />
       
       {/* 1. HERO SECTION */}

@@ -143,14 +143,14 @@ const Navbar = () => {
   const isAuthenticated = !!user;
 
   return (
-    <nav className="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-100 font-sans">
+    <nav className="fixed top-0 left-0 w-full z-50 bg-white shadow-sm border-b border-gray-100 font-sans">
       <div className="max-w-7xl mx-auto px-4 py-2">
         <div className="flex items-center justify-between">
           
           {/* --- LOGO --- */}
           <Link href="/" className="flex items-center gap-2 group z-50">
             {/* Ukuran logo responsif: w-32 di HP, w-40 di Laptop */}
-            <div className="relative h-10 w-32 md:h-12 md:w-40 transition-transform">
+            <div className="relative ml-10 h-10 w-32 md:h-12 md:w-40 transition-transform">
               <Image
                 src="/images/navbar.png"
                 alt="TiketLoka Logo"
