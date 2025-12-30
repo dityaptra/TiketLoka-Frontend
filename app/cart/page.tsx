@@ -259,9 +259,9 @@ export default function CartPage() {
   if (loading || authLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-[#F57C00]"/></div>;
 
   return (
-    <main className="min-h-screen bg-[#FAFAFA] pb-40 font-sans text-gray-800">
+    <main className="min-h-screen bg-[#FAFAFA] pb-40 font-sans text-gray-800 pt-15">
       <Navbar />
-      <div className="max-w-6xl mx-auto pt-4 px-4">
+      <div className="max-w-6xl mx-auto px-4">
         <div className="mb-6">
             <Link href="/" className="inline-flex items-center text-sm text-gray-500 hover:text-[#F57C00] gap-1">
                 <ArrowLeft className="w-4 h-4" /> Kembali
