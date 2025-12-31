@@ -104,7 +104,7 @@ function RegisterContent() {
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleAuth = async () => {
     setIsLoading(true);
     try {
       console.log('🔵 Initiating Google OAuth...');
@@ -317,7 +317,7 @@ function RegisterContent() {
             <div className="mt">
               <button
                 type="button"
-                onClick={handleGoogleLogin}
+                onClick={handleGoogleAuth}
                 className="w-full flex items-center justify-center cursor-pointer gap-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-3 rounded-lg transition-all text-sm"
               >
                 <GoogleIcon /> <span>Daftar dengan Google</span>
