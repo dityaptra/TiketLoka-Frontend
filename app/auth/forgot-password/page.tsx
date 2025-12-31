@@ -42,9 +42,8 @@ export default function ForgotPassword() {
       
       {/* --- BACKGROUND SHAPES --- */}
       <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-20%] w-[80vw] h-[90vh] bg-blue-400 rounded-full mix-blend-multiply filter blur-[140px] opacity-25 animate-pulse"></div>
-        <div className="absolute top-[0%] right-[-15%] w-[70vw] h-[80vh] bg-orange-300 rounded-full mix-blend-multiply filter blur-[140px] opacity-30 animate-pulse"></div>
-        <div className="absolute -bottom-32 -left-20 w-[60vw] h-[60vh] bg-cyan-200 rounded-full mix-blend-multiply filter blur-[120px] opacity-30"></div>
+        <div className="absolute top-[-10%] left-[-20%] w-[80vw] h-[90vh] bg-blue-400 rounded-full mix-blend-multiply filter blur-[140px] opacity-60"></div>
+        <div className="absolute top-[0%] right-[-15%] w-[70vw] h-[80vh] bg-orange-300 rounded-full mix-blend-multiply filter blur-[140px] opacity-60"></div>
       </div>
       
       {/* Pattern Overlay */}

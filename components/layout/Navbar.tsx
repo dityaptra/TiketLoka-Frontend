@@ -22,7 +22,7 @@ import {
   Home,
   LucideIcon,
   Menu, // Icon Menu Hamburger
-  X,    // Icon Close
+  X, // Icon Close
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
@@ -31,7 +31,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 const getAvatarUrl = (url: string | undefined) => {
   if (!url) return null;
   if (url.startsWith("http")) return url;
-  const cleanPath = url.startsWith('/') ? url.substring(1) : url;
+  const cleanPath = url.startsWith("/") ? url.substring(1) : url;
   return `${BASE_URL}/storage/${cleanPath}`;
 };
 
@@ -58,7 +58,7 @@ const Navbar = () => {
 
   // Cek Token
   useEffect(() => {
-    const token = Cookies.get('token');
+    const token = Cookies.get("token");
     if (token || user) {
       setHasToken(true);
     }
@@ -75,15 +75,15 @@ const Navbar = () => {
     setIsMobileMenuOpen(false); // Tutup menu mobile juga
 
     const result = await Swal.fire({
-      title: 'Yakin ingin keluar?',
+      title: "Yakin ingin keluar?",
       text: "Anda harus login kembali untuk mengakses tiket dan profil Anda.",
-      icon: 'warning',
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Ya, Keluar',
-      cancelButtonText: 'Batal',
-      reverseButtons: true
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Ya, Keluar",
+      cancelButtonText: "Batal",
+      reverseButtons: true,
     });
 
     if (result.isConfirmed) {
@@ -92,13 +92,13 @@ const Navbar = () => {
         await deleteSession();
         await logout();
         setHasToken(false);
-        router.push('/');
+        router.push("/");
         router.refresh();
       } catch (error) {
         console.error("Logout error:", error);
         setIsLoggingOut(false);
         await deleteSession();
-        window.location.href = '/';
+        window.location.href = "/";
       }
     }
   };
@@ -125,7 +125,8 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [menuRef]);
 
-  const baseNavStyle = "flex items-center gap-2 px-3 py-2 rounded-full transition-all duration-200 group";
+  const baseNavStyle =
+    "flex items-center gap-2 px-3 py-2 rounded-full transition-all duration-200 group";
 
   const getNavStyle = (path: string) => {
     const isActive = pathname === path;
@@ -146,11 +147,9 @@ const Navbar = () => {
     <nav className="fixed top-0 left-0 w-full z-50 bg-white shadow-sm border-b border-gray-100 font-sans">
       <div className="max-w-7xl mx-auto px-4 py-2">
         <div className="flex items-center justify-between">
-          
           {/* --- LOGO --- */}
-          <Link href="/" className="flex items-center gap-2 group z-50">
-            {/* Ukuran logo responsif: w-32 di HP, w-40 di Laptop */}
-            <div className="relative ml-10 h-10 w-32 md:h-12 md:w-40 transition-transform">
+          <Link href="/" className="flex items-center gap-2 group">
+            <div className="relative ml-2 md:ml-10 h-10 w-32 md:h-12 md:w-40 transition-transform">
               <Image
                 src="/images/navbar.png"
                 alt="TiketLoka Logo"
@@ -173,7 +172,10 @@ const Navbar = () => {
               <span className="text-sm font-medium">Bantuan</span>
             </Link>
 
-            <button onClick={handleCartClick} className={`${getNavStyle("/cart")} relative cursor-pointer`}>
+            <button
+              onClick={handleCartClick}
+              className={`${getNavStyle("/cart")} relative cursor-pointer`}
+            >
               <div className="relative">
                 <ShoppingCart className="w-5 h-5" />
                 {cartCount > 0 && (
@@ -187,12 +189,18 @@ const Navbar = () => {
 
             {isAuthenticated && (
               <>
-                <button onClick={handleTicketsClick} className={getNavStyle("/tickets")}>
+                <button
+                  onClick={handleTicketsClick}
+                  className={getNavStyle("/tickets")}
+                >
                   <Ticket className="w-5 h-5" />
                   <span className="text-sm font-medium">Tiket Saya</span>
                 </button>
 
-                <Link href="/notifications" className={getNavStyle("/notifications")}>
+                <Link
+                  href="/notifications"
+                  className={getNavStyle("/notifications")}
+                >
                   <div className="relative">
                     <Bell className="w-5 h-5" />
                     {unreadCount > 0 && (
@@ -208,7 +216,10 @@ const Navbar = () => {
 
             {/* Profile Dropdown Desktop */}
             {isAuthenticated ? (
-              <div className="relative ml-2 pl-2 border-l border-blue-200" ref={menuRef}>
+              <div
+                className="relative ml-2 pl-2 border-l border-blue-200"
+                ref={menuRef}
+              >
                 <button
                   className="flex items-center gap-2 p-1 rounded-full hover:bg-blue-50 transition-colors"
                   onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
@@ -235,16 +246,27 @@ const Navbar = () => {
                 </button>
 
                 {/* Dropdown Content */}
-                <div className={`absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.1)] border border-gray-100 py-2 animate-in fade-in slide-in-from-top-2 z-50 ${isProfileMenuOpen ? "block" : "hidden"}`}>
+                <div
+                  className={`absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.1)] border border-gray-100 py-2 animate-in fade-in slide-in-from-top-2 z-50 ${
+                    isProfileMenuOpen ? "block" : "hidden"
+                  }`}
+                >
                   <div className="px-5 py-3 border-b border-gray-100 mb-2">
                     <p className="font-bold text-[#0B2F5E] truncate text-base">
                       {user?.name || "Pengguna"}
                     </p>
-                    <p className="text-xs text-gray-500 truncate">Member TiketLoka</p>
+                    <p className="text-xs text-gray-500 truncate">
+                      Member TiketLoka
+                    </p>
                   </div>
                   {profileMenuItems.map((item, index) => (
-                    <Link href={item.href} key={index} className="w-full text-left px-5 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-[#0B2F5E] flex items-center gap-3 transition-colors">
-                      <item.icon className="w-4 h-4" /> <span>{item.label}</span>
+                    <Link
+                      href={item.href}
+                      key={index}
+                      className="w-full text-left px-5 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-[#0B2F5E] flex items-center gap-3 transition-colors"
+                    >
+                      <item.icon className="w-4 h-4" />{" "}
+                      <span>{item.label}</span>
                     </Link>
                   ))}
                   <div className="my-2 border-t border-gray-100"></div>
@@ -261,10 +283,14 @@ const Navbar = () => {
             ) : (
               <div className="flex items-center gap-3 ml-2 pl-4 border-l border-gray-300">
                 <Link href="/login">
-                  <button className="px-5 py-2 text-sm text-[#0B2F5E] font-bold border border-[#0B2F5E] rounded-lg hover:bg-blue-50 transition-colors">Masuk</button>
+                  <button className="px-5 py-2 text-sm text-[#0B2F5E] font-bold border border-[#0B2F5E] rounded-lg hover:bg-blue-50 transition-colors">
+                    Masuk
+                  </button>
                 </Link>
                 <Link href="/register">
-                  <button className="px-5 py-2 text-sm bg-[#F57C00] text-white font-bold rounded-lg hover:bg-[#E65100] transition-colors">Daftar</button>
+                  <button className="px-5 py-2 text-sm bg-[#F57C00] text-white font-bold rounded-lg hover:bg-[#E65100] transition-colors">
+                    Daftar
+                  </button>
                 </Link>
               </div>
             )}
@@ -272,101 +298,131 @@ const Navbar = () => {
 
           {/* --- MOBILE ACTIONS (Visible di HP) --- */}
           <div className="flex lg:hidden items-center gap-3">
-             {/* Icon Cart & Notif tetap muncul di Navbar HP agar mudah diakses */}
-             <button onClick={handleCartClick} className="relative p-2 text-gray-600">
-                <ShoppingCart className="w-6 h-6" />
-                {cartCount > 0 && (
+            {/* Icon Cart & Notif tetap muncul di Navbar HP agar mudah diakses */}
+            <button
+              onClick={handleCartClick}
+              className="relative p-2 text-gray-600"
+            >
+              <ShoppingCart className="w-6 h-6" />
+              {cartCount > 0 && (
+                <span className="absolute top-1 right-1 bg-red-600 text-white text-[10px] font-bold h-4 w-4 flex items-center justify-center rounded-full border-2 border-white">
+                  {cartCount}
+                </span>
+              )}
+            </button>
+
+            {isAuthenticated && (
+              <Link
+                href="/notifications"
+                className="relative p-2 text-gray-600"
+              >
+                <Bell className="w-6 h-6" />
+                {unreadCount > 0 && (
                   <span className="absolute top-1 right-1 bg-red-600 text-white text-[10px] font-bold h-4 w-4 flex items-center justify-center rounded-full border-2 border-white">
-                    {cartCount}
+                    {unreadCount}
                   </span>
                 )}
-             </button>
+              </Link>
+            )}
 
-             {isAuthenticated && (
-               <Link href="/notifications" className="relative p-2 text-gray-600">
-                  <Bell className="w-6 h-6" />
-                  {unreadCount > 0 && (
-                    <span className="absolute top-1 right-1 bg-red-600 text-white text-[10px] font-bold h-4 w-4 flex items-center justify-center rounded-full border-2 border-white">
-                      {unreadCount}
-                    </span>
-                  )}
-               </Link>
-             )}
-
-             {/* Hamburger Menu Toggle */}
-             <button 
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="p-2 text-gray-700 hover:bg-gray-100 rounded-lg"
-             >
-                {isMobileMenuOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
-             </button>
+            {/* Hamburger Menu Toggle */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+            >
+              {isMobileMenuOpen ? (
+                <X className="w-7 h-7" />
+              ) : (
+                <Menu className="w-7 h-7" />
+              )}
+            </button>
           </div>
-
         </div>
 
         {/* --- MOBILE MENU DROPDOWN --- */}
         {/* Menu ini hanya muncul di HP saat tombol hamburger diklik */}
         {isMobileMenuOpen && (
           <div className="lg:hidden mt-4 pb-4 animate-in slide-in-from-top-5 border-t border-gray-100 pt-4">
-            
             {/* Jika User Login: Tampilkan Info Profil Singkat */}
             {isAuthenticated && (
-                <div className="flex items-center gap-3 px-3 mb-6 bg-blue-50 p-4 rounded-xl">
-                   <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-blue-500 overflow-hidden border border-blue-200 relative">
-                      {user?.avatar_url ? (
-                        <Image src={getAvatarUrl(user.avatar_url) || ""} alt="Avatar" fill className="object-cover" />
-                      ) : (
-                        <User size={24} />
-                      )}
-                   </div>
-                   <div className="overflow-hidden">
-                      <p className="font-bold text-[#0B2F5E] truncate">{user?.name}</p>
-                      <p className="text-xs text-gray-500">{user?.email}</p>
-                   </div>
+              <div className="flex items-center gap-3 px-3 mb-6 bg-blue-50 p-4 rounded-xl">
+                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-blue-500 overflow-hidden border border-blue-200 relative">
+                  {user?.avatar_url ? (
+                    <Image
+                      src={getAvatarUrl(user.avatar_url) || ""}
+                      alt="Avatar"
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <User size={24} />
+                  )}
                 </div>
+                <div className="overflow-hidden">
+                  <p className="font-bold text-[#0B2F5E] truncate">
+                    {user?.name}
+                  </p>
+                  <p className="text-xs text-gray-500">{user?.email}</p>
+                </div>
+              </div>
             )}
 
             <div className="flex flex-col gap-2">
-              <Link href="/" className="px-4 py-3 hover:bg-gray-50 rounded-lg flex items-center gap-3 font-medium text-gray-700">
+              <Link
+                href="/"
+                className="px-4 py-3 hover:bg-gray-50 rounded-lg flex items-center gap-3 font-medium text-gray-700"
+              >
                 <Home className="w-5 h-5 text-blue-600" /> Beranda
               </Link>
-              
+
               {isAuthenticated && (
-                <button onClick={handleTicketsClick} className="px-4 py-3 hover:bg-gray-50 rounded-lg flex items-center gap-3 font-medium text-gray-700 w-full text-left">
+                <button
+                  onClick={handleTicketsClick}
+                  className="px-4 py-3 hover:bg-gray-50 rounded-lg flex items-center gap-3 font-medium text-gray-700 w-full text-left"
+                >
                   <Ticket className="w-5 h-5 text-orange-500" /> Tiket Saya
                 </button>
               )}
 
-              <Link href="/help" className="px-4 py-3 hover:bg-gray-50 rounded-lg flex items-center gap-3 font-medium text-gray-700">
+              <Link
+                href="/help"
+                className="px-4 py-3 hover:bg-gray-50 rounded-lg flex items-center gap-3 font-medium text-gray-700"
+              >
                 <CircleHelp className="w-5 h-5 text-green-600" /> Bantuan
               </Link>
 
               {isAuthenticated ? (
                 <>
-                   <Link href="/settings" className="px-4 py-3 hover:bg-gray-50 rounded-lg flex items-center gap-3 font-medium text-gray-700">
-                      <Settings className="w-5 h-5 text-gray-500" /> Pengaturan
-                   </Link>
-                   <button 
-                      onClick={handleLogout}
-                      className="px-4 py-3 hover:bg-red-50 rounded-lg flex items-center gap-3 font-medium text-red-600 w-full text-left mt-2 border-t border-gray-100 pt-4"
-                   >
-                      <LogOut className="w-5 h-5" /> Keluar
-                   </button>
+                  <Link
+                    href="/settings"
+                    className="px-4 py-3 hover:bg-gray-50 rounded-lg flex items-center gap-3 font-medium text-gray-700"
+                  >
+                    <Settings className="w-5 h-5 text-gray-500" /> Pengaturan
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="px-4 py-3 hover:bg-red-50 rounded-lg flex items-center gap-3 font-medium text-red-600 w-full text-left mt-2 border-t border-gray-100 pt-4"
+                  >
+                    <LogOut className="w-5 h-5" /> Keluar
+                  </button>
                 </>
               ) : (
                 <div className="grid grid-cols-2 gap-3 mt-4 px-2">
-                   <Link href="/login">
-                      <button className="w-full py-3 text-center border border-[#0B2F5E] text-[#0B2F5E] font-bold rounded-lg">Masuk</button>
-                   </Link>
-                   <Link href="/register">
-                      <button className="w-full py-3 text-center bg-[#F57C00] text-white font-bold rounded-lg shadow-md hover:bg-[#E65100]">Daftar</button>
-                   </Link>
+                  <Link href="/login">
+                    <button className="w-full py-3 text-center border border-[#0B2F5E] text-[#0B2F5E] font-bold rounded-lg">
+                      Masuk
+                    </button>
+                  </Link>
+                  <Link href="/register">
+                    <button className="w-full py-3 text-center bg-[#F57C00] text-white font-bold rounded-lg shadow-md hover:bg-[#E65100]">
+                      Daftar
+                    </button>
+                  </Link>
                 </div>
               )}
             </div>
           </div>
         )}
-
       </div>
     </nav>
   );

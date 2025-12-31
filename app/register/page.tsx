@@ -131,11 +131,11 @@ function RegisterContent() {
 
   return (
     <div className="min-h-screen flex flex-col font-sans relative overflow-hidden bg-white">
-      {/* --- BACKGROUND BLUR EFFECT --- */}
+      
+      {/* --- BACKGROUND SHAPES --- */}
       <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-20%] w-[80vw] h-[90vh] bg-blue-400 rounded-full mix-blend-multiply filter blur-[140px] opacity-25 animate-pulse"></div>
-        <div className="absolute top-[0%] right-[-15%] w-[70vw] h-[80vh] bg-orange-300 rounded-full mix-blend-multiply filter blur-[140px] opacity-30 animate-pulse"></div>
-        <div className="absolute -bottom-32 -left-20 w-[60vw] h-[60vh] bg-cyan-200 rounded-full mix-blend-multiply filter blur-[120px] opacity-30"></div>
+        <div className="absolute top-[-10%] left-[-20%] w-[80vw] h-[90vh] bg-blue-400 rounded-full mix-blend-multiply filter blur-[140px] opacity-60"></div>
+        <div className="absolute top-[0%] right-[-15%] w-[70vw] h-[80vh] bg-orange-300 rounded-full mix-blend-multiply filter blur-[140px] opacity-60"></div>
       </div>
 
       <div className="flex-1 flex items-center justify-center p-4 md:p-6 pt-10 relative z-10">
@@ -291,7 +291,7 @@ function RegisterContent() {
               <button
                 type="submit"
                 disabled={!isFormValid || isLoading}
-                className={`w-full font-semibold py-3 rounded-lg transition-all transform flex items-center justify-center gap-2 mt-8 
+                className={`w-full font-semibold py-3 rounded-lg transition-all transform flex items-center justify-center gap-2 mt-2 
                   ${
                     isFormValid && !isLoading
                       ? "bg-[#F57C00] hover:bg-[#E65100] text-white cursor-pointer"
@@ -314,7 +314,6 @@ function RegisterContent() {
               <div className="flex-1 h-px bg-gray-300"></div>
             </div>
 
-            {/* Social Login Buttons */}
             <div className="mt">
               <button
                 type="button"
