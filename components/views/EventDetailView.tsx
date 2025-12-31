@@ -98,7 +98,7 @@ export default function EventDetailView({ slug }: { slug: string }) {
     if (!destination) return null;
 
     return (
-        <main className="min-h-screen bg-white text-gray-800 font-sans">
+        <main className="min-h-screen bg-white text-gray-800 font-sans pt-20">
             <Navbar />
             <div className="max-w-7xl mx-auto px-4 pt-4 pb-8">
                 <div className="mb-12">

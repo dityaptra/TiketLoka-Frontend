@@ -239,7 +239,7 @@ function AllDestinationsContent() {
 // EXPORT
 export default function AllDestinationsPage() {
     return (
-        <main className="min-h-screen bg-white font-sans text-gray-900">
+        <main className="min-h-screen bg-white font-sans text-gray-900 pt-20">
             <Suspense fallback={<div className="h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-orange-500"></div></div>}>
                 <AllDestinationsContent />
             </Suspense>
