@@ -72,6 +72,7 @@ const HeroSection = () => {
           
           {/* Tombol Cari */}
           <button 
+            aria-label="Cari"
             type="submit"
             className="bg-[#F57C00] hover:bg-[#E65100] text-white p-3 md:px-8 md:py-4 rounded-full font-bold transition-all shadow-lg flex-shrink-0 active:scale-95 cursor-pointer"
           >

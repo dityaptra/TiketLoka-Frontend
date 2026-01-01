@@ -114,10 +114,11 @@ export default function Footer() {
   );
 }
 // Komponen Kecil untuk Social Link
-function SocialLink({ href, icon }: { href: string; icon: React.ReactNode }) {
+function SocialLink({ href, icon, "aria-label": ariaLabel }: { href: string; icon: React.ReactNode; "aria-label": string }) {
   return (
     <Link
       href={href}
+      aria-label={ariaLabel}
       className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-[#F57C00] hover:text-white transition-all duration-300 hover:shadow-md transform hover:-translate-y-1"
     >
       {icon}
