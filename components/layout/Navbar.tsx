@@ -174,6 +174,7 @@ const Navbar = () => {
 
             <button
               onClick={handleCartClick}
+              aria-label="Keranjang Belanja"
               className={`${getNavStyle("/cart")} relative cursor-pointer`}
             >
               <div className="relative">
@@ -190,6 +191,7 @@ const Navbar = () => {
             {isAuthenticated && (
               <>
                 <button
+                  aria-label="Tiket"
                   onClick={handleTicketsClick}
                   className={getNavStyle("/tickets")}
                 >
@@ -221,6 +223,7 @@ const Navbar = () => {
                 ref={menuRef}
               >
                 <button
+                  aria-label="Menu Utama"
                   className="flex items-center gap-2 p-1 rounded-full hover:bg-blue-50 transition-colors"
                   onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
                 >
@@ -271,6 +274,7 @@ const Navbar = () => {
                   ))}
                   <div className="my-2 border-t border-gray-100"></div>
                   <button
+                    aria-label="Logout"
                     onClick={handleLogout}
                     disabled={isLoggingOut}
                     className="w-full text-left px-5 py-3 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 flex items-center gap-3 transition-colors disabled:opacity-50"
@@ -301,6 +305,7 @@ const Navbar = () => {
             {/* Icon Cart & Notif tetap muncul di Navbar HP agar mudah diakses */}
             <button
               onClick={handleCartClick}
+              aria-label="Keranjang Belanja"
               className="relative p-2 text-gray-600"
             >
               <ShoppingCart className="w-6 h-6" />
@@ -327,6 +332,7 @@ const Navbar = () => {
 
             {/* Hamburger Menu Toggle */}
             <button
+              aria-label="Menu Utama"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="p-2 text-gray-700 hover:bg-gray-100 rounded-lg"
             >
@@ -377,6 +383,7 @@ const Navbar = () => {
 
               {isAuthenticated && (
                 <button
+                  aria-label="Tiket"
                   onClick={handleTicketsClick}
                   className="px-4 py-3 hover:bg-gray-50 rounded-lg flex items-center gap-3 font-medium text-gray-700 w-full text-left"
                 >
@@ -400,6 +407,7 @@ const Navbar = () => {
                     <Settings className="w-5 h-5 text-gray-500" /> Pengaturan
                   </Link>
                   <button
+                    aria-label="Logout"
                     onClick={handleLogout}
                     className="px-4 py-3 hover:bg-red-50 rounded-lg flex items-center gap-3 font-medium text-red-600 w-full text-left mt-2 border-t border-gray-100 pt-4"
                   >

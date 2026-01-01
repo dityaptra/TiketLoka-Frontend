@@ -62,7 +62,7 @@ export default function HomePage() {
               Kami menjamin pengalaman liburan terbaik dengan pelayanan standar internasional.
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
             <FeatureCard icon={TrendingUp} title="Harga Terbaik" description="Jaminan harga termurah dengan promo menarik setiap harinya." />
             <FeatureCard icon={Calendar} title="Booking Mudah" description="Pesan tiket dalam hitungan detik, konfirmasi instan ke email." />
             <FeatureCard icon={Shield} title="Transaksi Aman" description="Pembayaran terenkripsi dan terjamin keamanannya 100%." />

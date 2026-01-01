@@ -38,9 +38,9 @@ export default function Footer() {
             {/* 'mt-auto' akan mendorong icon sosmed ke paling bawah container */}
             {/* Ini membuat tampilannya seimbang dengan kolom Hubungi Kami yang panjang */}
             <div className="mt-auto flex gap-3">
-              <SocialLink href="#" icon={<FaInstagram size={18} />} />
-              <SocialLink href="#" icon={<FaFacebookF size={16} />} />
-              <SocialLink href="#" icon={<FaYoutube size={18} />} />
+              <SocialLink href="#" aria-label="Instagram" icon={<FaInstagram size={18} />} />
+              <SocialLink href="#" aria-label="Facebook" icon={<FaFacebookF size={16} />} />
+              <SocialLink href="#" aria-label="Youtube" icon={<FaYoutube size={18} />} />
             </div>
           </div>
 
@@ -48,9 +48,9 @@ export default function Footer() {
           <div className="flex flex-col h-full">
             <h3 className="text-white font-bold text-lg mb-6">Perusahaan</h3>
             <ul className="space-y-3 text-sm text-white">
-              <FooterLink href="/about" text="Tentang Kami" />
-              <FooterLink href="/blog" text="Blog Travel" />
-              <FooterLink href="/partner" text="Daftar Jadi Partner" />
+              <FooterLink href="/" text="Tentang Kami" />
+              <FooterLink href="/" text="Blog Travel" />
+              <FooterLink href="/" text="Daftar Jadi Partner" />
             </ul>
           </div>
 
@@ -59,7 +59,7 @@ export default function Footer() {
             <h3 className="text-white font-bold text-lg mb-6">Dukungan</h3>
             <ul className="space-y-3 text-sm text-white">
               <FooterLink href="/help" text="Pusat Bantuan" />
-              <FooterLink href="/how-to-book" text="Cara Pemesanan" />
+              <FooterLink href="/" text="Cara Pemesanan" />
               <FooterLink href="/help" text="Pertanyaan Umum (FAQ)" />
             </ul>
           </div>

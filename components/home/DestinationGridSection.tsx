@@ -53,7 +53,6 @@ export default function DestinationGridSection({ endpoint, title, limit }: { end
     <section className="py-6 md:py-12 px-4">
       <div className="max-w-7xl mx-auto">
         <div className="h-6 md:h-10 w-32 md:w-64 bg-gray-200 rounded-lg animate-pulse mb-4 md:mb-10"></div>
-        {/* Ubah grid di sini juga untuk konsistensi loading */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="bg-white rounded-xl overflow-hidden border border-gray-100">
@@ -89,14 +88,15 @@ export default function DestinationGridSection({ endpoint, title, limit }: { end
             <p className="text-gray-500 text-xs md:text-base hidden md:block">Tempat wisata terfavorit pilihan traveler</p>
           </div>
           
+          {/* UBAH 1: Tambahkan 'hidden md:flex' agar tombol ini HILANG di mobile */}
           {limit && (
-            <Link href="/events" className="flex items-center gap-1 md:gap-2 text-[#FF5B00] font-bold hover:underline transition-all text-sm md:text-base">
+            <Link href="/events" className="hidden md:flex items-center gap-1 md:gap-2 text-[#FF5B00] font-bold hover:underline transition-all text-sm md:text-base">
               Lihat Semua <ArrowUpRight size={16} className="md:w-[18px] md:h-[18px]" />
             </Link>
           )}
         </div>
         
-        {/* GRID KARTU (2 Kolom di Mobile, 4 di Desktop) */}
+        {/* GRID KARTU */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
           {destinations.map((item) => {
             const categoryName = typeof item.category === 'object' && item.category !== null 
@@ -109,7 +109,7 @@ export default function DestinationGridSection({ endpoint, title, limit }: { end
                   key={item.id} 
                   className="group bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-[#FF5B00]/30 md:border-gray-300 hover:-translate-y-1 md:hover:-translate-y-2 transition duration-200 flex flex-col shadow-sm hover:shadow-md"
                 >
-                  {/* IMAGE SECTION (Lebih Pendek di Mobile) */}
+                  {/* IMAGE SECTION */}
                   <div className="relative h-32 md:h-44 overflow-hidden bg-gray-100 border-b border-gray-100">
                     <img
                       src={getImageUrl(item.image_url)}
@@ -119,7 +119,6 @@ export default function DestinationGridSection({ endpoint, title, limit }: { end
                         (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1517400508535-b2a1a062776c?q=80&w=2070';
                       }}
                     />
-                    {/* Label Lokasi (Lebih Kecil di Mobile) */}
                     <div className="absolute top-2 left-2 md:top-3 md:left-3">
                         <span className="bg-black/50 backdrop-blur-[2px] text-white text-[8px] md:text-[10px] font-bold px-1.5 py-0.5 md:px-2 md:py-1 rounded-[4px] flex items-center gap-0.5 md:gap-1">
                             <MapPin size={8} className="md:w-[10px] md:h-[10px]" /> {item.location ? item.location.split(',')[0] : 'Indonesia'}
@@ -127,19 +126,15 @@ export default function DestinationGridSection({ endpoint, title, limit }: { end
                     </div>
                   </div>
 
-                  {/* CONTENT SECTION (Padding & Font Lebih Kecil di Mobile) */}
+                  {/* CONTENT SECTION */}
                   <div className="p-2 md:p-3 pt-3 md:pt-4 flex flex-col flex-1">
-                    {/* Kategori */}
                     <span className="text-[10px] md:text-[11px] text-gray-400 mb-0.5 md:mb-1 block uppercase tracking-wide truncate">
                         {categoryName}
                     </span>
-
-                    {/* Judul */}
                     <h3 className="text-sm md:text-[15px] font-bold text-gray-900 leading-tight md:leading-snug mb-1.5 md:mb-2 line-clamp-2 group-hover:text-[#FF5B00] transition-colors">
                       {item.name}
                     </h3>
                     
-                    {/* Rating (Hanya Tampil Jika Ada Data Rating Asli) */}
                     <div className="flex items-center gap-1.5 mb-2 md:mb-4">
                         <div className="flex items-center gap-0.5 bg-orange-50 px-1 py-0.5 md:px-1.5 rounded border border-orange-100">
                             <Star size={8} className="fill-[#FFB800] text-[#FFB800] md:w-[10px] md:h-[10px]" />
@@ -149,7 +144,6 @@ export default function DestinationGridSection({ endpoint, title, limit }: { end
                         </div>
                     </div>
 
-                    {/* Harga Asli */}
                     <div className="mt-auto pt-2 md:pt-3 flex flex-col">
                         <span className="text-[9px] md:text-[10px] text-gray-400 font-medium">Mulai dari</span>
                         <span className="text-sm md:text-lg font-bold text-[#FF5B00]">
@@ -161,6 +155,18 @@ export default function DestinationGridSection({ endpoint, title, limit }: { end
             );
           })}
         </div>
+
+        {/* UBAH 2: TOMBOL LIHAT SEMUA ALA KLOOK (Hanya di Mobile) */}
+        {limit && (
+          <div className="mt-4 md:hidden">
+            <Link 
+              href="/events" 
+              className="block w-full py-3 text-center border border-gray-300 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors"
+            >
+              Lihat semua
+            </Link>
+          </div>
+        )}
 
       </div>
     </section>
