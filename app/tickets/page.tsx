@@ -48,32 +48,36 @@ export default function MyTicketsPage() {
     if (authLoading) return;
 
     const fetchBookings = async () => {
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
       try {
         const res = await fetch(`${BASE_URL}/api/my-bookings`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
+            Authorization: `Bearer ${token}`,
           },
         });
 
         const json = await res.json();
-        
         if (res.ok) {
           setBookings(json.data);
         } else {
           console.error("Gagal ambil tiket:", json.message);
         }
       } catch (err) {
-        console.error("Network error:", err);
+        console.error(err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchBookings();
-    
-  }, [authLoading, BASE_URL]);
+  }, [token, authLoading, BASE_URL]);
 
   // --- LOGIKA DATA TIKET & PENGECEKAN KADALUARSA ---
   const allTickets = useMemo(() => {
