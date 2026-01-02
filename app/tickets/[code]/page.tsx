@@ -176,17 +176,17 @@ export default function TicketDetailPage() {
             </div>
 
             {/* === KANAN: QR CODE === */}
-            <div className="md:w-80 w-full bg-white flex flex-col items-center justify-center p-8 relative print:bg-gray-50 print:border-l print:border-gray-200">
+            <div className="md:w-80 w-full bg-gray-50 flex flex-col items-center justify-center p-8 relative print:bg-gray-50 print:border-l print:border-gray-200">
               <h3 className="text-[#0B2F5E] font-bold mb-4 tracking-widest text-sm uppercase">Scan Here</h3>
 
-              <div className="bg-white p-3 rounded-2xl shadow-sm border border-gray-300 mb-4 print:border-gray-400">
+              <div className="bg-white p-3 rounded-2xl shadow-sm border border-gray-200 mb-4 print:border-gray-400">
                 <QRCodeSVG value={displayCode} size={140} level={"H"} />
               </div>
 
               <div className="text-center w-full">
                 <p className="text-xs text-gray-400 mb-1 uppercase">Ticket Code</p>
                 <div 
-                    className={`flex items-center justify-center gap-2 bg-white border rounded-lg px-3 py-2 cursor-pointer transition group select-none ${isCopied ? "border-green-500 bg-green-50" : "border-gray-300 hover:border-blue-300"}`}
+                    className={`flex items-center justify-center gap-2 bg-white border rounded-lg px-3 py-2 cursor-pointer transition group select-none ${isCopied ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-blue-300"}`}
                     onClick={() => handleCopyCode(displayCode)}
                 >
                   <span className={`font-mono text-lg font-bold tracking-wider ${isCopied ? "text-green-600" : "text-[#0B2F5E]"}`}>
