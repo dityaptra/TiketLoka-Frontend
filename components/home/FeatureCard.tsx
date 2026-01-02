@@ -11,11 +11,11 @@ const FeatureCard = ({ icon: Icon, title, description }: FeatureCardProps) => (
     <div className="absolute inset-0 opacity-10" 
          style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '16px 16px' }}>
     </div>
-    <div className="absolute -bottom-4 -right-4 text-white opacity-10 transition-all duration-500 group-hover:scale-110 group-hover:rotate-12">
+    <div className="absolute -bottom-4 -right-4 text-white opacity-10 transition-all duration-500">
       <Icon size={100} strokeWidth={1.5} />
     </div>
-    <div className="relative z-10 flex flex-col h-full">
-      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-orange-600/20 transition-transform duration-300 group-hover:scale-110">
+    <div className="relative z-10 items-center text-center flex flex-col h-full">
+      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-orange-600/20 transition-transform duration-300">
         <Icon size={24} className="text-[#F57C00]" strokeWidth={2.5} />
       </div>
       <h3 className="text-lg font-bold text-white mb-2 tracking-tight">
