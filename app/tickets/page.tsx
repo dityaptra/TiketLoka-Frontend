@@ -56,6 +56,7 @@ export default function MyTicketsPage() {
       try {
         const res = await fetch(`${BASE_URL}/api/my-bookings`, {
           method: "GET",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
