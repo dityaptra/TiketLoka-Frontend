@@ -274,7 +274,7 @@ export default function CartPage() {
         </div>
 
         {carts.length === 0 ? (
-          <div className="text-center py-24 bg-white rounded-3xl border border-dashed border-gray-200">
+          <div className="text-center py-24 bg-white rounded-3xl border border-dashed border-gray-300">
             <Ticket className="w-16 h-16 text-gray-200 mx-auto mb-4" />
             <h3 className="text-xl font-bold">Keranjang Kosong</h3>
             <Link href="/" className="mt-6 inline-block px-8 py-3 bg-[#F57C00] text-white rounded-xl font-bold">Mulai Belanja</Link>
