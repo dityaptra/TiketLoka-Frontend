@@ -291,7 +291,7 @@ function RegisterContent() {
               <button
                 type="submit"
                 disabled={!isFormValid || isLoading}
-                className={`w-full font-semibold py-3 rounded-lg transition-all transform flex items-center justify-center gap-2 mt-2 
+                className={`w-full font-semibold py-3 rounded-lg transition-all transform flex items-center justify-center gap-2 mt-6 
                   ${
                     isFormValid && !isLoading
                       ? "bg-[#F57C00] hover:bg-[#E65100] text-white cursor-pointer"

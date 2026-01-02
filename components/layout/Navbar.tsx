@@ -287,12 +287,12 @@ const Navbar = () => {
             ) : (
               <div className="flex items-center gap-3 ml-2 pl-4 border-l border-gray-300">
                 <Link href="/login">
-                  <button className="px-5 py-2 text-sm text-[#0B2F5E] font-bold border border-[#0B2F5E] rounded-lg hover:bg-blue-50 transition-colors">
+                  <button className="px-5 py-2 text-sm text-[#0B2F5E] font-bold border border-[#0B2F5E] rounded-lg hover:bg-blue-50 transition-colors cursor-pointer">
                     Masuk
                   </button>
                 </Link>
                 <Link href="/register">
-                  <button className="px-5 py-2 text-sm bg-[#F57C00] text-white font-bold rounded-lg hover:bg-[#E65100] transition-colors">
+                  <button className="px-5 py-2 text-sm bg-[#F57C00] text-white font-bold rounded-lg hover:bg-[#E65100] transition-colors cursor-pointer">
                     Daftar
                   </button>
                 </Link>

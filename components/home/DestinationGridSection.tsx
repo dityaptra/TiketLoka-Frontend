@@ -156,12 +156,12 @@ export default function DestinationGridSection({ endpoint, title, limit }: { end
           })}
         </div>
 
-        {/* UBAH 2: TOMBOL LIHAT SEMUA ALA KLOOK (Hanya di Mobile) */}
+        {/* UBAH 2: TOMBOL LIHAT SEMUA (Hanya di Mobile) */}
         {limit && (
           <div className="mt-4 md:hidden">
             <Link 
               href="/events" 
-              className="block w-full py-3 text-center border border-gray-300 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors"
+              className="inline-flex items-center justify-center px-8 py-3 border border-gray-400 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors"
             >
               Lihat semua
             </Link>
