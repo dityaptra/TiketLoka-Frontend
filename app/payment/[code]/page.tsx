@@ -23,15 +23,15 @@ interface AddonDetail {
 interface BookingItem {
     id: number;
     quantity: number;
-    price: number; // Harga unit tiket
+    price: number; 
     subtotal: number;
     destination: {
         name: string;
         location: string;
         price: number;
-        addons?: AddonDetail[]; // Master data addons untuk lookup
+        addons?: AddonDetail[]; 
     };
-    addons: any; // Bisa JSON string "[1,2]" atau array [1,2]
+    addons: any; 
 }
 
 interface BookingDetail {
@@ -41,7 +41,7 @@ interface BookingDetail {
     status: 'pending' | 'paid' | 'cancelled';
     payment_method: string; 
     created_at: string;
-    details: BookingItem[]; // Rincian tiket dalam pesanan
+    details: BookingItem[]; 
     qris_string?: string; 
 }
 
@@ -57,16 +57,26 @@ export default function PaymentPage() {
 
     const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
-    // --- FETCH DATA (DIPERBAIKI) ---
+    // --- HELPER FORMAT RUPIAH YANG KONSISTEN ---
+    const formatIDR = (value: number | string) => {
+        const price = Number(value);
+        return new Intl.NumberFormat("id-ID", {
+            style: "currency",
+            currency: "IDR",
+            minimumFractionDigits: 0, // Hilangkan ,00
+            maximumFractionDigits: 0,
+        }).format(price);
+    };
+
+    // --- FETCH DATA ---
     const fetchBooking = useCallback(async () => {
         try {
-            // PERBAIKAN: Tambah credentials dan header
             const res = await fetch(`${BASE_URL}/api/bookings/${params.code}`, {
                 headers: { 
                     'Authorization': `Bearer ${token}`,
                     'Accept': 'application/json' 
                 },
-                credentials: 'include' // <--- PENTING: Agar cookie sesi terbawa
+                credentials: 'include' 
             });
             const json = await res.json();
             
@@ -77,7 +87,6 @@ export default function PaymentPage() {
                     router.replace(`/tickets/${json.data.booking_code}`);
                 }
             } else {
-                // Jika 401 (Unauth) atau 404 (Not Found)
                 if (res.status === 401) {
                     toast.error("Sesi berakhir, silakan login ulang");
                     router.push('/login');
@@ -98,7 +107,7 @@ export default function PaymentPage() {
         if (token) fetchBooking();
     }, [token, fetchBooking]);
 
-    // --- KALKULASI RINCIAN HARGA (TIKET + ADDONS) ---
+    // --- KALKULASI RINCIAN HARGA ---
     const priceBreakdown = useMemo(() => {
         if (!booking || !booking.details) return [];
         
@@ -106,7 +115,6 @@ export default function PaymentPage() {
             const qty = Number(item.quantity) || 0;
             const ticketPrice = Number(item.price || item.destination.price);
             
-            // Parsing Addon yang dipilih
             let selectedAddonIds: any[] = [];
             try {
                 selectedAddonIds = Array.isArray(item.addons) 
@@ -116,13 +124,11 @@ export default function PaymentPage() {
 
             const selectedIdsString = selectedAddonIds.map(String);
 
-            // Lookup Nama & Harga Addon
             const masterAddons = item.destination.addons || [];
             const selectedAddonData = masterAddons.filter((a: any) => 
                 selectedIdsString.includes(String(a.id))
             );
 
-            // Gunakan subtotal dari DB jika tersedia, jika tidak hitung manual
             const finalItemTotal = Number(item.subtotal) > 0 
                 ? Number(item.subtotal) 
                 : (ticketPrice + selectedAddonData.reduce((s, a) => s + Number(a.price), 0)) * qty;
@@ -151,7 +157,7 @@ export default function PaymentPage() {
         return `${m}:${s < 10 ? '0' : ''}${s}`;
     };
 
-    // --- ACTIONS (DIPERBAIKI) ---
+    // --- ACTIONS ---
     const handleCheckStatus = async () => {
         setProcessing(true);
         try {
@@ -162,7 +168,7 @@ export default function PaymentPage() {
                     'Authorization': `Bearer ${token}`,
                     'Accept': 'application/json'
                 },
-                credentials: 'include' // <--- PENTING
+                credentials: 'include'
             });
             if (res.ok) {
                 toast.success("Pembayaran Dikonfirmasi!");
@@ -200,7 +206,7 @@ export default function PaymentPage() {
                     'Authorization': `Bearer ${token}`,
                     'Accept': 'application/json'
                 },
-                credentials: 'include' // <--- PENTING
+                credentials: 'include' 
             });
             if (res.ok) {
                 toast.success("Pesanan berhasil dibatalkan");
@@ -222,7 +228,6 @@ export default function PaymentPage() {
 
     if (loading) return <div className="min-h-screen flex justify-center items-center"><Loader2 className="animate-spin text-[#0B2F5E] w-10 h-10"/></div>;
     
-    // Safety check jika fetch error tapi tidak redirect (jarang terjadi)
     if (!booking) return null;
 
     const isQRIS = booking.payment_method === 'qris';
@@ -255,7 +260,8 @@ export default function PaymentPage() {
                             <div className="bg-[#0B2F5E] p-8 text-center text-white relative">
                                 <p className="text-sm text-blue-100 mb-1">Total Tagihan</p>
                                 <div className="flex items-center justify-center gap-2">
-                                    <h1 className="text-4xl font-extrabold">Rp {(booking.grand_total || 0).toLocaleString('id-ID')}</h1>
+                                    {/* MENGGUNAKAN HELPER FORMATIDR DISINI */}
+                                    <h1 className="text-4xl font-extrabold">{formatIDR(booking.grand_total || 0)}</h1>
                                     <button onClick={() => copyToClipboard(String(booking.grand_total))} className="p-1.5 hover:bg-white/10 rounded-lg transition"><Copy size={18}/></button>
                                 </div>
                                 <p className="mt-4 text-xs opacity-60">ID Pesanan: {booking.booking_code}</p>
@@ -271,12 +277,14 @@ export default function PaymentPage() {
                                                 <p className="font-bold text-gray-800 text-sm">{item.name}</p>
                                                 <p className="text-[10px] text-gray-400">{item.qty} Tiket</p>
                                             </div>
-                                            <p className="text-sm font-bold text-gray-800">Rp {item.itemTotal.toLocaleString('id-ID')}</p>
+                                            {/* MENGGUNAKAN HELPER FORMATIDR DISINI */}
+                                            <p className="text-sm font-bold text-gray-800">{formatIDR(item.itemTotal)}</p>
                                         </div>
                                         {item.addons.map((a: any, idx: number) => (
                                             <div key={idx} className="flex justify-between text-[10px] text-orange-600 pl-4 border-l border-orange-200 mt-1">
                                                 <span>+ {a.name}</span>
-                                                <span>Rp {(Number(a.price) * item.qty).toLocaleString('id-ID')}</span>
+                                                {/* MENGGUNAKAN HELPER FORMATIDR DISINI */}
+                                                <span>{formatIDR(Number(a.price) * item.qty)}</span>
                                             </div>
                                         ))}
                                     </div>
