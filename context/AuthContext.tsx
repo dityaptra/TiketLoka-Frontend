@@ -23,98 +23,85 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   login: (token: string, userData: User) => void;
-  logout: () => Promise<void>;
+  logout: () => void; // Kita ubah jadi void biasa karena logout frontend lebih instan
   updateUser: (userData: Partial<User>) => void;
   isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// KONFIGURASI URL API
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+// --- HELPER: Fungsi Membaca Cookie ---
+// Ditaruh di luar komponen agar bersih
+const getCookie = (name: string) => {
+  if (typeof document === 'undefined') return null;
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift();
+  return null;
+};
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  // Token hanya disimpan di Memori (State), HILANG saat refresh.
-  // Ini AMAN karena autentikasi utama sekarang dipegang oleh Cookie HttpOnly.
-  const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  // Cek LocalStorage saat aplikasi pertama kali dimuat
-  useEffect(() => {
-    // ❌ KITA HAPUS LOGIKA GET TOKEN DARI SINI
-    // Kita hanya mengambil data User agar tampilan profil tetap ada
-    const storedUser = localStorage.getItem("user");
+  // 1. LAZY INITIALIZATION UNTUK TOKEN (KUNCI AGAR TIDAK LOGOUT SAAT REFRESH)
+  // Kode ini jalan SEBELUM render pertama, jadi state langsung terisi.
+  const [token, setToken] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      // Cari cookie manual yang kita buat di halaman Login
+      return getCookie('session_token') || null;
+    }
+    return null;
+  });
 
-    if (storedUser) {
+  // 2. LAZY INITIALIZATION UNTUK USER
+  const [user, setUser] = useState<User | null>(() => {
+    if (typeof window !== 'undefined') {
+      const storedUser = localStorage.getItem("tiketloka_user_data");
       try {
-        setUser(JSON.parse(storedUser));
+        return storedUser ? JSON.parse(storedUser) : null;
       } catch (e) {
-        console.error("Error parsing user data", e);
-        localStorage.removeItem("user");
+        return null;
       }
     }
-    
-    // Pastikan tidak ada sisa token lama di LocalStorage pengguna
-    localStorage.removeItem("token"); 
-    
+    return null;
+  });
+
+  const [isLoading, setIsLoading] = useState(true);
+
+  // useEffect hanya untuk mematikan status loading
+  useEffect(() => {
     setIsLoading(false);
   }, []);
 
-  // Fungsi Login (Simpan data)
+  // Fungsi Login
   const login = (newToken: string, userData: User) => {
-    setToken(newToken); // Simpan di memori sementara
+    setToken(newToken);
     setUser(userData);
     
-    // Simpan data user saja (aman)
-    localStorage.setItem("user", JSON.stringify(userData));
-
-    // Redirect sesuai role
-    // (Opsional: Bisa dihapus jika redirect sudah ditangani di page login)
-    /* if (userData.role === "admin") {
-      router.push("/admin/dashboard");
-    } else {
-      router.push("/");
-    }
-    */
+    // Simpan data user ke localStorage agar persist saat refresh
+    localStorage.setItem("tiketloka_user_data", JSON.stringify(userData));
+    
+    // Catatan: Token tidak perlu disimpan ke localStorage/Cookie di sini
+    // karena Halaman Login (Page.tsx) sudah melakukannya untuk kita.
   };
 
-  // Fungsi Logout (Hapus data)
-  const logout = async () => {
-    const currentToken = token;
-
-    // 1. BERSIHKAN CLIENT SIDE
+  // Fungsi Logout
+  const logout = () => {
     setToken(null);
     setUser(null);
-    // Hapus data user dari storage
-    localStorage.removeItem("user");
-    // Pastikan token bersih (jaga-jaga)
-    localStorage.removeItem("token");
+    
+    // 1. Bersihkan LocalStorage
+    localStorage.removeItem("tiketloka_user_data");
+    localStorage.removeItem("tiketloka_cart_data"); // Bersihkan keranjang juga
 
-    // 2. REDIRECT SEGERA (Optimistic UI)
-    router.replace("/"); 
+    // 2. HAPUS COOKIE MANUAL
+    // Kita set expired date ke masa lalu agar browser menghapusnya
+    document.cookie = "session_token=; path=/; max-age=0; secure; samesite=lax";
+    document.cookie = "user_role=; path=/; max-age=0; secure; samesite=lax";
+
+    // 3. Redirect ke Login
+    router.push("/login");
     router.refresh();
-
-    // 3. PANGGIL API LOGOUT DI BACKGROUND
-    // Karena token di localstorage sudah tidak ada, fetch ini mungkin perlu
-    // cookie credentials agar backend tahu siapa yg logout.
-    try {
-      await fetch(`${BASE_URL}/api/logout`, {
-        method: "POST",
-        headers: {
-          // Jika backend butuh Bearer dan kita punya di state, kirim.
-          // Tapi jika refresh, token null. Backend harus bisa baca cookie.
-          ...(currentToken ? { Authorization: `Bearer ${currentToken}` } : {}),
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        // PENTING: Kirim cookie HttpOnly ke backend Laravel
-        credentials: "include", 
-      });
-    } catch (error) {
-      console.warn("Server logout failed, but client session is cleared.");
-    }
   };
 
   // Fungsi Update User
@@ -122,7 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (user) {
       const updatedUser = { ...user, ...userData };
       setUser(updatedUser);
-      localStorage.setItem("user", JSON.stringify(updatedUser));
+      localStorage.setItem("tiketloka_user_data", JSON.stringify(updatedUser));
     }
   };
 
