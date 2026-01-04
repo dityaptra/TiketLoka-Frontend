@@ -69,9 +69,25 @@ function LoginContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
+
+      // 1. CEK KONTEN RESPONSE DULU (Mencegah "Unexpected token <")
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+         // Jika bukan JSON (biasanya HTML Error dari Laravel), lempar error manual
+         const text = await res.text(); 
+         console.error("Non-JSON response:", text); // Cek console browser untuk lihat error PHP aslinya
+         throw new Error("Terjadi kesalahan server (500). Cek console untuk detail.");
+      }
+
       const data = await res.json();
 
       if (!res.ok) throw new Error(data.message || "Login gagal");
+
+      // 2. SOLUSI COOKIE MANUAL (Agar AuthContext bisa baca saat refresh)
+      document.cookie = `session_token=${data.access_token}; path=/; max-age=86400; secure; samesite=lax`;
+      
+      const role = data.user.role || 'customer';
+      document.cookie = `user_role=${role}; path=/; max-age=86400; secure; samesite=lax`;
 
       await createSession(data.access_token, data.user.role);
       login(data.access_token, data.user);
@@ -95,6 +111,7 @@ function LoginContent() {
     }
   };
 
+  // ... (Sisa kode sama persis seperti sebelumnya) ...
   const handleGoogleAuth = async () => {
     setIsLoading(true);
     try {
@@ -212,6 +229,8 @@ function LoginContent() {
               <div className={inputWrapperClass}>
                 <Lock className={iconClass} />
                 <input
+                  type="showPassword" // Perhatikan ini, sebelumnya type logic agak aneh di original
+                  // Sebaiknya: type={showPassword ? "text" : "password"}
                   type={showPassword ? "text" : "password"}
                   required
                   value={password}
