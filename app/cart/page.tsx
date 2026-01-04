@@ -8,10 +8,10 @@ import {
     Ticket, CheckSquare, Square, Wallet, ShieldCheck, 
     ScanLine, Building2, PlusCircle
 } from 'lucide-react'; 
-import { CartItem } from '@/types';
+import { CartItem } from '@/types'; // Pastikan tipe ini sesuai
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { useCartContext } from '@/context/CartContext'; 
+import { useCartContext } from '@/context/CartContext'; // <-- KITA AKAN PAKAI INI
 import { useNotification } from '@/context/NotificationContext'; 
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
@@ -19,10 +19,12 @@ import Swal from 'sweetalert2';
 export default function CartPage() {
   const router = useRouter();
   const { token, isLoading: authLoading } = useAuth();
-  const { refreshCart } = useCartContext(); 
+  
+  // 1. AMBIL DATA DARI CONTEXT (BUKAN FETCH MANUAL)
+  const { cartItems, refreshCart } = useCartContext(); 
+
   const { addNotification } = useNotification(); 
 
-  const [carts, setCarts] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [paymentMethod, setPaymentMethod] = useState('qris'); 
@@ -61,34 +63,29 @@ export default function CartPage() {
     return `${BASE_URL}/storage/${cleanPath}`;
   };
 
-  // 1. Fetch Data (DITAMBAHKAN credentials: 'include')
+  // 2. USEEFFECT: CUKUP CEK AUTH & LOADING
+  // Kita tidak perlu fetch manual lagi, karena CartContext sudah melakukannya secara otomatis
   useEffect(() => {
-    if (authLoading) return; 
-    const fetchCart = async () => {
-      if (!token) { setLoading(false); return; }
-      try {
-        const res = await fetch(`${BASE_URL}/api/cart`, {
-            headers: { 
-                'Authorization': `Bearer ${token}`,
-                'Accept': 'application/json' 
-            },
-            credentials: 'include' // <--- WAJIB: Agar cookie session terkirim
-        });
-        const json = await res.json();
-        if (res.ok) setCarts(json.data);
-        else if (res.status === 401) router.push('/login');
-      } catch (error) {
-        toast.error('Gagal memuat keranjang');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCart();
-  }, [token, authLoading, router, BASE_URL]);
+    if (!authLoading) {
+        if (!token) {
+            router.push('/login');
+        } else {
+            // Beri sedikit delay agar terasa smooth, atau langsung set false
+            setLoading(false);
+            
+            // Opsional: Paksa refresh sekali lagi untuk memastikan data terbaru dari server
+            refreshCart(); 
+        }
+    }
+  }, [authLoading, token, router, refreshCart]);
 
   // --- LOGIKA KALKULASI TOTAL (TERMASUK ADDONS) ---
+  // Ganti 'carts' menjadi 'cartItems' (dari context)
   const { totalQty, subTotalBase, totalAddons, grandTotal } = useMemo(() => {
-    const selectedItems = carts.filter(item => selectedIds.includes(item.id));
+    // Pastikan cartItems adalah array sebelum di-filter
+    const currentItems = Array.isArray(cartItems) ? cartItems : [];
+    
+    const selectedItems = currentItems.filter(item => selectedIds.includes(item.id));
     
     let tQty = 0;
     let sBase = 0;
@@ -103,7 +100,7 @@ export default function CartPage() {
 
         // 2. Kalkulasi Addons
         const itemAddonDetails = getItemAddons(item);
-        const itemAddonPricePerPax = itemAddonDetails.reduce((sum, a) => sum + Number(a.price), 0);
+        const itemAddonPricePerPax = itemAddonDetails.reduce((sum: number, a: any) => sum + Number(a.price), 0);
         
         tAddons += (itemAddonPricePerPax * qty);
     });
@@ -114,19 +111,20 @@ export default function CartPage() {
         totalAddons: tAddons, 
         grandTotal: sBase + tAddons 
     };
-  }, [carts, selectedIds]);
+  }, [cartItems, selectedIds]); // Dependency berubah jadi cartItems
 
   const toggleSelect = (id: number) => {
     setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   };
 
   const toggleSelectAll = () => {
-    setSelectedIds(selectedIds.length === carts.length && carts.length > 0 ? [] : carts.map(item => item.id));
+    const currentItems = Array.isArray(cartItems) ? cartItems : [];
+    setSelectedIds(selectedIds.length === currentItems.length && currentItems.length > 0 ? [] : currentItems.map(item => item.id));
   };
 
-  // --- FITUR BARU: HAPUS SEMUA KERANJANG ---
+  // --- HAPUS SEMUA KERANJANG ---
   const handleClearCart = async () => {
-    if (carts.length === 0) return;
+    if (cartItems.length === 0) return;
 
     const result = await Swal.fire({
         title: 'Kosongkan Keranjang?',
@@ -149,13 +147,13 @@ export default function CartPage() {
                 'Authorization': `Bearer ${token}`,
                 'Accept': 'application/json' 
             },
-            credentials: 'include' // <--- WAJIB
+            credentials: 'include' 
         });
 
         if (res.ok) {
-            setCarts([]); 
             setSelectedIds([]); 
             toast.success('Keranjang berhasil dikosongkan');
+            // Update Context (ini akan otomatis update tampilan dan localStorage)
             await refreshCart(); 
         } else {
             const json = await res.json();
@@ -166,7 +164,7 @@ export default function CartPage() {
     }
   };
 
-  // 2. Fungsi Hapus Item Satuan (SWEETALERT)
+  // --- HAPUS ITEM SATUAN ---
   const handleDelete = async (id: number) => {
     const result = await Swal.fire({
         title: 'Hapus dari keranjang?',
@@ -188,16 +186,17 @@ export default function CartPage() {
             'Authorization': `Bearer ${token}`,
             'Accept': 'application/json' 
           },
-          credentials: 'include' // <--- WAJIB
+          credentials: 'include' 
       });
-      setCarts(prev => prev.filter(item => item.id !== id));
+      
       setSelectedIds(prev => prev.filter(selId => selId !== id));
       toast.success('Item dihapus');
+      // Update Context agar seluruh aplikasi tahu item berkurang
       await refreshCart(); 
     } catch (error) { toast.error('Gagal menghapus'); }
   };
 
-  // 3. Logic Checkout (DIPERBAIKI)
+  // --- CHECKOUT ---
   const handleCheckout = async () => {
     if (selectedIds.length === 0) return toast.error('Pilih minimal 1 item!');
 
@@ -221,15 +220,14 @@ export default function CartPage() {
     
     setIsCheckingOut(true);
     try {
-      // --- PERBAIKAN UTAMA DISINI ---
       const res = await fetch(`${BASE_URL}/api/checkout`, {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json', 
             'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json' // Tambahan header standard
+            'Accept': 'application/json' 
         },
-        credentials: 'include', // <--- INI KUNCINYA AGAR TIDAK 401
+        credentials: 'include', 
         body: JSON.stringify({ cart_ids: selectedIds, payment_method: paymentMethod })
       });
 
@@ -238,13 +236,11 @@ export default function CartPage() {
       if (res.ok) {
         addNotification('transaction', 'Menunggu Pembayaran', `Pesanan ${json.booking_code} berhasil dibuat.`);
         toast.success("Checkout berhasil!");
-        await refreshCart(); 
+        await refreshCart(); // Kosongkan item yang sudah dibeli dari cart context
         router.push(`/payment/${json.booking_code}`);
       } else { 
-        // Handle error spesifik dari backend
         toast.error(json.message || "Terjadi kesalahan saat checkout"); 
         if (res.status === 401) {
-             // Jika masih 401, token mungkin expired
              router.push('/login');
         }
       }
@@ -258,10 +254,14 @@ export default function CartPage() {
 
   if (loading || authLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-[#F57C00]"/></div>;
 
+  // Pastikan cartItems selalu array untuk rendering
+  const displayItems = Array.isArray(cartItems) ? cartItems : [];
+
   return (
     <main className="min-h-screen bg-[#FAFAFA] pb-40 font-sans text-gray-800 pt-20">
       <Navbar />
       <div className="max-w-6xl mx-auto px-4">
+        {/* ... Header Link & Title ... */}
         <div className="mb-3">
             <Link href="/" className="inline-flex items-center text-sm text-gray-500 hover:text-[#F57C00] gap-1">
                 <ArrowLeft className="w-4 h-4" /> Kembali
@@ -273,7 +273,7 @@ export default function CartPage() {
             <h1 className="text-3xl font-extrabold text-[#0B2F5E]">Keranjang</h1>
         </div>
 
-        {carts.length === 0 ? (
+        {displayItems.length === 0 ? (
           <div className="text-center py-24 bg-white rounded-3xl border border-dashed border-gray-300">
             <Ticket className="w-16 h-16 text-gray-200 mx-auto mb-4" />
             <h3 className="text-xl font-bold">Keranjang Kosong</h3>
@@ -286,8 +286,8 @@ export default function CartPage() {
                {/* --- HEADER LIST DENGAN HAPUS SEMUA --- */}
                <div className="bg-white p-4 rounded-xl border border-gray-100 flex items-center justify-between">
                    <div className="flex items-center gap-3 cursor-pointer select-none" onClick={toggleSelectAll}>
-                        {selectedIds.length === carts.length ? <CheckSquare className="text-[#F57C00]" /> : <Square className="text-gray-300" />}
-                        <span className="font-bold text-sm">Pilih Semua ({carts.length})</span>
+                        {selectedIds.length === displayItems.length ? <CheckSquare className="text-[#F57C00]" /> : <Square className="text-gray-300" />}
+                        <span className="font-bold text-sm">Pilih Semua ({displayItems.length})</span>
                    </div>
                    
                    <button 
@@ -298,9 +298,9 @@ export default function CartPage() {
                    </button>
                </div>
 
-              {carts.map((item) => {
+              {displayItems.map((item: CartItem) => {
                 const itemAddons = getItemAddons(item);
-                const itemAddonTotal = itemAddons.reduce((s, a) => s + Number(a.price), 0);
+                const itemAddonTotal = itemAddons.reduce((s: number, a: any) => s + Number(a.price), 0);
                 const itemPrice = (Number(item.destination.price) + itemAddonTotal) * item.quantity;
 
                 return (
