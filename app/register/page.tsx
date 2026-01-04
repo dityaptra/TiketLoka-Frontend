@@ -6,7 +6,6 @@ import { useNotification } from "@/context/NotificationContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-// 👇 Tambahkan ArrowLeft
 import { Loader2, User, Mail, Phone, Lock, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { createSession, deleteSession } from "@/app/actions/auth";
 
@@ -80,13 +79,28 @@ function RegisterContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
+
+      // 1. CEK JSON (Anti Error HTML 500)
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+          // Jika backend error mengembalikan HTML, lempar error agar tidak crash
+          throw new Error("Terjadi kesalahan server (500). Silakan coba lagi nanti.");
+      }
+
       const data = await res.json();
       
       if (!res.ok)
         throw new Error(data.message || "Gagal melakukan pendaftaran");
 
-      await createSession(data.access_token, data.user.role);
+      // 2. 🔥 PENTING: BUAT COOKIE MANUAL (AUTO LOGIN PERSISTEN)
+      // Agar setelah register, user tidak logout saat refresh
+      document.cookie = `session_token=${data.access_token}; path=/; max-age=86400; secure; samesite=lax`;
+      
+      const role = data.user.role || 'customer';
+      document.cookie = `user_role=${role}; path=/; max-age=86400; secure; samesite=lax`;
 
+      // 3. Update Session & Context
+      await createSession(data.access_token, data.user.role);
       login(data.access_token, data.user);
 
       addNotification(
